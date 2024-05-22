@@ -729,7 +729,7 @@ func (UnimplementedHandler) DomainSealCapsule(ctx context.Context, req *CapsuleS
 // DomainSetActiveExternalRootEncryptionKey implements domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called.
+// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 //
 // POST /domains/{domainID}/control/keys/active
 func (UnimplementedHandler) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, req *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (r DomainSetActiveExternalRootEncryptionKeyRes, _ error) {

@@ -9035,7 +9035,7 @@ type DomainQueryAccessLogParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName
@@ -9766,7 +9766,7 @@ type DomainQueryAccessLogSingleCapsuleParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName

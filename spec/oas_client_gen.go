@@ -526,7 +526,7 @@ type Invoker interface {
 	// DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 	//
 	// This will set which root encryption is active: i.e. is used for new capsules, or is used to
-	// encrypt KEKs when `/keys/rotate` is called.
+	// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 	//
 	// POST /domains/{domainID}/control/keys/active
 	DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error)
@@ -11632,7 +11632,7 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 // DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called.
+// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 //
 // POST /domains/{domainID}/control/keys/active
 func (c *Client) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error) {

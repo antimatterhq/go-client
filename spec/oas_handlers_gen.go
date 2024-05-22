@@ -12204,7 +12204,7 @@ func (s *Server) handleDomainSealCapsuleRequest(args [2]string, argsEscaped bool
 // handleDomainSetActiveExternalRootEncryptionKeyRequest handles domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called.
+// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 //
 // POST /domains/{domainID}/control/keys/active
 func (s *Server) handleDomainSetActiveExternalRootEncryptionKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
