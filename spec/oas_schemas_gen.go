@@ -673,6 +673,95 @@ func (s *AntimatterDelegatedAWSKeyInfoProviderName) UnmarshalText(data []byte) e
 	}
 }
 
+// The details required to use an GCP Key root encryption key that has been  delegated to
+// Antimatter's GCP service account. This will use Antimatter's  service account during set up of the
+// GCP client.
+// Ref: #/components/schemas/AntimatterDelegatedGCPKeyInfo
+type AntimatterDelegatedGCPKeyInfo struct {
+	// The Google project ID.
+	ProjectID string `json:"projectID"`
+	// Location of Google keyring.
+	Location string `json:"location"`
+	// The Google keyring's ID at location.
+	KeyringID string `json:"keyringID"`
+	// The key ID that should be used in the Google keyring.
+	KeyID string `json:"keyID"`
+}
+
+// GetProjectID returns the value of ProjectID.
+func (s *AntimatterDelegatedGCPKeyInfo) GetProjectID() string {
+	return s.ProjectID
+}
+
+// GetLocation returns the value of Location.
+func (s *AntimatterDelegatedGCPKeyInfo) GetLocation() string {
+	return s.Location
+}
+
+// GetKeyringID returns the value of KeyringID.
+func (s *AntimatterDelegatedGCPKeyInfo) GetKeyringID() string {
+	return s.KeyringID
+}
+
+// GetKeyID returns the value of KeyID.
+func (s *AntimatterDelegatedGCPKeyInfo) GetKeyID() string {
+	return s.KeyID
+}
+
+// SetProjectID sets the value of ProjectID.
+func (s *AntimatterDelegatedGCPKeyInfo) SetProjectID(val string) {
+	s.ProjectID = val
+}
+
+// SetLocation sets the value of Location.
+func (s *AntimatterDelegatedGCPKeyInfo) SetLocation(val string) {
+	s.Location = val
+}
+
+// SetKeyringID sets the value of KeyringID.
+func (s *AntimatterDelegatedGCPKeyInfo) SetKeyringID(val string) {
+	s.KeyringID = val
+}
+
+// SetKeyID sets the value of KeyID.
+func (s *AntimatterDelegatedGCPKeyInfo) SetKeyID(val string) {
+	s.KeyID = val
+}
+
+type AntimatterDelegatedGCPKeyInfoProviderName string
+
+const (
+	AntimatterDelegatedGCPKeyInfoProviderNameGcpAm AntimatterDelegatedGCPKeyInfoProviderName = "gcp_am"
+)
+
+// AllValues returns all AntimatterDelegatedGCPKeyInfoProviderName values.
+func (AntimatterDelegatedGCPKeyInfoProviderName) AllValues() []AntimatterDelegatedGCPKeyInfoProviderName {
+	return []AntimatterDelegatedGCPKeyInfoProviderName{
+		AntimatterDelegatedGCPKeyInfoProviderNameGcpAm,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AntimatterDelegatedGCPKeyInfoProviderName) MarshalText() ([]byte, error) {
+	switch s {
+	case AntimatterDelegatedGCPKeyInfoProviderNameGcpAm:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AntimatterDelegatedGCPKeyInfoProviderName) UnmarshalText(data []byte) error {
+	switch AntimatterDelegatedGCPKeyInfoProviderName(data) {
+	case AntimatterDelegatedGCPKeyInfoProviderNameGcpAm:
+		*s = AntimatterDelegatedGCPKeyInfoProviderNameGcpAm
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/AvailableDelegatedRootEncryptionKeyProvider
 type AvailableDelegatedRootEncryptionKeyProvider struct {
 	Name           string `json:"name"`
@@ -905,6 +994,57 @@ func (s *AvailableServiceAccountRootEncryptionKeyProviderType) UnmarshalText(dat
 	switch AvailableServiceAccountRootEncryptionKeyProviderType(data) {
 	case AvailableServiceAccountRootEncryptionKeyProviderTypeServiceAccountRootEncryptionKeyProvider:
 		*s = AvailableServiceAccountRootEncryptionKeyProviderTypeServiceAccountRootEncryptionKeyProvider
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BYOKKeyInfo
+type BYOKKeyInfo struct {
+	// The base64-encoded key material to use as the basis for an
+	// encryption key.
+	Key []byte `json:"key"`
+}
+
+// GetKey returns the value of Key.
+func (s *BYOKKeyInfo) GetKey() []byte {
+	return s.Key
+}
+
+// SetKey sets the value of Key.
+func (s *BYOKKeyInfo) SetKey(val []byte) {
+	s.Key = val
+}
+
+type BYOKKeyInfoProviderName string
+
+const (
+	BYOKKeyInfoProviderNameByok BYOKKeyInfoProviderName = "byok"
+)
+
+// AllValues returns all BYOKKeyInfoProviderName values.
+func (BYOKKeyInfoProviderName) AllValues() []BYOKKeyInfoProviderName {
+	return []BYOKKeyInfoProviderName{
+		BYOKKeyInfoProviderNameByok,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BYOKKeyInfoProviderName) MarshalText() ([]byte, error) {
+	switch s {
+	case BYOKKeyInfoProviderNameByok:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BYOKKeyInfoProviderName) UnmarshalText(data []byte) error {
+	switch BYOKKeyInfoProviderName(data) {
+	case BYOKKeyInfoProviderNameByok:
+		*s = BYOKKeyInfoProviderNameByok
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4949,20 +5089,6 @@ func (s *GoogleOAuthDomainIdentityProviderDetailsType) UnmarshalText(data []byte
 	}
 }
 
-type GoogleOAuthToken struct {
-	Token string
-}
-
-// GetToken returns the value of Token.
-func (s *GoogleOAuthToken) GetToken() string {
-	return s.Token
-}
-
-// SetToken sets the value of Token.
-func (s *GoogleOAuthToken) SetToken(val string) {
-	s.Token = val
-}
-
 type HookName string
 
 type IdentityProviderName string
@@ -5739,8 +5865,10 @@ func (s *KeyInfos) SetKeyInformation(val KeyInfosKeyInformation) {
 type KeyInfosKeyInformation struct {
 	Type                          KeyInfosKeyInformationType // switch on this field
 	GCPServiceAccountKeyInfo      GCPServiceAccountKeyInfo
+	AntimatterDelegatedGCPKeyInfo AntimatterDelegatedGCPKeyInfo
 	AWSServiceAccountKeyInfo      AWSServiceAccountKeyInfo
 	AntimatterDelegatedAWSKeyInfo AntimatterDelegatedAWSKeyInfo
+	BYOKKeyInfo                   BYOKKeyInfo
 }
 
 // KeyInfosKeyInformationType is oneOf type of KeyInfosKeyInformation.
@@ -5749,13 +5877,20 @@ type KeyInfosKeyInformationType string
 // Possible values for KeyInfosKeyInformationType.
 const (
 	GCPServiceAccountKeyInfoKeyInfosKeyInformation      KeyInfosKeyInformationType = "gcp_sa"
+	AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation KeyInfosKeyInformationType = "gcp_am"
 	AWSServiceAccountKeyInfoKeyInfosKeyInformation      KeyInfosKeyInformationType = "aws_sa"
 	AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation KeyInfosKeyInformationType = "aws_am"
+	BYOKKeyInfoKeyInfosKeyInformation                   KeyInfosKeyInformationType = "byok"
 )
 
 // IsGCPServiceAccountKeyInfo reports whether KeyInfosKeyInformation is GCPServiceAccountKeyInfo.
 func (s KeyInfosKeyInformation) IsGCPServiceAccountKeyInfo() bool {
 	return s.Type == GCPServiceAccountKeyInfoKeyInfosKeyInformation
+}
+
+// IsAntimatterDelegatedGCPKeyInfo reports whether KeyInfosKeyInformation is AntimatterDelegatedGCPKeyInfo.
+func (s KeyInfosKeyInformation) IsAntimatterDelegatedGCPKeyInfo() bool {
+	return s.Type == AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation
 }
 
 // IsAWSServiceAccountKeyInfo reports whether KeyInfosKeyInformation is AWSServiceAccountKeyInfo.
@@ -5766,6 +5901,11 @@ func (s KeyInfosKeyInformation) IsAWSServiceAccountKeyInfo() bool {
 // IsAntimatterDelegatedAWSKeyInfo reports whether KeyInfosKeyInformation is AntimatterDelegatedAWSKeyInfo.
 func (s KeyInfosKeyInformation) IsAntimatterDelegatedAWSKeyInfo() bool {
 	return s.Type == AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation
+}
+
+// IsBYOKKeyInfo reports whether KeyInfosKeyInformation is BYOKKeyInfo.
+func (s KeyInfosKeyInformation) IsBYOKKeyInfo() bool {
+	return s.Type == BYOKKeyInfoKeyInfosKeyInformation
 }
 
 // SetGCPServiceAccountKeyInfo sets KeyInfosKeyInformation to GCPServiceAccountKeyInfo.
@@ -5786,6 +5926,27 @@ func (s KeyInfosKeyInformation) GetGCPServiceAccountKeyInfo() (v GCPServiceAccou
 func NewGCPServiceAccountKeyInfoKeyInfosKeyInformation(v GCPServiceAccountKeyInfo) KeyInfosKeyInformation {
 	var s KeyInfosKeyInformation
 	s.SetGCPServiceAccountKeyInfo(v)
+	return s
+}
+
+// SetAntimatterDelegatedGCPKeyInfo sets KeyInfosKeyInformation to AntimatterDelegatedGCPKeyInfo.
+func (s *KeyInfosKeyInformation) SetAntimatterDelegatedGCPKeyInfo(v AntimatterDelegatedGCPKeyInfo) {
+	s.Type = AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation
+	s.AntimatterDelegatedGCPKeyInfo = v
+}
+
+// GetAntimatterDelegatedGCPKeyInfo returns AntimatterDelegatedGCPKeyInfo and true boolean if KeyInfosKeyInformation is AntimatterDelegatedGCPKeyInfo.
+func (s KeyInfosKeyInformation) GetAntimatterDelegatedGCPKeyInfo() (v AntimatterDelegatedGCPKeyInfo, ok bool) {
+	if !s.IsAntimatterDelegatedGCPKeyInfo() {
+		return v, false
+	}
+	return s.AntimatterDelegatedGCPKeyInfo, true
+}
+
+// NewAntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation returns new KeyInfosKeyInformation from AntimatterDelegatedGCPKeyInfo.
+func NewAntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation(v AntimatterDelegatedGCPKeyInfo) KeyInfosKeyInformation {
+	var s KeyInfosKeyInformation
+	s.SetAntimatterDelegatedGCPKeyInfo(v)
 	return s
 }
 
@@ -5831,21 +5992,28 @@ func NewAntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation(v AntimatterDelegate
 	return s
 }
 
+// SetBYOKKeyInfo sets KeyInfosKeyInformation to BYOKKeyInfo.
+func (s *KeyInfosKeyInformation) SetBYOKKeyInfo(v BYOKKeyInfo) {
+	s.Type = BYOKKeyInfoKeyInfosKeyInformation
+	s.BYOKKeyInfo = v
+}
+
+// GetBYOKKeyInfo returns BYOKKeyInfo and true boolean if KeyInfosKeyInformation is BYOKKeyInfo.
+func (s KeyInfosKeyInformation) GetBYOKKeyInfo() (v BYOKKeyInfo, ok bool) {
+	if !s.IsBYOKKeyInfo() {
+		return v, false
+	}
+	return s.BYOKKeyInfo, true
+}
+
+// NewBYOKKeyInfoKeyInfosKeyInformation returns new KeyInfosKeyInformation from BYOKKeyInfo.
+func NewBYOKKeyInfoKeyInfosKeyInformation(v BYOKKeyInfo) KeyInfosKeyInformation {
+	var s KeyInfosKeyInformation
+	s.SetBYOKKeyInfo(v)
+	return s
+}
+
 type LogEntryID string
-
-type MicrosoftOAuthToken struct {
-	Token string
-}
-
-// GetToken returns the value of Token.
-func (s *MicrosoftOAuthToken) GetToken() string {
-	return s.Token
-}
-
-// SetToken sets the value of Token.
-func (s *MicrosoftOAuthToken) SetToken(val string) {
-	s.Token = val
-}
 
 // An individual capsule data-plane log entry, in the form required when inserting a  new record.
 // Ref: #/components/schemas/NewAccessLogEntry
@@ -6059,13 +6227,21 @@ func (s *NewCapabilityDefinition) SetDescription(val string) {
 // Parameters when creating a domain.
 // Ref: #/components/schemas/NewDomain
 type NewDomain struct {
-	AdminEmail  string    `json:"adminEmail"`
+	AdminEmail string `json:"adminEmail"`
+	// If supplied, and if the principal claim contains the email
+	// address specified as adminEmail, skip email verification.
+	GoogleJWT   OptString `json:"googleJWT"`
 	DisplayName OptString `json:"displayName"`
 }
 
 // GetAdminEmail returns the value of AdminEmail.
 func (s *NewDomain) GetAdminEmail() string {
 	return s.AdminEmail
+}
+
+// GetGoogleJWT returns the value of GoogleJWT.
+func (s *NewDomain) GetGoogleJWT() OptString {
+	return s.GoogleJWT
 }
 
 // GetDisplayName returns the value of DisplayName.
@@ -6076,6 +6252,11 @@ func (s *NewDomain) GetDisplayName() OptString {
 // SetAdminEmail sets the value of AdminEmail.
 func (s *NewDomain) SetAdminEmail(val string) {
 	s.AdminEmail = val
+}
+
+// SetGoogleJWT sets the value of GoogleJWT.
+func (s *NewDomain) SetGoogleJWT(val OptString) {
+	s.GoogleJWT = val
 }
 
 // SetDisplayName sets the value of DisplayName.
@@ -6502,6 +6683,20 @@ func (s *NewReadContextConfigRuleTokenScope) UnmarshalText(data []byte) error {
 	}
 }
 
+type OAuthToken struct {
+	Token string
+}
+
+// GetToken returns the value of Token.
+func (s *OAuthToken) GetToken() string {
+	return s.Token
+}
+
+// SetToken sets the value of Token.
+func (s *OAuthToken) SetToken(val string) {
+	s.Token = val
+}
+
 // NewOptAPIKeyDomainIdentityProviderDetailsType returns new OptAPIKeyDomainIdentityProviderDetailsType with value set to v.
 func NewOptAPIKeyDomainIdentityProviderDetailsType(v APIKeyDomainIdentityProviderDetailsType) OptAPIKeyDomainIdentityProviderDetailsType {
 	return OptAPIKeyDomainIdentityProviderDetailsType{
@@ -6778,6 +6973,52 @@ func (o OptAntimatterDelegatedAWSKeyInfoProviderName) Or(d AntimatterDelegatedAW
 	return d
 }
 
+// NewOptAntimatterDelegatedGCPKeyInfoProviderName returns new OptAntimatterDelegatedGCPKeyInfoProviderName with value set to v.
+func NewOptAntimatterDelegatedGCPKeyInfoProviderName(v AntimatterDelegatedGCPKeyInfoProviderName) OptAntimatterDelegatedGCPKeyInfoProviderName {
+	return OptAntimatterDelegatedGCPKeyInfoProviderName{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAntimatterDelegatedGCPKeyInfoProviderName is optional AntimatterDelegatedGCPKeyInfoProviderName.
+type OptAntimatterDelegatedGCPKeyInfoProviderName struct {
+	Value AntimatterDelegatedGCPKeyInfoProviderName
+	Set   bool
+}
+
+// IsSet returns true if OptAntimatterDelegatedGCPKeyInfoProviderName was set.
+func (o OptAntimatterDelegatedGCPKeyInfoProviderName) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAntimatterDelegatedGCPKeyInfoProviderName) Reset() {
+	var v AntimatterDelegatedGCPKeyInfoProviderName
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAntimatterDelegatedGCPKeyInfoProviderName) SetTo(v AntimatterDelegatedGCPKeyInfoProviderName) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAntimatterDelegatedGCPKeyInfoProviderName) Get() (v AntimatterDelegatedGCPKeyInfoProviderName, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAntimatterDelegatedGCPKeyInfoProviderName) Or(d AntimatterDelegatedGCPKeyInfoProviderName) AntimatterDelegatedGCPKeyInfoProviderName {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAvailableDelegatedRootEncryptionKeyProviderType returns new OptAvailableDelegatedRootEncryptionKeyProviderType with value set to v.
 func NewOptAvailableDelegatedRootEncryptionKeyProviderType(v AvailableDelegatedRootEncryptionKeyProviderType) OptAvailableDelegatedRootEncryptionKeyProviderType {
 	return OptAvailableDelegatedRootEncryptionKeyProviderType{
@@ -6864,6 +7105,52 @@ func (o OptAvailableServiceAccountRootEncryptionKeyProviderType) Get() (v Availa
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAvailableServiceAccountRootEncryptionKeyProviderType) Or(d AvailableServiceAccountRootEncryptionKeyProviderType) AvailableServiceAccountRootEncryptionKeyProviderType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBYOKKeyInfoProviderName returns new OptBYOKKeyInfoProviderName with value set to v.
+func NewOptBYOKKeyInfoProviderName(v BYOKKeyInfoProviderName) OptBYOKKeyInfoProviderName {
+	return OptBYOKKeyInfoProviderName{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBYOKKeyInfoProviderName is optional BYOKKeyInfoProviderName.
+type OptBYOKKeyInfoProviderName struct {
+	Value BYOKKeyInfoProviderName
+	Set   bool
+}
+
+// IsSet returns true if OptBYOKKeyInfoProviderName was set.
+func (o OptBYOKKeyInfoProviderName) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBYOKKeyInfoProviderName) Reset() {
+	var v BYOKKeyInfoProviderName
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBYOKKeyInfoProviderName) SetTo(v BYOKKeyInfoProviderName) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBYOKKeyInfoProviderName) Get() (v BYOKKeyInfoProviderName, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBYOKKeyInfoProviderName) Or(d BYOKKeyInfoProviderName) BYOKKeyInfoProviderName {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10294,6 +10581,8 @@ type SessionID string
 type StarredDomainAddOK struct{}
 
 func (*StarredDomainAddOK) starredDomainAddRes() {}
+
+type StarredDomainAddReq struct{}
 
 // Ref: #/components/schemas/StarredDomainList
 type StarredDomainList struct {

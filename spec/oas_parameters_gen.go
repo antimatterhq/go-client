@@ -763,7 +763,9 @@ func decodeDomainContactIssueVerifyParams(args [1]string, argsEscaped bool, r *h
 type DomainContactVerifyParams struct {
 	DomainID DomainID
 	// Security token issued with verification request.
-	Token string
+	Token OptString
+	// Google-issued JWT carrying the verification email address.
+	GoogleJWT OptString
 	// Email address to be tested against the supplied token.
 	Address string
 }
@@ -781,7 +783,18 @@ func unpackDomainContactVerifyParams(packed middleware.Parameters) (params Domai
 			Name: "token",
 			In:   "query",
 		}
-		params.Token = packed[key].(string)
+		if v, ok := packed[key]; ok {
+			params.Token = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "googleJWT",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.GoogleJWT = v.(OptString)
+		}
 	}
 	{
 		key := middleware.ParameterKey{
@@ -865,28 +878,74 @@ func decodeDomainContactVerifyParams(args [1]string, argsEscaped bool, r *http.R
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
+				var paramsDotTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTokenVal = c
+					return nil
+				}(); err != nil {
 					return err
 				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.Token = c
+				params.Token.SetTo(paramsDotTokenVal)
 				return nil
 			}); err != nil {
 				return err
 			}
-		} else {
-			return validate.ErrFieldRequired
 		}
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "token",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: googleJWT.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "googleJWT",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotGoogleJWTVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotGoogleJWTVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.GoogleJWT.SetTo(paramsDotGoogleJWTVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "googleJWT",
 			In:   "query",
 			Err:  err,
 		}

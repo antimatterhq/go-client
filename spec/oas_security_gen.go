@@ -17,12 +17,9 @@ type SecurityHandler interface {
 	// HandleDomainIdentity handles domain_identity security.
 	// A JWT auth scheme using a token obtained from the domain /authenticate endpoint.
 	HandleDomainIdentity(ctx context.Context, operationName string, t DomainIdentity) (context.Context, error)
-	// HandleGoogleOAuthToken handles google_oauth_token security.
+	// HandleOAuthToken handles oauth_token security.
 	// A JWT token obtained from the browser based Google OAuth flow.
-	HandleGoogleOAuthToken(ctx context.Context, operationName string, t GoogleOAuthToken) (context.Context, error)
-	// HandleMicrosoftOAuthToken handles microsoft_oauth_token security.
-	// A JWT token obtained from the browser based Microsoft OAuth flow.
-	HandleMicrosoftOAuthToken(ctx context.Context, operationName string, t MicrosoftOAuthToken) (context.Context, error)
+	HandleOAuthToken(ctx context.Context, operationName string, t OAuthToken) (context.Context, error)
 }
 
 func findAuthorization(h http.Header, prefix string) (string, bool) {
@@ -55,29 +52,14 @@ func (s *Server) securityDomainIdentity(ctx context.Context, operationName strin
 	}
 	return rctx, true, err
 }
-func (s *Server) securityGoogleOAuthToken(ctx context.Context, operationName string, req *http.Request) (context.Context, bool, error) {
-	var t GoogleOAuthToken
+func (s *Server) securityOAuthToken(ctx context.Context, operationName string, req *http.Request) (context.Context, bool, error) {
+	var t OAuthToken
 	token, ok := findAuthorization(req.Header, "Bearer")
 	if !ok {
 		return ctx, false, nil
 	}
 	t.Token = token
-	rctx, err := s.sec.HandleGoogleOAuthToken(ctx, operationName, t)
-	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
-		return nil, false, nil
-	} else if err != nil {
-		return nil, false, err
-	}
-	return rctx, true, err
-}
-func (s *Server) securityMicrosoftOAuthToken(ctx context.Context, operationName string, req *http.Request) (context.Context, bool, error) {
-	var t MicrosoftOAuthToken
-	token, ok := findAuthorization(req.Header, "Bearer")
-	if !ok {
-		return ctx, false, nil
-	}
-	t.Token = token
-	rctx, err := s.sec.HandleMicrosoftOAuthToken(ctx, operationName, t)
+	rctx, err := s.sec.HandleOAuthToken(ctx, operationName, t)
 	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
 		return nil, false, nil
 	} else if err != nil {
@@ -91,12 +73,9 @@ type SecuritySource interface {
 	// DomainIdentity provides domain_identity security value.
 	// A JWT auth scheme using a token obtained from the domain /authenticate endpoint.
 	DomainIdentity(ctx context.Context, operationName string) (DomainIdentity, error)
-	// GoogleOAuthToken provides google_oauth_token security value.
+	// OAuthToken provides oauth_token security value.
 	// A JWT token obtained from the browser based Google OAuth flow.
-	GoogleOAuthToken(ctx context.Context, operationName string) (GoogleOAuthToken, error)
-	// MicrosoftOAuthToken provides microsoft_oauth_token security value.
-	// A JWT token obtained from the browser based Microsoft OAuth flow.
-	MicrosoftOAuthToken(ctx context.Context, operationName string) (MicrosoftOAuthToken, error)
+	OAuthToken(ctx context.Context, operationName string) (OAuthToken, error)
 }
 
 func (s *Client) securityDomainIdentity(ctx context.Context, operationName string, req *http.Request) error {
@@ -107,18 +86,10 @@ func (s *Client) securityDomainIdentity(ctx context.Context, operationName strin
 	req.Header.Set("Authorization", "Bearer "+t.Token)
 	return nil
 }
-func (s *Client) securityGoogleOAuthToken(ctx context.Context, operationName string, req *http.Request) error {
-	t, err := s.sec.GoogleOAuthToken(ctx, operationName)
+func (s *Client) securityOAuthToken(ctx context.Context, operationName string, req *http.Request) error {
+	t, err := s.sec.OAuthToken(ctx, operationName)
 	if err != nil {
-		return errors.Wrap(err, "security source \"GoogleOAuthToken\"")
-	}
-	req.Header.Set("Authorization", "Bearer "+t.Token)
-	return nil
-}
-func (s *Client) securityMicrosoftOAuthToken(ctx context.Context, operationName string, req *http.Request) error {
-	t, err := s.sec.MicrosoftOAuthToken(ctx, operationName)
-	if err != nil {
-		return errors.Wrap(err, "security source \"MicrosoftOAuthToken\"")
+		return errors.Wrap(err, "security source \"OAuthToken\"")
 	}
 	req.Header.Set("Authorization", "Bearer "+t.Token)
 	return nil

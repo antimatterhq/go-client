@@ -1663,6 +1663,155 @@ func (s *AntimatterDelegatedAWSKeyInfo) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *AntimatterDelegatedGCPKeyInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AntimatterDelegatedGCPKeyInfo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("projectID")
+		e.Str(s.ProjectID)
+	}
+	{
+		e.FieldStart("location")
+		e.Str(s.Location)
+	}
+	{
+		e.FieldStart("keyringID")
+		e.Str(s.KeyringID)
+	}
+	{
+		e.FieldStart("keyID")
+		e.Str(s.KeyID)
+	}
+}
+
+var jsonFieldsNameOfAntimatterDelegatedGCPKeyInfo = [4]string{
+	0: "projectID",
+	1: "location",
+	2: "keyringID",
+	3: "keyID",
+}
+
+// Decode decodes AntimatterDelegatedGCPKeyInfo from json.
+func (s *AntimatterDelegatedGCPKeyInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AntimatterDelegatedGCPKeyInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "projectID":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ProjectID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"projectID\"")
+			}
+		case "location":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Location = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"location\"")
+			}
+		case "keyringID":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.KeyringID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"keyringID\"")
+			}
+		case "keyID":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.KeyID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"keyID\"")
+			}
+		case "providerName":
+			return d.Skip()
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AntimatterDelegatedGCPKeyInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAntimatterDelegatedGCPKeyInfo) {
+					name = jsonFieldsNameOfAntimatterDelegatedGCPKeyInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AntimatterDelegatedGCPKeyInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AntimatterDelegatedGCPKeyInfo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *AvailableDelegatedRootEncryptionKeyProvider) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -2103,6 +2252,104 @@ func (s *AvailableServiceAccountRootEncryptionKeyProvider) MarshalJSON() ([]byte
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *AvailableServiceAccountRootEncryptionKeyProvider) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BYOKKeyInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BYOKKeyInfo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("key")
+		e.Base64(s.Key)
+	}
+}
+
+var jsonFieldsNameOfBYOKKeyInfo = [1]string{
+	0: "key",
+}
+
+// Decode decodes BYOKKeyInfo from json.
+func (s *BYOKKeyInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BYOKKeyInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "key":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Base64()
+				s.Key = []byte(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"key\"")
+			}
+		case "providerName":
+			return d.Skip()
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BYOKKeyInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBYOKKeyInfo) {
+					name = jsonFieldsNameOfBYOKKeyInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BYOKKeyInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BYOKKeyInfo) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -13513,6 +13760,14 @@ func (s KeyInfosKeyInformation) encodeFields(e *jx.Encoder) {
 		e.FieldStart("providerName")
 		e.Str("aws_sa")
 		s.AWSServiceAccountKeyInfo.encodeFields(e)
+	case BYOKKeyInfoKeyInfosKeyInformation:
+		e.FieldStart("providerName")
+		e.Str("byok")
+		s.BYOKKeyInfo.encodeFields(e)
+	case AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation:
+		e.FieldStart("providerName")
+		e.Str("gcp_am")
+		s.AntimatterDelegatedGCPKeyInfo.encodeFields(e)
 	case GCPServiceAccountKeyInfoKeyInfosKeyInformation:
 		e.FieldStart("providerName")
 		e.Str("gcp_sa")
@@ -13549,6 +13804,12 @@ func (s *KeyInfosKeyInformation) Decode(d *jx.Decoder) error {
 				case "aws_sa":
 					s.Type = AWSServiceAccountKeyInfoKeyInfosKeyInformation
 					found = true
+				case "byok":
+					s.Type = BYOKKeyInfoKeyInfosKeyInformation
+					found = true
+				case "gcp_am":
+					s.Type = AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation
+					found = true
 				case "gcp_sa":
 					s.Type = GCPServiceAccountKeyInfoKeyInfosKeyInformation
 					found = true
@@ -13570,12 +13831,20 @@ func (s *KeyInfosKeyInformation) Decode(d *jx.Decoder) error {
 		if err := s.GCPServiceAccountKeyInfo.Decode(d); err != nil {
 			return err
 		}
+	case AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation:
+		if err := s.AntimatterDelegatedGCPKeyInfo.Decode(d); err != nil {
+			return err
+		}
 	case AWSServiceAccountKeyInfoKeyInfosKeyInformation:
 		if err := s.AWSServiceAccountKeyInfo.Decode(d); err != nil {
 			return err
 		}
 	case AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation:
 		if err := s.AntimatterDelegatedAWSKeyInfo.Decode(d); err != nil {
+			return err
+		}
+	case BYOKKeyInfoKeyInfosKeyInformation:
+		if err := s.BYOKKeyInfo.Decode(d); err != nil {
 			return err
 		}
 	default:
@@ -14175,6 +14444,12 @@ func (s *NewDomain) encodeFields(e *jx.Encoder) {
 		e.Str(s.AdminEmail)
 	}
 	{
+		if s.GoogleJWT.Set {
+			e.FieldStart("googleJWT")
+			s.GoogleJWT.Encode(e)
+		}
+	}
+	{
 		if s.DisplayName.Set {
 			e.FieldStart("displayName")
 			s.DisplayName.Encode(e)
@@ -14182,9 +14457,10 @@ func (s *NewDomain) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNewDomain = [2]string{
+var jsonFieldsNameOfNewDomain = [3]string{
 	0: "adminEmail",
-	1: "displayName",
+	1: "googleJWT",
+	2: "displayName",
 }
 
 // Decode decodes NewDomain from json.
@@ -14207,6 +14483,16 @@ func (s *NewDomain) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"adminEmail\"")
+			}
+		case "googleJWT":
+			if err := func() error {
+				s.GoogleJWT.Reset()
+				if err := s.GoogleJWT.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"googleJWT\"")
 			}
 		case "displayName":
 			if err := func() error {
@@ -19729,6 +20015,50 @@ func (s SessionID) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SessionID) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *StarredDomainAddReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *StarredDomainAddReq) encodeFields(e *jx.Encoder) {
+}
+
+var jsonFieldsNameOfStarredDomainAddReq = [0]string{}
+
+// Decode decodes StarredDomainAddReq from json.
+func (s *StarredDomainAddReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StarredDomainAddReq to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		default:
+			return d.Skip()
+		}
+	}); err != nil {
+		return errors.Wrap(err, "decode StarredDomainAddReq")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *StarredDomainAddReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StarredDomainAddReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

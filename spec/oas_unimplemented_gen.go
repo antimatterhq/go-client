@@ -851,7 +851,7 @@ func (UnimplementedHandler) DomainUpsertWriteContextConfiguration(ctx context.Co
 // Adds the domain to the list of starred domains for the user.
 //
 // PUT /global/starred-domains/{domainID}
-func (UnimplementedHandler) StarredDomainAdd(ctx context.Context, params StarredDomainAddParams) (r StarredDomainAddRes, _ error) {
+func (UnimplementedHandler) StarredDomainAdd(ctx context.Context, req *StarredDomainAddReq, params StarredDomainAddParams) (r StarredDomainAddRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

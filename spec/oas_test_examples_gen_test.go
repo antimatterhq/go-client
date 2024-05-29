@@ -181,6 +181,18 @@ func TestAntimatterDelegatedAWSKeyInfo_EncodeDecode(t *testing.T) {
 	var typ2 AntimatterDelegatedAWSKeyInfo
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestAntimatterDelegatedGCPKeyInfo_EncodeDecode(t *testing.T) {
+	var typ AntimatterDelegatedGCPKeyInfo
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 AntimatterDelegatedGCPKeyInfo
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestAvailableDelegatedRootEncryptionKeyProvider_EncodeDecode(t *testing.T) {
 	var typ AvailableDelegatedRootEncryptionKeyProvider
 	typ.SetFake()
@@ -227,6 +239,18 @@ func TestAvailableServiceAccountRootEncryptionKeyProvider_EncodeDecode(t *testin
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 AvailableServiceAccountRootEncryptionKeyProvider
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestBYOKKeyInfo_EncodeDecode(t *testing.T) {
+	var typ BYOKKeyInfo
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 BYOKKeyInfo
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestCapability_EncodeDecode(t *testing.T) {
@@ -2165,6 +2189,18 @@ func TestSessionID_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 SessionID
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestStarredDomainAddReq_EncodeDecode(t *testing.T) {
+	var typ StarredDomainAddReq
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 StarredDomainAddReq
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestStarredDomainList_EncodeDecode(t *testing.T) {

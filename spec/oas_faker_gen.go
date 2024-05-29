@@ -278,6 +278,30 @@ func (s *AntimatterDelegatedAWSKeyInfo) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *AntimatterDelegatedGCPKeyInfo) SetFake() {
+	{
+		{
+			s.ProjectID = "string"
+		}
+	}
+	{
+		{
+			s.Location = "string"
+		}
+	}
+	{
+		{
+			s.KeyringID = "string"
+		}
+	}
+	{
+		{
+			s.KeyID = "string"
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *AvailableDelegatedRootEncryptionKeyProvider) SetFake() {
 	{
 		{
@@ -342,6 +366,15 @@ func (s *AvailableServiceAccountRootEncryptionKeyProvider) SetFake() {
 	{
 		{
 			s.Description = "string"
+		}
+	}
+}
+
+// SetFake set fake values.
+func (s *BYOKKeyInfo) SetFake() {
+	{
+		{
+			s.Key = []byte("[]byte")
 		}
 	}
 }
@@ -2520,6 +2553,11 @@ func (s *NewDomain) SetFake() {
 	}
 	{
 		{
+			s.GoogleJWT.SetFake()
+		}
+	}
+	{
+		{
 			s.DisplayName.SetFake()
 		}
 	}
@@ -3609,6 +3647,10 @@ func (s *SessionID) SetFake() {
 		unwrapped = "string"
 	}
 	*s = SessionID(unwrapped)
+}
+
+// SetFake set fake values.
+func (s *StarredDomainAddReq) SetFake() {
 }
 
 // SetFake set fake values.

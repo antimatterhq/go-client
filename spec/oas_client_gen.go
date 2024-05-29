@@ -610,7 +610,7 @@ type Invoker interface {
 	// Adds the domain to the list of starred domains for the user.
 	//
 	// PUT /global/starred-domains/{domainID}
-	StarredDomainAdd(ctx context.Context, params StarredDomainAddParams) (StarredDomainAddRes, error)
+	StarredDomainAdd(ctx context.Context, request *StarredDomainAddReq, params StarredDomainAddParams) (StarredDomainAddRes, error)
 	// StarredDomainList invokes starredDomainList operation.
 	//
 	// Returns a list of domains that the user has starred. This is a list of domain IDs, not domain
@@ -953,6 +953,15 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
+	}
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -1647,7 +1656,27 @@ func (c *Client) sendDomainContactVerify(ctx context.Context, params DomainConta
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Token))
+			if val, ok := params.Token.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "googleJWT" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "googleJWT",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.GoogleJWT.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -13601,12 +13630,12 @@ func (c *Client) sendDomainUpsertWriteContextConfiguration(ctx context.Context, 
 // Adds the domain to the list of starred domains for the user.
 //
 // PUT /global/starred-domains/{domainID}
-func (c *Client) StarredDomainAdd(ctx context.Context, params StarredDomainAddParams) (StarredDomainAddRes, error) {
-	res, err := c.sendStarredDomainAdd(ctx, params)
+func (c *Client) StarredDomainAdd(ctx context.Context, request *StarredDomainAddReq, params StarredDomainAddParams) (StarredDomainAddRes, error) {
+	res, err := c.sendStarredDomainAdd(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendStarredDomainAdd(ctx context.Context, params StarredDomainAddParams) (res StarredDomainAddRes, err error) {
+func (c *Client) sendStarredDomainAdd(ctx context.Context, request *StarredDomainAddReq, params StarredDomainAddParams) (res StarredDomainAddRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("starredDomainAdd"),
 		semconv.HTTPMethodKey.String("PUT"),
@@ -13672,30 +13701,22 @@ func (c *Client) sendStarredDomainAdd(ctx context.Context, params StarredDomainA
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
+	if err := encodeStarredDomainAddRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
 
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:GoogleOAuthToken"
-			switch err := c.securityGoogleOAuthToken(ctx, "StarredDomainAdd", r); {
+			stage = "Security:OAuthToken"
+			switch err := c.securityOAuthToken(ctx, "StarredDomainAdd", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"GoogleOAuthToken\"")
-			}
-		}
-		{
-			stage = "Security:MicrosoftOAuthToken"
-			switch err := c.securityMicrosoftOAuthToken(ctx, "StarredDomainAdd", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"MicrosoftOAuthToken\"")
+				return res, errors.Wrap(err, "security \"OAuthToken\"")
 			}
 		}
 
@@ -13703,7 +13724,6 @@ func (c *Client) sendStarredDomainAdd(ctx context.Context, params StarredDomainA
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13795,25 +13815,14 @@ func (c *Client) sendStarredDomainList(ctx context.Context) (res StarredDomainLi
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:GoogleOAuthToken"
-			switch err := c.securityGoogleOAuthToken(ctx, "StarredDomainList", r); {
+			stage = "Security:OAuthToken"
+			switch err := c.securityOAuthToken(ctx, "StarredDomainList", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"GoogleOAuthToken\"")
-			}
-		}
-		{
-			stage = "Security:MicrosoftOAuthToken"
-			switch err := c.securityMicrosoftOAuthToken(ctx, "StarredDomainList", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"MicrosoftOAuthToken\"")
+				return res, errors.Wrap(err, "security \"OAuthToken\"")
 			}
 		}
 
@@ -13821,7 +13830,6 @@ func (c *Client) sendStarredDomainList(ctx context.Context) (res StarredDomainLi
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13933,25 +13941,14 @@ func (c *Client) sendStarredDomainRemove(ctx context.Context, params StarredDoma
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:GoogleOAuthToken"
-			switch err := c.securityGoogleOAuthToken(ctx, "StarredDomainRemove", r); {
+			stage = "Security:OAuthToken"
+			switch err := c.securityOAuthToken(ctx, "StarredDomainRemove", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"GoogleOAuthToken\"")
-			}
-		}
-		{
-			stage = "Security:MicrosoftOAuthToken"
-			switch err := c.securityMicrosoftOAuthToken(ctx, "StarredDomainRemove", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"MicrosoftOAuthToken\"")
+				return res, errors.Wrap(err, "security \"OAuthToken\"")
 			}
 		}
 
@@ -13959,7 +13956,6 @@ func (c *Client) sendStarredDomainRemove(ctx context.Context, params StarredDoma
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {

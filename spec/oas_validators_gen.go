@@ -497,6 +497,15 @@ func (s AntimatterDelegatedAWSKeyInfoProviderName) Validate() error {
 	}
 }
 
+func (s AntimatterDelegatedGCPKeyInfoProviderName) Validate() error {
+	switch s {
+	case "gcp_am":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s AvailableDelegatedRootEncryptionKeyProviderType) Validate() error {
 	switch s {
 	case "DelegatedRootEncryptionKeyProvider":
@@ -509,6 +518,42 @@ func (s AvailableDelegatedRootEncryptionKeyProviderType) Validate() error {
 func (s AvailableServiceAccountRootEncryptionKeyProviderType) Validate() error {
 	switch s {
 	case "ServiceAccountRootEncryptionKeyProvider":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *BYOKKeyInfo) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:    256,
+			MinLengthSet: true,
+			MaxLength:    0,
+			MaxLengthSet: false,
+			Email:        false,
+			Hostname:     false,
+			Regex:        nil,
+		}).Validate(string(s.Key)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "key",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s BYOKKeyInfoProviderName) Validate() error {
+	switch s {
+	case "byok":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3850,6 +3895,45 @@ func (s JSONPatchRequestTstValue) Validate() error {
 		return nil
 	case BoolJSONPatchRequestTstValue:
 		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *KeyInfos) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.KeyInformation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "keyInformation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s KeyInfosKeyInformation) Validate() error {
+	switch s.Type {
+	case GCPServiceAccountKeyInfoKeyInfosKeyInformation:
+		return nil // no validation needed
+	case AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation:
+		return nil // no validation needed
+	case AWSServiceAccountKeyInfoKeyInfosKeyInformation:
+		return nil // no validation needed
+	case AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation:
+		return nil // no validation needed
+	case BYOKKeyInfoKeyInfosKeyInformation:
+		if err := s.BYOKKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
 	}

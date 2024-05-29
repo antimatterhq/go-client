@@ -592,7 +592,7 @@ type Handler interface {
 	// Adds the domain to the list of starred domains for the user.
 	//
 	// PUT /global/starred-domains/{domainID}
-	StarredDomainAdd(ctx context.Context, params StarredDomainAddParams) (StarredDomainAddRes, error)
+	StarredDomainAdd(ctx context.Context, req *StarredDomainAddReq, params StarredDomainAddParams) (StarredDomainAddRes, error)
 	// StarredDomainList implements starredDomainList operation.
 	//
 	// Returns a list of domains that the user has starred. This is a list of domain IDs, not domain

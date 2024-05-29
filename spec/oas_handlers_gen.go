@@ -1150,6 +1150,10 @@ func (s *Server) handleDomainContactVerifyRequest(args [1]string, argsEscaped bo
 					In:   "query",
 				}: params.Token,
 				{
+					Name: "googleJWT",
+					In:   "query",
+				}: params.GoogleJWT,
+				{
 					Name: "address",
 					In:   "query",
 				}: params.Address,
@@ -14447,15 +14451,15 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityGoogleOAuthToken(ctx, "StarredDomainAdd", r)
+			sctx, ok, err := s.securityOAuthToken(ctx, "StarredDomainAdd", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "GoogleOAuthToken",
+					Security:         "OAuthToken",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:GoogleOAuthToken", err)
+					recordError("Security:OAuthToken", err)
 				}
 				return
 			}
@@ -14464,30 +14468,11 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 				ctx = sctx
 			}
 		}
-		{
-			sctx, ok, err := s.securityMicrosoftOAuthToken(ctx, "StarredDomainAdd", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "MicrosoftOAuthToken",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:MicrosoftOAuthToken", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
 
 		if ok := func() bool {
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14518,6 +14503,21 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
+	request, close, err := s.decodeStarredDomainAddRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response StarredDomainAddRes
 	if m := s.cfg.Middleware; m != nil {
@@ -14526,7 +14526,7 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 			OperationName:    "StarredDomainAdd",
 			OperationSummary: "Adds to starred domains",
 			OperationID:      "starredDomainAdd",
-			Body:             nil,
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "domainID",
@@ -14537,7 +14537,7 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 		}
 
 		type (
-			Request  = struct{}
+			Request  = *StarredDomainAddReq
 			Params   = StarredDomainAddParams
 			Response = StarredDomainAddRes
 		)
@@ -14550,12 +14550,12 @@ func (s *Server) handleStarredDomainAddRequest(args [1]string, argsEscaped bool,
 			mreq,
 			unpackStarredDomainAddParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.StarredDomainAdd(ctx, params)
+				response, err = s.h.StarredDomainAdd(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.StarredDomainAdd(ctx, params)
+		response, err = s.h.StarredDomainAdd(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
@@ -14630,15 +14630,15 @@ func (s *Server) handleStarredDomainListRequest(args [0]string, argsEscaped bool
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityGoogleOAuthToken(ctx, "StarredDomainList", r)
+			sctx, ok, err := s.securityOAuthToken(ctx, "StarredDomainList", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "GoogleOAuthToken",
+					Security:         "OAuthToken",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:GoogleOAuthToken", err)
+					recordError("Security:OAuthToken", err)
 				}
 				return
 			}
@@ -14647,30 +14647,11 @@ func (s *Server) handleStarredDomainListRequest(args [0]string, argsEscaped bool
 				ctx = sctx
 			}
 		}
-		{
-			sctx, ok, err := s.securityMicrosoftOAuthToken(ctx, "StarredDomainList", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "MicrosoftOAuthToken",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:MicrosoftOAuthToken", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
 
 		if ok := func() bool {
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14797,15 +14778,15 @@ func (s *Server) handleStarredDomainRemoveRequest(args [1]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityGoogleOAuthToken(ctx, "StarredDomainRemove", r)
+			sctx, ok, err := s.securityOAuthToken(ctx, "StarredDomainRemove", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "GoogleOAuthToken",
+					Security:         "OAuthToken",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:GoogleOAuthToken", err)
+					recordError("Security:OAuthToken", err)
 				}
 				return
 			}
@@ -14814,30 +14795,11 @@ func (s *Server) handleStarredDomainRemoveRequest(args [1]string, argsEscaped bo
 				ctx = sctx
 			}
 		}
-		{
-			sctx, ok, err := s.securityMicrosoftOAuthToken(ctx, "StarredDomainRemove", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "MicrosoftOAuthToken",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					recordError("Security:MicrosoftOAuthToken", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
 
 		if ok := func() bool {
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
