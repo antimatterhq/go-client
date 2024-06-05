@@ -469,6 +469,15 @@ func (UnimplementedHandler) DomainGetTagInfo(ctx context.Context, params DomainG
 	return r, ht.ErrNotImplemented
 }
 
+// DomainGetVendorSettings implements domainGetVendorSettings operation.
+//
+// Return the current vendor settings for a given domain.
+//
+// GET /domains/{domainID}/control/vendor/settings
+func (UnimplementedHandler) DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (r DomainGetVendorSettingsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainGetWriteContextRegexRules implements domainGetWriteContextRegexRules operation.
 //
 // Get a full listing of all regex rules for the context.
@@ -654,6 +663,15 @@ func (UnimplementedHandler) DomainPutCapability(ctx context.Context, req *NewCap
 //
 // PUT /domains/{domainID}/control/facts/{factType}
 func (UnimplementedHandler) DomainPutFactType(ctx context.Context, req *NewFactTypeDefinition, params DomainPutFactTypeParams) (r DomainPutFactTypeRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainPutVendorSettings implements domainPutVendorSettings operation.
+//
+// Create or update the vendor settings for a given domain.
+//
+// PUT /domains/{domainID}/control/vendor/settings
+func (UnimplementedHandler) DomainPutVendorSettings(ctx context.Context, req *VendorSettings, params DomainPutVendorSettingsParams) (r DomainPutVendorSettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

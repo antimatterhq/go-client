@@ -185,6 +185,10 @@ type DomainGetTagInfoRes interface {
 	domainGetTagInfoRes()
 }
 
+type DomainGetVendorSettingsRes interface {
+	domainGetVendorSettingsRes()
+}
+
 type DomainGetWriteContextRegexRulesRes interface {
 	domainGetWriteContextRegexRulesRes()
 }
@@ -259,6 +263,10 @@ type DomainPutCapabilityRes interface {
 
 type DomainPutFactTypeRes interface {
 	domainPutFactTypeRes()
+}
+
+type DomainPutVendorSettingsRes interface {
+	domainPutVendorSettingsRes()
 }
 
 type DomainQueryAccessLogRes interface {

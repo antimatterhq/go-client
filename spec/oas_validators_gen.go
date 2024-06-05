@@ -6020,6 +6020,25 @@ func (s *UpsertSpanTagsRequest) Validate() error {
 	return nil
 }
 
+func (s *VendorSettings) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.ManagedKeyId.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "managedKeyId",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *VerifyContactResponse) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {

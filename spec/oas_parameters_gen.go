@@ -6523,6 +6523,86 @@ func decodeDomainGetTagInfoParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// DomainGetVendorSettingsParams is parameters of domainGetVendorSettings operation.
+type DomainGetVendorSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainGetVendorSettingsParams(packed middleware.Parameters) (params DomainGetVendorSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainGetVendorSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainGetVendorSettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainGetWriteContextRegexRulesParams is parameters of domainGetWriteContextRegexRules operation.
 type DomainGetWriteContextRegexRulesParams struct {
 	DomainID    DomainID
@@ -9053,6 +9133,86 @@ func decodeDomainPutFactTypeParams(args [2]string, argsEscaped bool, r *http.Req
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "factType",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainPutVendorSettingsParams is parameters of domainPutVendorSettings operation.
+type DomainPutVendorSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainPutVendorSettingsParams(packed middleware.Parameters) (params DomainPutVendorSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainPutVendorSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPutVendorSettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
 			In:   "path",
 			Err:  err,
 		}

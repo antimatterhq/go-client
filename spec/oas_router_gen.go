@@ -1325,6 +1325,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											return
 										}
 									}
+								case 'v': // Prefix: "vendor/settings"
+									if l := len("vendor/settings"); len(elem) >= l && elem[0:l] == "vendor/settings" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleDomainGetVendorSettingsRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "PUT":
+											s.handleDomainPutVendorSettingsRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET,PUT")
+										}
+
+										return
+									}
 								case 'w': // Prefix: "write-context"
 									if l := len("write-context"); len(elem) >= l && elem[0:l] == "write-context" {
 										elem = elem[l:]
@@ -3229,6 +3253,37 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											default:
 												return
 											}
+										}
+									}
+								case 'v': // Prefix: "vendor/settings"
+									if l := len("vendor/settings"); len(elem) >= l && elem[0:l] == "vendor/settings" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											// Leaf: DomainGetVendorSettings
+											r.name = "DomainGetVendorSettings"
+											r.summary = "Get vendor settings for the domain"
+											r.operationID = "domainGetVendorSettings"
+											r.pathPattern = "/domains/{domainID}/control/vendor/settings"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "PUT":
+											// Leaf: DomainPutVendorSettings
+											r.name = "DomainPutVendorSettings"
+											r.summary = "Create or update vendor settings"
+											r.operationID = "domainPutVendorSettings"
+											r.pathPattern = "/domains/{domainID}/control/vendor/settings"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
 										}
 									}
 								case 'w': // Prefix: "write-context"

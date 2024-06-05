@@ -326,6 +326,12 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/tag-info
 	DomainGetTagInfo(ctx context.Context, params DomainGetTagInfoParams) (DomainGetTagInfoRes, error)
+	// DomainGetVendorSettings implements domainGetVendorSettings operation.
+	//
+	// Return the current vendor settings for a given domain.
+	//
+	// GET /domains/{domainID}/control/vendor/settings
+	DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (DomainGetVendorSettingsRes, error)
 	// DomainGetWriteContextRegexRules implements domainGetWriteContextRegexRules operation.
 	//
 	// Get a full listing of all regex rules for the context.
@@ -457,6 +463,12 @@ type Handler interface {
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, req *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
+	// DomainPutVendorSettings implements domainPutVendorSettings operation.
+	//
+	// Create or update the vendor settings for a given domain.
+	//
+	// PUT /domains/{domainID}/control/vendor/settings
+	DomainPutVendorSettings(ctx context.Context, req *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
 	// DomainQueryAccessLog implements domainQueryAccessLog operation.
 	//
 	// Query the data access log for this domain. This contains all operations interacting with capsules

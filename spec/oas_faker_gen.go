@@ -3869,6 +3869,30 @@ func (s *UpsertSpanTagsRequest) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *VendorSettings) SetFake() {
+	{
+		{
+			s.Name = "string"
+		}
+	}
+	{
+		{
+			s.SupportContact = "string"
+		}
+	}
+	{
+		{
+			s.ManagedKeyId.SetFake()
+		}
+	}
+	{
+		{
+			s.HYOKDisabled = true
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *VerifyContactResponse) SetFake() {
 	{
 		{

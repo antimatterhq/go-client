@@ -344,6 +344,12 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/tag-info
 	DomainGetTagInfo(ctx context.Context, params DomainGetTagInfoParams) (DomainGetTagInfoRes, error)
+	// DomainGetVendorSettings invokes domainGetVendorSettings operation.
+	//
+	// Return the current vendor settings for a given domain.
+	//
+	// GET /domains/{domainID}/control/vendor/settings
+	DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (DomainGetVendorSettingsRes, error)
 	// DomainGetWriteContextRegexRules invokes domainGetWriteContextRegexRules operation.
 	//
 	// Get a full listing of all regex rules for the context.
@@ -475,6 +481,12 @@ type Invoker interface {
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
+	// DomainPutVendorSettings invokes domainPutVendorSettings operation.
+	//
+	// Create or update the vendor settings for a given domain.
+	//
+	// PUT /domains/{domainID}/control/vendor/settings
+	DomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
 	// DomainQueryAccessLog invokes domainQueryAccessLog operation.
 	//
 	// Query the data access log for this domain. This contains all operations interacting with capsules
@@ -7380,6 +7392,133 @@ func (c *Client) sendDomainGetTagInfo(ctx context.Context, params DomainGetTagIn
 	return result, nil
 }
 
+// DomainGetVendorSettings invokes domainGetVendorSettings operation.
+//
+// Return the current vendor settings for a given domain.
+//
+// GET /domains/{domainID}/control/vendor/settings
+func (c *Client) DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (DomainGetVendorSettingsRes, error) {
+	res, err := c.sendDomainGetVendorSettings(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (res DomainGetVendorSettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetVendorSettings"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/vendor/settings"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetVendorSettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/vendor/settings"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetVendorSettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetVendorSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainGetWriteContextRegexRules invokes domainGetWriteContextRegexRules operation.
 //
 // Get a full listing of all regex rules for the context.
@@ -10183,6 +10322,145 @@ func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactType
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainPutFactTypeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainPutVendorSettings invokes domainPutVendorSettings operation.
+//
+// Create or update the vendor settings for a given domain.
+//
+// PUT /domains/{domainID}/control/vendor/settings
+func (c *Client) DomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error) {
+	res, err := c.sendDomainPutVendorSettings(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (res DomainPutVendorSettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPutVendorSettings"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/vendor/settings"),
+	}
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPutVendorSettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/vendor/settings"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainPutVendorSettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainPutVendorSettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainPutVendorSettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

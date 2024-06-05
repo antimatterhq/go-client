@@ -1750,7 +1750,9 @@ func (s *ConflictError) SetMessage(val string) {
 func (*ConflictError) domainCreatePeerDomainRes()              {}
 func (*ConflictError) domainDeleteCapabilityRes()              {}
 func (*ConflictError) domainExternalRootEncryptionKeyTestRes() {}
+func (*ConflictError) domainGetVendorSettingsRes()             {}
 func (*ConflictError) domainPutCapabilityRes()                 {}
+func (*ConflictError) domainPutVendorSettingsRes()             {}
 func (*ConflictError) domainReadContextFlushRes()              {}
 func (*ConflictError) domainUpsertSpanTagsRes()                {}
 
@@ -3984,6 +3986,11 @@ type DomainPutFactTypeOK struct{}
 
 func (*DomainPutFactTypeOK) domainPutFactTypeRes() {}
 
+// DomainPutVendorSettingsOK is response for DomainPutVendorSettings operation.
+type DomainPutVendorSettingsOK struct{}
+
+func (*DomainPutVendorSettingsOK) domainPutVendorSettingsRes() {}
+
 type DomainQueryAccessLogOperationType string
 
 const (
@@ -5172,6 +5179,7 @@ func (*InvalidRequestError) domainGetReadContextRes()                        {}
 func (*InvalidRequestError) domainGetSettingsRes()                           {}
 func (*InvalidRequestError) domainGetStatusRes()                             {}
 func (*InvalidRequestError) domainGetTagInfoRes()                            {}
+func (*InvalidRequestError) domainGetVendorSettingsRes()                     {}
 func (*InvalidRequestError) domainGetWriteContextRegexRulesRes()             {}
 func (*InvalidRequestError) domainInsertIdentityProviderPrincipalRes()       {}
 func (*InvalidRequestError) domainInsertWriteContextRegexRuleRes()           {}
@@ -5191,6 +5199,7 @@ func (*InvalidRequestError) domainPatchSettingsRes()                         {}
 func (*InvalidRequestError) domainPolicyFlushRes()                           {}
 func (*InvalidRequestError) domainPutCapabilityRes()                         {}
 func (*InvalidRequestError) domainPutFactTypeRes()                           {}
+func (*InvalidRequestError) domainPutVendorSettingsRes()                     {}
 func (*InvalidRequestError) domainQueryAccessLogRes()                        {}
 func (*InvalidRequestError) domainQueryAccessLogSingleCapsuleRes()           {}
 func (*InvalidRequestError) domainQueryControlLogRes()                       {}
@@ -8872,6 +8881,7 @@ func (*PermanentRedirect) domainGetReadContextRes()                        {}
 func (*PermanentRedirect) domainGetSettingsRes()                           {}
 func (*PermanentRedirect) domainGetStatusRes()                             {}
 func (*PermanentRedirect) domainGetTagInfoRes()                            {}
+func (*PermanentRedirect) domainGetVendorSettingsRes()                     {}
 func (*PermanentRedirect) domainGetWriteContextRegexRulesRes()             {}
 func (*PermanentRedirect) domainInsertIdentityProviderPrincipalRes()       {}
 func (*PermanentRedirect) domainInsertWriteContextRegexRuleRes()           {}
@@ -8891,6 +8901,7 @@ func (*PermanentRedirect) domainPatchSettingsRes()                         {}
 func (*PermanentRedirect) domainPolicyFlushRes()                           {}
 func (*PermanentRedirect) domainPutCapabilityRes()                         {}
 func (*PermanentRedirect) domainPutFactTypeRes()                           {}
+func (*PermanentRedirect) domainPutVendorSettingsRes()                     {}
 func (*PermanentRedirect) domainQueryAccessLogRes()                        {}
 func (*PermanentRedirect) domainQueryAccessLogSingleCapsuleRes()           {}
 func (*PermanentRedirect) domainQueryControlLogRes()                       {}
@@ -10169,6 +10180,7 @@ func (*ResourceExhaustedError) domainGetReadContextRes()                        
 func (*ResourceExhaustedError) domainGetSettingsRes()                           {}
 func (*ResourceExhaustedError) domainGetStatusRes()                             {}
 func (*ResourceExhaustedError) domainGetTagInfoRes()                            {}
+func (*ResourceExhaustedError) domainGetVendorSettingsRes()                     {}
 func (*ResourceExhaustedError) domainGetWriteContextRegexRulesRes()             {}
 func (*ResourceExhaustedError) domainInsertIdentityProviderPrincipalRes()       {}
 func (*ResourceExhaustedError) domainInsertWriteContextRegexRuleRes()           {}
@@ -10188,6 +10200,7 @@ func (*ResourceExhaustedError) domainPatchSettingsRes()                         
 func (*ResourceExhaustedError) domainPolicyFlushRes()                           {}
 func (*ResourceExhaustedError) domainPutCapabilityRes()                         {}
 func (*ResourceExhaustedError) domainPutFactTypeRes()                           {}
+func (*ResourceExhaustedError) domainPutVendorSettingsRes()                     {}
 func (*ResourceExhaustedError) domainQueryAccessLogRes()                        {}
 func (*ResourceExhaustedError) domainQueryAccessLogSingleCapsuleRes()           {}
 func (*ResourceExhaustedError) domainQueryControlLogRes()                       {}
@@ -10297,6 +10310,7 @@ func (*ResourceNotFoundError) domainGetReadContextRes()                        {
 func (*ResourceNotFoundError) domainGetSettingsRes()                           {}
 func (*ResourceNotFoundError) domainGetStatusRes()                             {}
 func (*ResourceNotFoundError) domainGetTagInfoRes()                            {}
+func (*ResourceNotFoundError) domainGetVendorSettingsRes()                     {}
 func (*ResourceNotFoundError) domainGetWriteContextRegexRulesRes()             {}
 func (*ResourceNotFoundError) domainInsertIdentityProviderPrincipalRes()       {}
 func (*ResourceNotFoundError) domainInsertWriteContextRegexRuleRes()           {}
@@ -10316,6 +10330,7 @@ func (*ResourceNotFoundError) domainPatchSettingsRes()                         {
 func (*ResourceNotFoundError) domainPolicyFlushRes()                           {}
 func (*ResourceNotFoundError) domainPutCapabilityRes()                         {}
 func (*ResourceNotFoundError) domainPutFactTypeRes()                           {}
+func (*ResourceNotFoundError) domainPutVendorSettingsRes()                     {}
 func (*ResourceNotFoundError) domainQueryAccessLogRes()                        {}
 func (*ResourceNotFoundError) domainQueryAccessLogSingleCapsuleRes()           {}
 func (*ResourceNotFoundError) domainQueryControlLogRes()                       {}
@@ -10975,6 +10990,7 @@ func (*UnauthorizedError) domainGetReadContextRes()                        {}
 func (*UnauthorizedError) domainGetSettingsRes()                           {}
 func (*UnauthorizedError) domainGetStatusRes()                             {}
 func (*UnauthorizedError) domainGetTagInfoRes()                            {}
+func (*UnauthorizedError) domainGetVendorSettingsRes()                     {}
 func (*UnauthorizedError) domainGetWriteContextRegexRulesRes()             {}
 func (*UnauthorizedError) domainInsertIdentityProviderPrincipalRes()       {}
 func (*UnauthorizedError) domainInsertWriteContextRegexRuleRes()           {}
@@ -10994,6 +11010,7 @@ func (*UnauthorizedError) domainPatchSettingsRes()                         {}
 func (*UnauthorizedError) domainPolicyFlushRes()                           {}
 func (*UnauthorizedError) domainPutCapabilityRes()                         {}
 func (*UnauthorizedError) domainPutFactTypeRes()                           {}
+func (*UnauthorizedError) domainPutVendorSettingsRes()                     {}
 func (*UnauthorizedError) domainQueryAccessLogRes()                        {}
 func (*UnauthorizedError) domainQueryAccessLogSingleCapsuleRes()           {}
 func (*UnauthorizedError) domainQueryControlLogRes()                       {}
@@ -11042,6 +11059,61 @@ func (s *UpsertSpanTagsRequest) SetSummary(val TagSummary) {
 func (s *UpsertSpanTagsRequest) SetCreateToken(val CapsuleOperationToken) {
 	s.CreateToken = val
 }
+
+// Vendor settings for a domain.
+// Ref: #/components/schemas/VendorSettings
+type VendorSettings struct {
+	// The name of the vendor associated with the domain.
+	Name string `json:"name"`
+	// The contact point for the the vendor.
+	SupportContact string              `json:"supportContact"`
+	ManagedKeyId   RootEncryptionKeyID `json:"managedKeyId"`
+	// A flag that indicates whether the subdomains of this domain should have the HYOK (Hold Your Own
+	// Key) feature enabled in the UI.
+	HYOKDisabled bool `json:"HYOKDisabled"`
+}
+
+// GetName returns the value of Name.
+func (s *VendorSettings) GetName() string {
+	return s.Name
+}
+
+// GetSupportContact returns the value of SupportContact.
+func (s *VendorSettings) GetSupportContact() string {
+	return s.SupportContact
+}
+
+// GetManagedKeyId returns the value of ManagedKeyId.
+func (s *VendorSettings) GetManagedKeyId() RootEncryptionKeyID {
+	return s.ManagedKeyId
+}
+
+// GetHYOKDisabled returns the value of HYOKDisabled.
+func (s *VendorSettings) GetHYOKDisabled() bool {
+	return s.HYOKDisabled
+}
+
+// SetName sets the value of Name.
+func (s *VendorSettings) SetName(val string) {
+	s.Name = val
+}
+
+// SetSupportContact sets the value of SupportContact.
+func (s *VendorSettings) SetSupportContact(val string) {
+	s.SupportContact = val
+}
+
+// SetManagedKeyId sets the value of ManagedKeyId.
+func (s *VendorSettings) SetManagedKeyId(val RootEncryptionKeyID) {
+	s.ManagedKeyId = val
+}
+
+// SetHYOKDisabled sets the value of HYOKDisabled.
+func (s *VendorSettings) SetHYOKDisabled(val bool) {
+	s.HYOKDisabled = val
+}
+
+func (*VendorSettings) domainGetVendorSettingsRes() {}
 
 // Returned by successful contact email verification.
 // Ref: #/components/schemas/VerifyContactResponse
