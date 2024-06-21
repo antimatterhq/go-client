@@ -689,7 +689,7 @@ func (UnimplementedHandler) DomainPutFactType(ctx context.Context, req *NewFactT
 // Create or update the vendor settings for a given domain.
 //
 // PUT /domains/{domainID}/control/vendor/settings
-func (UnimplementedHandler) DomainPutVendorSettings(ctx context.Context, req *VendorSettings, params DomainPutVendorSettingsParams) (r DomainPutVendorSettingsRes, _ error) {
+func (UnimplementedHandler) DomainPutVendorSettings(ctx context.Context, req *NewVendorSettings, params DomainPutVendorSettingsParams) (r DomainPutVendorSettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

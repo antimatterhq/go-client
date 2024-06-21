@@ -4504,6 +4504,32 @@ func (s NewReadContextConfigRuleTokenScope) Validate() error {
 	}
 }
 
+func (s *NewVendorSettings) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ManagedKeyId.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "managedKeyId",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s PatchRequest) Validate() error {
 	alias := ([]PatchRequestItem)(s)
 	if alias == nil {

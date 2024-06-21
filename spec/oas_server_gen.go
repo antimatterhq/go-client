@@ -480,7 +480,7 @@ type Handler interface {
 	// Create or update the vendor settings for a given domain.
 	//
 	// PUT /domains/{domainID}/control/vendor/settings
-	DomainPutVendorSettings(ctx context.Context, req *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
+	DomainPutVendorSettings(ctx context.Context, req *NewVendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
 	// DomainQueryAccessLog implements domainQueryAccessLog operation.
 	//
 	// Query the data access log for this domain. This contains all operations interacting with capsules

@@ -15766,6 +15766,120 @@ func (s *NewReadContextConfigRuleTokenScope) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *NewVendorSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NewVendorSettings) encodeFields(e *jx.Encoder) {
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.SupportContact.Set {
+			e.FieldStart("supportContact")
+			s.SupportContact.Encode(e)
+		}
+	}
+	{
+		if s.ManagedKeyId.Set {
+			e.FieldStart("managedKeyId")
+			s.ManagedKeyId.Encode(e)
+		}
+	}
+	{
+		if s.HYOKDisabled.Set {
+			e.FieldStart("HYOKDisabled")
+			s.HYOKDisabled.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNewVendorSettings = [4]string{
+	0: "name",
+	1: "supportContact",
+	2: "managedKeyId",
+	3: "HYOKDisabled",
+}
+
+// Decode decodes NewVendorSettings from json.
+func (s *NewVendorSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewVendorSettings to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "supportContact":
+			if err := func() error {
+				s.SupportContact.Reset()
+				if err := s.SupportContact.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"supportContact\"")
+			}
+		case "managedKeyId":
+			if err := func() error {
+				s.ManagedKeyId.Reset()
+				if err := s.ManagedKeyId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"managedKeyId\"")
+			}
+		case "HYOKDisabled":
+			if err := func() error {
+				s.HYOKDisabled.Reset()
+				if err := s.HYOKDisabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"HYOKDisabled\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewVendorSettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewVendorSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewVendorSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AccessLogEntryCreateInfo as json.
 func (o OptAccessLogEntryCreateInfo) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -16463,6 +16577,39 @@ func (s OptReadContextRuleFactsItemOperator) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptReadContextRuleFactsItemOperator) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RootEncryptionKeyReference as json.
+func (o OptRootEncryptionKeyReference) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes RootEncryptionKeyReference from json.
+func (o *OptRootEncryptionKeyReference) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptRootEncryptionKeyReference to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptRootEncryptionKeyReference) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptRootEncryptionKeyReference) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -19450,46 +19597,6 @@ func (s *ResourceNotFoundError) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ResourceNotFoundError) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RootEncryptionKeyID as json.
-func (s RootEncryptionKeyID) Encode(e *jx.Encoder) {
-	unwrapped := string(s)
-
-	e.Str(unwrapped)
-}
-
-// Decode decodes RootEncryptionKeyID from json.
-func (s *RootEncryptionKeyID) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RootEncryptionKeyID to nil")
-	}
-	var unwrapped string
-	if err := func() error {
-		v, err := d.Str()
-		unwrapped = string(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = RootEncryptionKeyID(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s RootEncryptionKeyID) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RootEncryptionKeyID) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

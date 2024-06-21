@@ -294,7 +294,7 @@ func encodeDomainPutFactTypeRequest(
 }
 
 func encodeDomainPutVendorSettingsRequest(
-	req *VendorSettings,
+	req *NewVendorSettings,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

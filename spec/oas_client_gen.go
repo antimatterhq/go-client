@@ -498,7 +498,7 @@ type Invoker interface {
 	// Create or update the vendor settings for a given domain.
 	//
 	// PUT /domains/{domainID}/control/vendor/settings
-	DomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
+	DomainPutVendorSettings(ctx context.Context, request *NewVendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error)
 	// DomainQueryAccessLog invokes domainQueryAccessLog operation.
 	//
 	// Query the data access log for this domain. This contains all operations interacting with capsules
@@ -10594,12 +10594,12 @@ func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactType
 // Create or update the vendor settings for a given domain.
 //
 // PUT /domains/{domainID}/control/vendor/settings
-func (c *Client) DomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error) {
+func (c *Client) DomainPutVendorSettings(ctx context.Context, request *NewVendorSettings, params DomainPutVendorSettingsParams) (DomainPutVendorSettingsRes, error) {
 	res, err := c.sendDomainPutVendorSettings(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainPutVendorSettings(ctx context.Context, request *VendorSettings, params DomainPutVendorSettingsParams) (res DomainPutVendorSettingsRes, err error) {
+func (c *Client) sendDomainPutVendorSettings(ctx context.Context, request *NewVendorSettings, params DomainPutVendorSettingsParams) (res DomainPutVendorSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutVendorSettings"),
 		semconv.HTTPMethodKey.String("PUT"),

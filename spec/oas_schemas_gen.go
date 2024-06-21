@@ -6840,6 +6840,59 @@ func (s *NewReadContextConfigRuleTokenScope) UnmarshalText(data []byte) error {
 	}
 }
 
+// Vendor settings for a domain.
+// Ref: #/components/schemas/NewVendorSettings
+type NewVendorSettings struct {
+	// The name of the vendor associated with the domain.
+	Name OptString `json:"name"`
+	// The contact point for the the vendor.
+	SupportContact OptString                     `json:"supportContact"`
+	ManagedKeyId   OptRootEncryptionKeyReference `json:"managedKeyId"`
+	// A flag that indicates whether the subdomains of this domain should have the HYOK (Hold Your Own
+	// Key) feature enabled in the UI.
+	HYOKDisabled OptBool `json:"HYOKDisabled"`
+}
+
+// GetName returns the value of Name.
+func (s *NewVendorSettings) GetName() OptString {
+	return s.Name
+}
+
+// GetSupportContact returns the value of SupportContact.
+func (s *NewVendorSettings) GetSupportContact() OptString {
+	return s.SupportContact
+}
+
+// GetManagedKeyId returns the value of ManagedKeyId.
+func (s *NewVendorSettings) GetManagedKeyId() OptRootEncryptionKeyReference {
+	return s.ManagedKeyId
+}
+
+// GetHYOKDisabled returns the value of HYOKDisabled.
+func (s *NewVendorSettings) GetHYOKDisabled() OptBool {
+	return s.HYOKDisabled
+}
+
+// SetName sets the value of Name.
+func (s *NewVendorSettings) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetSupportContact sets the value of SupportContact.
+func (s *NewVendorSettings) SetSupportContact(val OptString) {
+	s.SupportContact = val
+}
+
+// SetManagedKeyId sets the value of ManagedKeyId.
+func (s *NewVendorSettings) SetManagedKeyId(val OptRootEncryptionKeyReference) {
+	s.ManagedKeyId = val
+}
+
+// SetHYOKDisabled sets the value of HYOKDisabled.
+func (s *NewVendorSettings) SetHYOKDisabled(val OptBool) {
+	s.HYOKDisabled = val
+}
+
 type OAuthToken struct {
 	Token string
 }
@@ -8412,6 +8465,52 @@ func (o OptReadContextRuleFactsItemOperator) Get() (v ReadContextRuleFactsItemOp
 
 // Or returns value if set, or given parameter if does not.
 func (o OptReadContextRuleFactsItemOperator) Or(d ReadContextRuleFactsItemOperator) ReadContextRuleFactsItemOperator {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptRootEncryptionKeyReference returns new OptRootEncryptionKeyReference with value set to v.
+func NewOptRootEncryptionKeyReference(v RootEncryptionKeyReference) OptRootEncryptionKeyReference {
+	return OptRootEncryptionKeyReference{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRootEncryptionKeyReference is optional RootEncryptionKeyReference.
+type OptRootEncryptionKeyReference struct {
+	Value RootEncryptionKeyReference
+	Set   bool
+}
+
+// IsSet returns true if OptRootEncryptionKeyReference was set.
+func (o OptRootEncryptionKeyReference) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRootEncryptionKeyReference) Reset() {
+	var v RootEncryptionKeyReference
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRootEncryptionKeyReference) SetTo(v RootEncryptionKeyReference) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRootEncryptionKeyReference) Get() (v RootEncryptionKeyReference, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRootEncryptionKeyReference) Or(d RootEncryptionKeyReference) RootEncryptionKeyReference {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -11211,8 +11310,8 @@ type VendorSettings struct {
 	// The name of the vendor associated with the domain.
 	Name string `json:"name"`
 	// The contact point for the the vendor.
-	SupportContact string              `json:"supportContact"`
-	ManagedKeyId   RootEncryptionKeyID `json:"managedKeyId"`
+	SupportContact string                     `json:"supportContact"`
+	ManagedKeyId   RootEncryptionKeyReference `json:"managedKeyId"`
 	// A flag that indicates whether the subdomains of this domain should have the HYOK (Hold Your Own
 	// Key) feature enabled in the UI.
 	HYOKDisabled bool `json:"HYOKDisabled"`
@@ -11229,7 +11328,7 @@ func (s *VendorSettings) GetSupportContact() string {
 }
 
 // GetManagedKeyId returns the value of ManagedKeyId.
-func (s *VendorSettings) GetManagedKeyId() RootEncryptionKeyID {
+func (s *VendorSettings) GetManagedKeyId() RootEncryptionKeyReference {
 	return s.ManagedKeyId
 }
 
@@ -11249,7 +11348,7 @@ func (s *VendorSettings) SetSupportContact(val string) {
 }
 
 // SetManagedKeyId sets the value of ManagedKeyId.
-func (s *VendorSettings) SetManagedKeyId(val RootEncryptionKeyID) {
+func (s *VendorSettings) SetManagedKeyId(val RootEncryptionKeyReference) {
 	s.ManagedKeyId = val
 }
 

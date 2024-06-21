@@ -1379,7 +1379,7 @@ func (s *Server) decodeDomainPutFactTypeRequest(r *http.Request) (
 }
 
 func (s *Server) decodeDomainPutVendorSettingsRequest(r *http.Request) (
-	req *VendorSettings,
+	req *NewVendorSettings,
 	close func() error,
 	rerr error,
 ) {
@@ -1418,7 +1418,7 @@ func (s *Server) decodeDomainPutVendorSettingsRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request VendorSettings
+		var request NewVendorSettings
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

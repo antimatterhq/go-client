@@ -11544,7 +11544,7 @@ func (s *Server) handleDomainPutVendorSettingsRequest(args [1]string, argsEscape
 		}
 
 		type (
-			Request  = *VendorSettings
+			Request  = *NewVendorSettings
 			Params   = DomainPutVendorSettingsParams
 			Response = DomainPutVendorSettingsRes
 		)

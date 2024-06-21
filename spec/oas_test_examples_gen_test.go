@@ -1735,6 +1735,18 @@ func TestNewReadContextConfigRuleTokenScope_EncodeDecode(t *testing.T) {
 	var typ2 NewReadContextConfigRuleTokenScope
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestNewVendorSettings_EncodeDecode(t *testing.T) {
+	var typ NewVendorSettings
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 NewVendorSettings
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestPatchRequest_EncodeDecode(t *testing.T) {
 	var typ PatchRequest
 	typ.SetFake()
@@ -2081,18 +2093,6 @@ func TestResourceNotFoundError_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 ResourceNotFoundError
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestRootEncryptionKeyID_EncodeDecode(t *testing.T) {
-	var typ RootEncryptionKeyID
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 RootEncryptionKeyID
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestRootEncryptionKeyIDResponse_EncodeDecode(t *testing.T) {

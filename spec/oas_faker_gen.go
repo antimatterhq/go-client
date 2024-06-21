@@ -2790,6 +2790,30 @@ func (s *NewReadContextConfigRuleTokenScope) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *NewVendorSettings) SetFake() {
+	{
+		{
+			s.Name.SetFake()
+		}
+	}
+	{
+		{
+			s.SupportContact.SetFake()
+		}
+	}
+	{
+		{
+			s.ManagedKeyId.SetFake()
+		}
+	}
+	{
+		{
+			s.HYOKDisabled.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *OptAccessLogEntryCreateInfo) SetFake() {
 	var elem AccessLogEntryCreateInfo
 	{
@@ -2972,6 +2996,15 @@ func (s *OptReadContextRuleFactsItemArgumentsItemSource) SetFake() {
 // SetFake set fake values.
 func (s *OptReadContextRuleFactsItemOperator) SetFake() {
 	var elem ReadContextRuleFactsItemOperator
+	{
+		elem.SetFake()
+	}
+	s.SetTo(elem)
+}
+
+// SetFake set fake values.
+func (s *OptRootEncryptionKeyReference) SetFake() {
+	var elem RootEncryptionKeyReference
 	{
 		elem.SetFake()
 	}
@@ -3573,15 +3606,6 @@ func (s *ResourceNotFoundError) SetFake() {
 			s.Message = "string"
 		}
 	}
-}
-
-// SetFake set fake values.
-func (s *RootEncryptionKeyID) SetFake() {
-	var unwrapped string
-	{
-		unwrapped = "string"
-	}
-	*s = RootEncryptionKeyID(unwrapped)
 }
 
 // SetFake set fake values.
