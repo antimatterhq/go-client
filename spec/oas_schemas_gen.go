@@ -147,7 +147,17 @@ type AccessLogEntry struct {
 	// Information available if the operation is of type "read". allowedTags are those that were allowed
 	// without transformation during the read. redactedTags are those that were redacted during the read.
 	// tokenizedTags are those that were tokenized during the read.
-	ReadInfo OptAccessLogEntryReadInfo `json:"readInfo"`
+	ReadInfo        OptAccessLogEntryReadInfo `json:"readInfo"`
+	CapsuleTags     []Tag                     `json:"capsuleTags"`
+	CapsuleSpanTags TagSummary                `json:"capsuleSpanTags"`
+	// How big this capsule is.
+	CapsuleSize int64 `json:"capsuleSize"`
+	// When this capsule was created.
+	CapsuleCreated time.Time `json:"capsuleCreated"`
+	// The principals issuer.
+	Issuer string `json:"issuer"`
+	// The principal for this operation.
+	Principal string `json:"principal"`
 }
 
 // GetID returns the value of ID.
@@ -200,6 +210,36 @@ func (s *AccessLogEntry) GetReadInfo() OptAccessLogEntryReadInfo {
 	return s.ReadInfo
 }
 
+// GetCapsuleTags returns the value of CapsuleTags.
+func (s *AccessLogEntry) GetCapsuleTags() []Tag {
+	return s.CapsuleTags
+}
+
+// GetCapsuleSpanTags returns the value of CapsuleSpanTags.
+func (s *AccessLogEntry) GetCapsuleSpanTags() TagSummary {
+	return s.CapsuleSpanTags
+}
+
+// GetCapsuleSize returns the value of CapsuleSize.
+func (s *AccessLogEntry) GetCapsuleSize() int64 {
+	return s.CapsuleSize
+}
+
+// GetCapsuleCreated returns the value of CapsuleCreated.
+func (s *AccessLogEntry) GetCapsuleCreated() time.Time {
+	return s.CapsuleCreated
+}
+
+// GetIssuer returns the value of Issuer.
+func (s *AccessLogEntry) GetIssuer() string {
+	return s.Issuer
+}
+
+// GetPrincipal returns the value of Principal.
+func (s *AccessLogEntry) GetPrincipal() string {
+	return s.Principal
+}
+
 // SetID sets the value of ID.
 func (s *AccessLogEntry) SetID(val LogEntryID) {
 	s.ID = val
@@ -248,6 +288,36 @@ func (s *AccessLogEntry) SetOpenInfo(val OptAccessLogEntryOpenInfo) {
 // SetReadInfo sets the value of ReadInfo.
 func (s *AccessLogEntry) SetReadInfo(val OptAccessLogEntryReadInfo) {
 	s.ReadInfo = val
+}
+
+// SetCapsuleTags sets the value of CapsuleTags.
+func (s *AccessLogEntry) SetCapsuleTags(val []Tag) {
+	s.CapsuleTags = val
+}
+
+// SetCapsuleSpanTags sets the value of CapsuleSpanTags.
+func (s *AccessLogEntry) SetCapsuleSpanTags(val TagSummary) {
+	s.CapsuleSpanTags = val
+}
+
+// SetCapsuleSize sets the value of CapsuleSize.
+func (s *AccessLogEntry) SetCapsuleSize(val int64) {
+	s.CapsuleSize = val
+}
+
+// SetCapsuleCreated sets the value of CapsuleCreated.
+func (s *AccessLogEntry) SetCapsuleCreated(val time.Time) {
+	s.CapsuleCreated = val
+}
+
+// SetIssuer sets the value of Issuer.
+func (s *AccessLogEntry) SetIssuer(val string) {
+	s.Issuer = val
+}
+
+// SetPrincipal sets the value of Principal.
+func (s *AccessLogEntry) SetPrincipal(val string) {
+	s.Principal = val
 }
 
 // Information available if the operation is of type "create".
@@ -464,16 +534,16 @@ func (*AccessLogResults) domainQueryAccessLogSingleCapsuleRes() {}
 // The stored key ID to use as the active root encryption key.
 // Ref: #/components/schemas/ActiveRootEncryptionKeyID
 type ActiveRootEncryptionKeyID struct {
-	KeyID RootEncryptionKeyID `json:"keyID"`
+	KeyID RootEncryptionKeyReference `json:"keyID"`
 }
 
 // GetKeyID returns the value of KeyID.
-func (s *ActiveRootEncryptionKeyID) GetKeyID() RootEncryptionKeyID {
+func (s *ActiveRootEncryptionKeyID) GetKeyID() RootEncryptionKeyReference {
 	return s.KeyID
 }
 
 // SetKeyID sets the value of KeyID.
-func (s *ActiveRootEncryptionKeyID) SetKeyID(val RootEncryptionKeyID) {
+func (s *ActiveRootEncryptionKeyID) SetKeyID(val RootEncryptionKeyReference) {
 	s.KeyID = val
 }
 
@@ -1003,7 +1073,7 @@ func (s *AvailableServiceAccountRootEncryptionKeyProviderType) UnmarshalText(dat
 // Ref: #/components/schemas/BYOKKeyInfo
 type BYOKKeyInfo struct {
 	// The base64-encoded key material to use as the basis for an
-	// encryption key.
+	// encryption key. It must be 256 bytes or longer.
 	Key []byte `json:"key"`
 }
 
@@ -1750,8 +1820,10 @@ func (s *ConflictError) SetMessage(val string) {
 func (*ConflictError) domainCreatePeerDomainRes()              {}
 func (*ConflictError) domainDeleteCapabilityRes()              {}
 func (*ConflictError) domainExternalRootEncryptionKeyTestRes() {}
+func (*ConflictError) domainGetDisasterRecoverySettingsRes()   {}
 func (*ConflictError) domainGetVendorSettingsRes()             {}
 func (*ConflictError) domainPutCapabilityRes()                 {}
+func (*ConflictError) domainPutDisasterRecoverySettingsRes()   {}
 func (*ConflictError) domainPutVendorSettingsRes()             {}
 func (*ConflictError) domainReadContextFlushRes()              {}
 func (*ConflictError) domainUpsertSpanTagsRes()                {}
@@ -1769,17 +1841,18 @@ type CreatePeerDomain struct {
 	DisplayNameForParent OptString `json:"displayNameForParent"`
 	// The default display name used for this domain. The display name is also treated as a nickname and
 	// so can be used from domainFromNickname.
-	DisplayNameForChild   string  `json:"displayNameForChild"`
-	LinkAll               OptBool `json:"linkAll"`
-	LinkIdentityProviders OptBool `json:"linkIdentityProviders"`
-	LinkFacts             OptBool `json:"linkFacts"`
-	LinkReadContexts      OptBool `json:"linkReadContexts"`
-	LinkWriteContexts     OptBool `json:"linkWriteContexts"`
-	LinkCapabilities      OptBool `json:"linkCapabilities"`
-	LinkDomainPolicy      OptBool `json:"linkDomainPolicy"`
-	LinkCapsuleAccessLog  OptBool `json:"linkCapsuleAccessLog"`
-	LinkControlLog        OptBool `json:"linkControlLog"`
-	LinkCapsuleManifest   OptBool `json:"linkCapsuleManifest"`
+	DisplayNameForChild    string  `json:"displayNameForChild"`
+	LinkAll                OptBool `json:"linkAll"`
+	LinkIdentityProviders  OptBool `json:"linkIdentityProviders"`
+	LinkFacts              OptBool `json:"linkFacts"`
+	LinkReadContexts       OptBool `json:"linkReadContexts"`
+	LinkWriteContexts      OptBool `json:"linkWriteContexts"`
+	LinkCapabilities       OptBool `json:"linkCapabilities"`
+	LinkDomainPolicy       OptBool `json:"linkDomainPolicy"`
+	LinkRootEncryptionKeys OptBool `json:"linkRootEncryptionKeys"`
+	LinkCapsuleAccessLog   OptBool `json:"linkCapsuleAccessLog"`
+	LinkControlLog         OptBool `json:"linkControlLog"`
+	LinkCapsuleManifest    OptBool `json:"linkCapsuleManifest"`
 }
 
 // GetNicknames returns the value of Nicknames.
@@ -1840,6 +1913,11 @@ func (s *CreatePeerDomain) GetLinkCapabilities() OptBool {
 // GetLinkDomainPolicy returns the value of LinkDomainPolicy.
 func (s *CreatePeerDomain) GetLinkDomainPolicy() OptBool {
 	return s.LinkDomainPolicy
+}
+
+// GetLinkRootEncryptionKeys returns the value of LinkRootEncryptionKeys.
+func (s *CreatePeerDomain) GetLinkRootEncryptionKeys() OptBool {
+	return s.LinkRootEncryptionKeys
 }
 
 // GetLinkCapsuleAccessLog returns the value of LinkCapsuleAccessLog.
@@ -1915,6 +1993,11 @@ func (s *CreatePeerDomain) SetLinkCapabilities(val OptBool) {
 // SetLinkDomainPolicy sets the value of LinkDomainPolicy.
 func (s *CreatePeerDomain) SetLinkDomainPolicy(val OptBool) {
 	s.LinkDomainPolicy = val
+}
+
+// SetLinkRootEncryptionKeys sets the value of LinkRootEncryptionKeys.
+func (s *CreatePeerDomain) SetLinkRootEncryptionKeys(val OptBool) {
+	s.LinkRootEncryptionKeys = val
 }
 
 // SetLinkCapsuleAccessLog sets the value of LinkCapsuleAccessLog.
@@ -2053,6 +2136,37 @@ func (s *DeleteTags) SetNames(val []string) {
 	s.Names = val
 }
 
+// Ref: #/components/schemas/DisasterRecoverySettings
+type DisasterRecoverySettings struct {
+	// Add a Disaster Recovery header to all encrypted capsules. If set to true, a DR public key must be
+	// set.
+	Enable OptBool `json:"enable"`
+	// An Antimatter Disaster Recovery public key to use if enable is true.
+	PublicKey OptString `json:"publicKey"`
+}
+
+// GetEnable returns the value of Enable.
+func (s *DisasterRecoverySettings) GetEnable() OptBool {
+	return s.Enable
+}
+
+// GetPublicKey returns the value of PublicKey.
+func (s *DisasterRecoverySettings) GetPublicKey() OptString {
+	return s.PublicKey
+}
+
+// SetEnable sets the value of Enable.
+func (s *DisasterRecoverySettings) SetEnable(val OptBool) {
+	s.Enable = val
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *DisasterRecoverySettings) SetPublicKey(val OptString) {
+	s.PublicKey = val
+}
+
+func (*DisasterRecoverySettings) domainGetDisasterRecoverySettingsRes() {}
+
 // Information about a domain.
 // Ref: #/components/schemas/Domain
 type Domain struct {
@@ -2119,6 +2233,9 @@ type DomainAuthenticateResponse struct {
 	Token string `json:"token"`
 	// The token expiration, in UTC.
 	Expiry OptDateTime `json:"expiry"`
+	// Optional advisory message for the caller. This can be used to indicate that the authenticating
+	// client is out of date.
+	Advisory []string `json:"advisory"`
 }
 
 // GetToken returns the value of Token.
@@ -2131,6 +2248,11 @@ func (s *DomainAuthenticateResponse) GetExpiry() OptDateTime {
 	return s.Expiry
 }
 
+// GetAdvisory returns the value of Advisory.
+func (s *DomainAuthenticateResponse) GetAdvisory() []string {
+	return s.Advisory
+}
+
 // SetToken sets the value of Token.
 func (s *DomainAuthenticateResponse) SetToken(val string) {
 	s.Token = val
@@ -2139,6 +2261,11 @@ func (s *DomainAuthenticateResponse) SetToken(val string) {
 // SetExpiry sets the value of Expiry.
 func (s *DomainAuthenticateResponse) SetExpiry(val OptDateTime) {
 	s.Expiry = val
+}
+
+// SetAdvisory sets the value of Advisory.
+func (s *DomainAuthenticateResponse) SetAdvisory(val []string) {
+	s.Advisory = val
 }
 
 func (*DomainAuthenticateResponse) domainAuthenticateRes() {}
@@ -2174,6 +2301,10 @@ type DomainControlLogEntry struct {
 	URL         string                           `json:"url"`
 	Summary     string                           `json:"summary"`
 	Description DomainControlLogEntryDescription `json:"description"`
+	// The principal's issuer.
+	Issuer string `json:"issuer"`
+	// The principal for this operation.
+	Principal string `json:"principal"`
 }
 
 // GetDomain returns the value of Domain.
@@ -2211,6 +2342,16 @@ func (s *DomainControlLogEntry) GetDescription() DomainControlLogEntryDescriptio
 	return s.Description
 }
 
+// GetIssuer returns the value of Issuer.
+func (s *DomainControlLogEntry) GetIssuer() string {
+	return s.Issuer
+}
+
+// GetPrincipal returns the value of Principal.
+func (s *DomainControlLogEntry) GetPrincipal() string {
+	return s.Principal
+}
+
 // SetDomain sets the value of Domain.
 func (s *DomainControlLogEntry) SetDomain(val DomainID) {
 	s.Domain = val
@@ -2244,6 +2385,16 @@ func (s *DomainControlLogEntry) SetSummary(val string) {
 // SetDescription sets the value of Description.
 func (s *DomainControlLogEntry) SetDescription(val DomainControlLogEntryDescription) {
 	s.Description = val
+}
+
+// SetIssuer sets the value of Issuer.
+func (s *DomainControlLogEntry) SetIssuer(val string) {
+	s.Issuer = val
+}
+
+// SetPrincipal sets the value of Principal.
+func (s *DomainControlLogEntry) SetPrincipal(val string) {
+	s.Principal = val
 }
 
 type DomainControlLogEntryDescription map[string]string
@@ -3229,6 +3380,11 @@ type DomainPeerConfig struct {
 	// restricting which capabilities and facts are exported, as rules referencing unexported facts and
 	// capabilities will not be exported.
 	ExportDomainPolicy OptBool `json:"exportDomainPolicy"`
+	// Export the root encryption keys to the target domain. Keys can only be exported as a whole, you
+	// cannot share individual keys. Additionally, the default encryption keys in a domain cannot be
+	// shared (note: default meaning the provider type, the  'active' key can be shared if it is not of
+	// type default).
+	ExportRootEncryptionKeys OptBool `json:"exportRootEncryptionKeys"`
 	// Allow the target domain to query the capsule access log for this domain.
 	ExportCapsuleAccessLog OptBool `json:"exportCapsuleAccessLog"`
 	// Allow the target domain to query the control audit log for this domain.
@@ -3276,6 +3432,8 @@ type DomainPeerConfig struct {
 	ImportAllCapabilities OptBool `json:"importAllCapabilities"`
 	// Import all domain policy (limited by the imported capabilities and facts) into this domain.
 	ImportDomainPolicy OptBool `json:"importDomainPolicy"`
+	// Import all root encryption keys into this domain.
+	ImportRootEncryptionKeys OptBool `json:"importRootEncryptionKeys"`
 	// For read contexts and domain policy, is the peer domain higher precedence  (<0) or lower
 	// precedence (>0) than the rules configured in the current domain (0). The precedence is also used
 	// to order the imported read context rules and domain policy rules with respect to policy imported
@@ -3348,6 +3506,11 @@ func (s *DomainPeerConfig) GetExportAllCapabilities() OptBool {
 // GetExportDomainPolicy returns the value of ExportDomainPolicy.
 func (s *DomainPeerConfig) GetExportDomainPolicy() OptBool {
 	return s.ExportDomainPolicy
+}
+
+// GetExportRootEncryptionKeys returns the value of ExportRootEncryptionKeys.
+func (s *DomainPeerConfig) GetExportRootEncryptionKeys() OptBool {
+	return s.ExportRootEncryptionKeys
 }
 
 // GetExportCapsuleAccessLog returns the value of ExportCapsuleAccessLog.
@@ -3450,6 +3613,11 @@ func (s *DomainPeerConfig) GetImportDomainPolicy() OptBool {
 	return s.ImportDomainPolicy
 }
 
+// GetImportRootEncryptionKeys returns the value of ImportRootEncryptionKeys.
+func (s *DomainPeerConfig) GetImportRootEncryptionKeys() OptBool {
+	return s.ImportRootEncryptionKeys
+}
+
 // GetImportPrecedence returns the value of ImportPrecedence.
 func (s *DomainPeerConfig) GetImportPrecedence() OptInt {
 	return s.ImportPrecedence
@@ -3528,6 +3696,11 @@ func (s *DomainPeerConfig) SetExportAllCapabilities(val OptBool) {
 // SetExportDomainPolicy sets the value of ExportDomainPolicy.
 func (s *DomainPeerConfig) SetExportDomainPolicy(val OptBool) {
 	s.ExportDomainPolicy = val
+}
+
+// SetExportRootEncryptionKeys sets the value of ExportRootEncryptionKeys.
+func (s *DomainPeerConfig) SetExportRootEncryptionKeys(val OptBool) {
+	s.ExportRootEncryptionKeys = val
 }
 
 // SetExportCapsuleAccessLog sets the value of ExportCapsuleAccessLog.
@@ -3628,6 +3801,11 @@ func (s *DomainPeerConfig) SetImportAllCapabilities(val OptBool) {
 // SetImportDomainPolicy sets the value of ImportDomainPolicy.
 func (s *DomainPeerConfig) SetImportDomainPolicy(val OptBool) {
 	s.ImportDomainPolicy = val
+}
+
+// SetImportRootEncryptionKeys sets the value of ImportRootEncryptionKeys.
+func (s *DomainPeerConfig) SetImportRootEncryptionKeys(val OptBool) {
+	s.ImportRootEncryptionKeys = val
 }
 
 // SetImportPrecedence sets the value of ImportPrecedence.
@@ -3981,6 +4159,11 @@ type DomainPutCapabilityOK struct{}
 
 func (*DomainPutCapabilityOK) domainPutCapabilityRes() {}
 
+// DomainPutDisasterRecoverySettingsOK is response for DomainPutDisasterRecoverySettings operation.
+type DomainPutDisasterRecoverySettingsOK struct{}
+
+func (*DomainPutDisasterRecoverySettingsOK) domainPutDisasterRecoverySettingsRes() {}
+
 // DomainPutFactTypeOK is response for DomainPutFactType operation.
 type DomainPutFactTypeOK struct{}
 
@@ -4105,6 +4288,8 @@ func (s *DomainQueryAccessLogSingleCapsuleOperationType) UnmarshalText(data []by
 type DomainReadContextFlushOK struct{}
 
 func (*DomainReadContextFlushOK) domainReadContextFlushRes() {}
+
+type DomainRenumberPolicyRulesReq struct{}
 
 // A list of the resources and permissions available.
 // Ref: #/components/schemas/DomainResourceSummary
@@ -4249,7 +4434,6 @@ func (*DomainSetActiveExternalRootEncryptionKeyOK) domainSetActiveExternalRootEn
 // Additional configuration options for a domain.
 // Ref: #/components/schemas/DomainSettings
 type DomainSettings struct {
-	DisasterRecovery OptDomainSettingsDisasterRecovery `json:"disasterRecovery"`
 	// A list of admin contact details that have been validated.
 	AdminContacts []string `json:"adminContacts"`
 	// A list of admin contact details that have been validated.
@@ -4258,11 +4442,6 @@ type DomainSettings struct {
 	PendingAdminContacts []string `json:"pendingAdminContacts"`
 	// User friendly custom display name.
 	DefaultDisplayName string `json:"defaultDisplayName"`
-}
-
-// GetDisasterRecovery returns the value of DisasterRecovery.
-func (s *DomainSettings) GetDisasterRecovery() OptDomainSettingsDisasterRecovery {
-	return s.DisasterRecovery
 }
 
 // GetAdminContacts returns the value of AdminContacts.
@@ -4283,11 +4462,6 @@ func (s *DomainSettings) GetPendingAdminContacts() []string {
 // GetDefaultDisplayName returns the value of DefaultDisplayName.
 func (s *DomainSettings) GetDefaultDisplayName() string {
 	return s.DefaultDisplayName
-}
-
-// SetDisasterRecovery sets the value of DisasterRecovery.
-func (s *DomainSettings) SetDisasterRecovery(val OptDomainSettingsDisasterRecovery) {
-	s.DisasterRecovery = val
 }
 
 // SetAdminContacts sets the value of AdminContacts.
@@ -4312,34 +4486,6 @@ func (s *DomainSettings) SetDefaultDisplayName(val string) {
 
 func (*DomainSettings) domainGetSettingsRes()   {}
 func (*DomainSettings) domainPatchSettingsRes() {}
-
-type DomainSettingsDisasterRecovery struct {
-	// Add a Disaster Recovery header to all encrypted capsules. If set to true, a DR public key must be
-	// set.
-	Enable OptBool `json:"enable"`
-	// An Antimatter Disaster Recovery public key to use if enable is true.
-	PublicKey OptString `json:"publicKey"`
-}
-
-// GetEnable returns the value of Enable.
-func (s *DomainSettingsDisasterRecovery) GetEnable() OptBool {
-	return s.Enable
-}
-
-// GetPublicKey returns the value of PublicKey.
-func (s *DomainSettingsDisasterRecovery) GetPublicKey() OptString {
-	return s.PublicKey
-}
-
-// SetEnable sets the value of Enable.
-func (s *DomainSettingsDisasterRecovery) SetEnable(val OptBool) {
-	s.Enable = val
-}
-
-// SetPublicKey sets the value of PublicKey.
-func (s *DomainSettingsDisasterRecovery) SetPublicKey(val OptString) {
-	s.PublicKey = val
-}
 
 // A JSON patch to apply to the domain settings.
 // Ref: #/components/schemas/DomainSettingsPatch
@@ -5165,6 +5311,7 @@ func (*InvalidRequestError) domainGetActiveExternalRootEncryptionKeyRes()    {}
 func (*InvalidRequestError) domainGetCapabilitiesRes()                       {}
 func (*InvalidRequestError) domainGetCapabilityRes()                         {}
 func (*InvalidRequestError) domainGetCapsuleInfoRes()                        {}
+func (*InvalidRequestError) domainGetDisasterRecoverySettingsRes()           {}
 func (*InvalidRequestError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*InvalidRequestError) domainGetFactByIDRes()                           {}
 func (*InvalidRequestError) domainGetFactTypeRes()                           {}
@@ -5198,6 +5345,7 @@ func (*InvalidRequestError) domainOpenCapsuleRes()                           {}
 func (*InvalidRequestError) domainPatchSettingsRes()                         {}
 func (*InvalidRequestError) domainPolicyFlushRes()                           {}
 func (*InvalidRequestError) domainPutCapabilityRes()                         {}
+func (*InvalidRequestError) domainPutDisasterRecoverySettingsRes()           {}
 func (*InvalidRequestError) domainPutFactTypeRes()                           {}
 func (*InvalidRequestError) domainPutVendorSettingsRes()                     {}
 func (*InvalidRequestError) domainQueryAccessLogRes()                        {}
@@ -7580,52 +7728,6 @@ func (o OptDomainQueryAccessLogSingleCapsuleOperationType) Or(d DomainQueryAcces
 	return d
 }
 
-// NewOptDomainSettingsDisasterRecovery returns new OptDomainSettingsDisasterRecovery with value set to v.
-func NewOptDomainSettingsDisasterRecovery(v DomainSettingsDisasterRecovery) OptDomainSettingsDisasterRecovery {
-	return OptDomainSettingsDisasterRecovery{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptDomainSettingsDisasterRecovery is optional DomainSettingsDisasterRecovery.
-type OptDomainSettingsDisasterRecovery struct {
-	Value DomainSettingsDisasterRecovery
-	Set   bool
-}
-
-// IsSet returns true if OptDomainSettingsDisasterRecovery was set.
-func (o OptDomainSettingsDisasterRecovery) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptDomainSettingsDisasterRecovery) Reset() {
-	var v DomainSettingsDisasterRecovery
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptDomainSettingsDisasterRecovery) SetTo(v DomainSettingsDisasterRecovery) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptDomainSettingsDisasterRecovery) Get() (v DomainSettingsDisasterRecovery, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptDomainSettingsDisasterRecovery) Or(d DomainSettingsDisasterRecovery) DomainSettingsDisasterRecovery {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptFactPolicyRulesItemArgumentsItemSource returns new OptFactPolicyRulesItemArgumentsItemSource with value set to v.
 func NewOptFactPolicyRulesItemArgumentsItemSource(v FactPolicyRulesItemArgumentsItemSource) OptFactPolicyRulesItemArgumentsItemSource {
 	return OptFactPolicyRulesItemArgumentsItemSource{
@@ -8867,6 +8969,7 @@ func (*PermanentRedirect) domainGetActiveExternalRootEncryptionKeyRes()    {}
 func (*PermanentRedirect) domainGetCapabilitiesRes()                       {}
 func (*PermanentRedirect) domainGetCapabilityRes()                         {}
 func (*PermanentRedirect) domainGetCapsuleInfoRes()                        {}
+func (*PermanentRedirect) domainGetDisasterRecoverySettingsRes()           {}
 func (*PermanentRedirect) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*PermanentRedirect) domainGetFactByIDRes()                           {}
 func (*PermanentRedirect) domainGetFactTypeRes()                           {}
@@ -8900,6 +9003,7 @@ func (*PermanentRedirect) domainOpenCapsuleRes()                           {}
 func (*PermanentRedirect) domainPatchSettingsRes()                         {}
 func (*PermanentRedirect) domainPolicyFlushRes()                           {}
 func (*PermanentRedirect) domainPutCapabilityRes()                         {}
+func (*PermanentRedirect) domainPutDisasterRecoverySettingsRes()           {}
 func (*PermanentRedirect) domainPutFactTypeRes()                           {}
 func (*PermanentRedirect) domainPutVendorSettingsRes()                     {}
 func (*PermanentRedirect) domainQueryAccessLogRes()                        {}
@@ -10166,6 +10270,7 @@ func (*ResourceExhaustedError) domainGetActiveExternalRootEncryptionKeyRes()    
 func (*ResourceExhaustedError) domainGetCapabilitiesRes()                       {}
 func (*ResourceExhaustedError) domainGetCapabilityRes()                         {}
 func (*ResourceExhaustedError) domainGetCapsuleInfoRes()                        {}
+func (*ResourceExhaustedError) domainGetDisasterRecoverySettingsRes()           {}
 func (*ResourceExhaustedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*ResourceExhaustedError) domainGetFactByIDRes()                           {}
 func (*ResourceExhaustedError) domainGetFactTypeRes()                           {}
@@ -10199,6 +10304,7 @@ func (*ResourceExhaustedError) domainOpenCapsuleRes()                           
 func (*ResourceExhaustedError) domainPatchSettingsRes()                         {}
 func (*ResourceExhaustedError) domainPolicyFlushRes()                           {}
 func (*ResourceExhaustedError) domainPutCapabilityRes()                         {}
+func (*ResourceExhaustedError) domainPutDisasterRecoverySettingsRes()           {}
 func (*ResourceExhaustedError) domainPutFactTypeRes()                           {}
 func (*ResourceExhaustedError) domainPutVendorSettingsRes()                     {}
 func (*ResourceExhaustedError) domainQueryAccessLogRes()                        {}
@@ -10296,6 +10402,7 @@ func (*ResourceNotFoundError) domainGetActiveExternalRootEncryptionKeyRes()    {
 func (*ResourceNotFoundError) domainGetCapabilitiesRes()                       {}
 func (*ResourceNotFoundError) domainGetCapabilityRes()                         {}
 func (*ResourceNotFoundError) domainGetCapsuleInfoRes()                        {}
+func (*ResourceNotFoundError) domainGetDisasterRecoverySettingsRes()           {}
 func (*ResourceNotFoundError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*ResourceNotFoundError) domainGetFactByIDRes()                           {}
 func (*ResourceNotFoundError) domainGetFactTypeRes()                           {}
@@ -10329,6 +10436,7 @@ func (*ResourceNotFoundError) domainOpenCapsuleRes()                           {
 func (*ResourceNotFoundError) domainPatchSettingsRes()                         {}
 func (*ResourceNotFoundError) domainPolicyFlushRes()                           {}
 func (*ResourceNotFoundError) domainPutCapabilityRes()                         {}
+func (*ResourceNotFoundError) domainPutDisasterRecoverySettingsRes()           {}
 func (*ResourceNotFoundError) domainPutFactTypeRes()                           {}
 func (*ResourceNotFoundError) domainPutVendorSettingsRes()                     {}
 func (*ResourceNotFoundError) domainQueryAccessLogRes()                        {}
@@ -10379,11 +10487,14 @@ type RootEncryptionKeyItem struct {
 	// The root encryption key's provider source.
 	Source string `json:"source"`
 	// The cloud provider's resource path/alias.
-	ResourcePath string `json:"resourcePath"`
-	// The root encryption key's unique identifier.
-	RekID string `json:"rekID"`
+	ResourcePath string                     `json:"resourcePath"`
+	RekID        RootEncryptionKeyReference `json:"rekID"`
 	// The user defined description for the root encryption key.
 	Description string `json:"description"`
+	// True if this root encryption key is imported.
+	Imported         bool        `json:"imported"`
+	SourceDomainID   OptDomainID `json:"sourceDomainID"`
+	SourceDomainName OptString   `json:"sourceDomainName"`
 }
 
 // GetSource returns the value of Source.
@@ -10397,13 +10508,28 @@ func (s *RootEncryptionKeyItem) GetResourcePath() string {
 }
 
 // GetRekID returns the value of RekID.
-func (s *RootEncryptionKeyItem) GetRekID() string {
+func (s *RootEncryptionKeyItem) GetRekID() RootEncryptionKeyReference {
 	return s.RekID
 }
 
 // GetDescription returns the value of Description.
 func (s *RootEncryptionKeyItem) GetDescription() string {
 	return s.Description
+}
+
+// GetImported returns the value of Imported.
+func (s *RootEncryptionKeyItem) GetImported() bool {
+	return s.Imported
+}
+
+// GetSourceDomainID returns the value of SourceDomainID.
+func (s *RootEncryptionKeyItem) GetSourceDomainID() OptDomainID {
+	return s.SourceDomainID
+}
+
+// GetSourceDomainName returns the value of SourceDomainName.
+func (s *RootEncryptionKeyItem) GetSourceDomainName() OptString {
+	return s.SourceDomainName
 }
 
 // SetSource sets the value of Source.
@@ -10417,7 +10543,7 @@ func (s *RootEncryptionKeyItem) SetResourcePath(val string) {
 }
 
 // SetRekID sets the value of RekID.
-func (s *RootEncryptionKeyItem) SetRekID(val string) {
+func (s *RootEncryptionKeyItem) SetRekID(val RootEncryptionKeyReference) {
 	s.RekID = val
 }
 
@@ -10426,15 +10552,32 @@ func (s *RootEncryptionKeyItem) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetImported sets the value of Imported.
+func (s *RootEncryptionKeyItem) SetImported(val bool) {
+	s.Imported = val
+}
+
+// SetSourceDomainID sets the value of SourceDomainID.
+func (s *RootEncryptionKeyItem) SetSourceDomainID(val OptDomainID) {
+	s.SourceDomainID = val
+}
+
+// SetSourceDomainName sets the value of SourceDomainName.
+func (s *RootEncryptionKeyItem) SetSourceDomainName(val OptString) {
+	s.SourceDomainName = val
+}
+
 func (*RootEncryptionKeyItem) domainGetActiveExternalRootEncryptionKeyRes() {}
 
 type RootEncryptionKeyListResponse []RootEncryptionKeyItem
 
 func (*RootEncryptionKeyListResponse) domainListExternalRootEncryptionKeyRes() {}
 
+type RootEncryptionKeyReference string
+
 // Ref: #/components/schemas/RootEncryptionKeyTestResponse
 type RootEncryptionKeyTestResponse struct {
-	ID RootEncryptionKeyID `json:"id"`
+	ID RootEncryptionKeyReference `json:"id"`
 	// The root encryption key's provider source.
 	Source string `json:"source"`
 	// The cloud provider's resource path/alias.
@@ -10447,7 +10590,7 @@ type RootEncryptionKeyTestResponse struct {
 }
 
 // GetID returns the value of ID.
-func (s *RootEncryptionKeyTestResponse) GetID() RootEncryptionKeyID {
+func (s *RootEncryptionKeyTestResponse) GetID() RootEncryptionKeyReference {
 	return s.ID
 }
 
@@ -10482,7 +10625,7 @@ func (s *RootEncryptionKeyTestResponse) GetLatencyMS() float64 {
 }
 
 // SetID sets the value of ID.
-func (s *RootEncryptionKeyTestResponse) SetID(val RootEncryptionKeyID) {
+func (s *RootEncryptionKeyTestResponse) SetID(val RootEncryptionKeyReference) {
 	s.ID = val
 }
 
@@ -10566,7 +10709,7 @@ func (s *RootEncryptionKeyTestResponseStatus) UnmarshalText(data []byte) error {
 	}
 }
 
-// The results for a query of the capsule access log.
+// The results for a rotation query.
 // Ref: #/components/schemas/RotateKeyEncryptionKeyResponse
 type RotateKeyEncryptionKeyResponse struct {
 	// If true, there are still keys encrypted with non-active root encryption keys. Query again to
@@ -10976,6 +11119,7 @@ func (*UnauthorizedError) domainGetActiveExternalRootEncryptionKeyRes()    {}
 func (*UnauthorizedError) domainGetCapabilitiesRes()                       {}
 func (*UnauthorizedError) domainGetCapabilityRes()                         {}
 func (*UnauthorizedError) domainGetCapsuleInfoRes()                        {}
+func (*UnauthorizedError) domainGetDisasterRecoverySettingsRes()           {}
 func (*UnauthorizedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*UnauthorizedError) domainGetFactByIDRes()                           {}
 func (*UnauthorizedError) domainGetFactTypeRes()                           {}
@@ -11009,6 +11153,7 @@ func (*UnauthorizedError) domainOpenCapsuleRes()                           {}
 func (*UnauthorizedError) domainPatchSettingsRes()                         {}
 func (*UnauthorizedError) domainPolicyFlushRes()                           {}
 func (*UnauthorizedError) domainPutCapabilityRes()                         {}
+func (*UnauthorizedError) domainPutDisasterRecoverySettingsRes()           {}
 func (*UnauthorizedError) domainPutFactTypeRes()                           {}
 func (*UnauthorizedError) domainPutVendorSettingsRes()                     {}
 func (*UnauthorizedError) domainQueryAccessLogRes()                        {}

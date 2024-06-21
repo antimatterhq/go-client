@@ -249,19 +249,53 @@ func (s *AccessLogEntry) encodeFields(e *jx.Encoder) {
 			s.ReadInfo.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("capsuleTags")
+		e.ArrStart()
+		for _, elem := range s.CapsuleTags {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("capsuleSpanTags")
+		s.CapsuleSpanTags.Encode(e)
+	}
+	{
+		e.FieldStart("capsuleSize")
+		e.Int64(s.CapsuleSize)
+	}
+	{
+		e.FieldStart("capsuleCreated")
+		json.EncodeDateTime(e, s.CapsuleCreated)
+	}
+	{
+		e.FieldStart("issuer")
+		e.Str(s.Issuer)
+	}
+	{
+		e.FieldStart("principal")
+		e.Str(s.Principal)
+	}
 }
 
-var jsonFieldsNameOfAccessLogEntry = [10]string{
-	0: "id",
-	1: "time",
-	2: "domain",
-	3: "capsule",
-	4: "operation",
-	5: "session",
-	6: "location",
-	7: "createInfo",
-	8: "openInfo",
-	9: "readInfo",
+var jsonFieldsNameOfAccessLogEntry = [16]string{
+	0:  "id",
+	1:  "time",
+	2:  "domain",
+	3:  "capsule",
+	4:  "operation",
+	5:  "session",
+	6:  "location",
+	7:  "createInfo",
+	8:  "openInfo",
+	9:  "readInfo",
+	10: "capsuleTags",
+	11: "capsuleSpanTags",
+	12: "capsuleSize",
+	13: "capsuleCreated",
+	14: "issuer",
+	15: "principal",
 }
 
 // Decode decodes AccessLogEntry from json.
@@ -375,6 +409,82 @@ func (s *AccessLogEntry) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"readInfo\"")
 			}
+		case "capsuleTags":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				s.CapsuleTags = make([]Tag, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Tag
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.CapsuleTags = append(s.CapsuleTags, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capsuleTags\"")
+			}
+		case "capsuleSpanTags":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				if err := s.CapsuleSpanTags.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capsuleSpanTags\"")
+			}
+		case "capsuleSize":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.CapsuleSize = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capsuleSize\"")
+			}
+		case "capsuleCreated":
+			requiredBitSet[1] |= 1 << 5
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.CapsuleCreated = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capsuleCreated\"")
+			}
+		case "issuer":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				v, err := d.Str()
+				s.Issuer = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"issuer\"")
+			}
+		case "principal":
+			requiredBitSet[1] |= 1 << 7
+			if err := func() error {
+				v, err := d.Str()
+				s.Principal = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"principal\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -386,7 +496,7 @@ func (s *AccessLogEntry) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00111111,
-		0b00000000,
+		0b11111100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4552,6 +4662,12 @@ func (s *CreatePeerDomain) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.LinkRootEncryptionKeys.Set {
+			e.FieldStart("linkRootEncryptionKeys")
+			s.LinkRootEncryptionKeys.Encode(e)
+		}
+	}
+	{
 		if s.LinkCapsuleAccessLog.Set {
 			e.FieldStart("linkCapsuleAccessLog")
 			s.LinkCapsuleAccessLog.Encode(e)
@@ -4571,7 +4687,7 @@ func (s *CreatePeerDomain) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreatePeerDomain = [15]string{
+var jsonFieldsNameOfCreatePeerDomain = [16]string{
 	0:  "nicknames",
 	1:  "importAliasForParent",
 	2:  "importAliasForChild",
@@ -4584,9 +4700,10 @@ var jsonFieldsNameOfCreatePeerDomain = [15]string{
 	9:  "linkWriteContexts",
 	10: "linkCapabilities",
 	11: "linkDomainPolicy",
-	12: "linkCapsuleAccessLog",
-	13: "linkControlLog",
-	14: "linkCapsuleManifest",
+	12: "linkRootEncryptionKeys",
+	13: "linkCapsuleAccessLog",
+	14: "linkControlLog",
+	15: "linkCapsuleManifest",
 }
 
 // Decode decodes CreatePeerDomain from json.
@@ -4729,6 +4846,16 @@ func (s *CreatePeerDomain) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"linkDomainPolicy\"")
+			}
+		case "linkRootEncryptionKeys":
+			if err := func() error {
+				s.LinkRootEncryptionKeys.Reset()
+				if err := s.LinkRootEncryptionKeys.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"linkRootEncryptionKeys\"")
 			}
 		case "linkCapsuleAccessLog":
 			if err := func() error {
@@ -5448,6 +5575,86 @@ func (s *DeleteTags) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *DisasterRecoverySettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DisasterRecoverySettings) encodeFields(e *jx.Encoder) {
+	{
+		if s.Enable.Set {
+			e.FieldStart("enable")
+			s.Enable.Encode(e)
+		}
+	}
+	{
+		if s.PublicKey.Set {
+			e.FieldStart("publicKey")
+			s.PublicKey.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfDisasterRecoverySettings = [2]string{
+	0: "enable",
+	1: "publicKey",
+}
+
+// Decode decodes DisasterRecoverySettings from json.
+func (s *DisasterRecoverySettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DisasterRecoverySettings to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enable":
+			if err := func() error {
+				s.Enable.Reset()
+				if err := s.Enable.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enable\"")
+			}
+		case "publicKey":
+			if err := func() error {
+				s.PublicKey.Reset()
+				if err := s.PublicKey.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"publicKey\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DisasterRecoverySettings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DisasterRecoverySettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DisasterRecoverySettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Domain) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -5719,11 +5926,22 @@ func (s *DomainAuthenticateResponse) encodeFields(e *jx.Encoder) {
 			s.Expiry.Encode(e, json.EncodeDateTime)
 		}
 	}
+	{
+		if s.Advisory != nil {
+			e.FieldStart("advisory")
+			e.ArrStart()
+			for _, elem := range s.Advisory {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfDomainAuthenticateResponse = [2]string{
+var jsonFieldsNameOfDomainAuthenticateResponse = [3]string{
 	0: "token",
 	1: "expiry",
+	2: "advisory",
 }
 
 // Decode decodes DomainAuthenticateResponse from json.
@@ -5756,6 +5974,25 @@ func (s *DomainAuthenticateResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"expiry\"")
+			}
+		case "advisory":
+			if err := func() error {
+				s.Advisory = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Advisory = append(s.Advisory, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"advisory\"")
 			}
 		default:
 			return d.Skip()
@@ -5946,9 +6183,17 @@ func (s *DomainControlLogEntry) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		s.Description.Encode(e)
 	}
+	{
+		e.FieldStart("issuer")
+		e.Str(s.Issuer)
+	}
+	{
+		e.FieldStart("principal")
+		e.Str(s.Principal)
+	}
 }
 
-var jsonFieldsNameOfDomainControlLogEntry = [7]string{
+var jsonFieldsNameOfDomainControlLogEntry = [9]string{
 	0: "domain",
 	1: "id",
 	2: "time",
@@ -5956,6 +6201,8 @@ var jsonFieldsNameOfDomainControlLogEntry = [7]string{
 	4: "url",
 	5: "summary",
 	6: "description",
+	7: "issuer",
+	8: "principal",
 }
 
 // Decode decodes DomainControlLogEntry from json.
@@ -5963,7 +6210,7 @@ func (s *DomainControlLogEntry) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DomainControlLogEntry to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -6043,6 +6290,30 @@ func (s *DomainControlLogEntry) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "issuer":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Str()
+				s.Issuer = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"issuer\"")
+			}
+		case "principal":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Principal = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"principal\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -6052,8 +6323,9 @@ func (s *DomainControlLogEntry) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b01111111,
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8293,6 +8565,12 @@ func (s *DomainPeerConfig) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ExportRootEncryptionKeys.Set {
+			e.FieldStart("exportRootEncryptionKeys")
+			s.ExportRootEncryptionKeys.Encode(e)
+		}
+	}
+	{
 		if s.ExportCapsuleAccessLog.Set {
 			e.FieldStart("exportCapsuleAccessLog")
 			s.ExportCapsuleAccessLog.Encode(e)
@@ -8437,6 +8715,12 @@ func (s *DomainPeerConfig) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ImportRootEncryptionKeys.Set {
+			e.FieldStart("importRootEncryptionKeys")
+			s.ImportRootEncryptionKeys.Encode(e)
+		}
+	}
+	{
 		if s.ImportPrecedence.Set {
 			e.FieldStart("importPrecedence")
 			s.ImportPrecedence.Encode(e)
@@ -8466,7 +8750,7 @@ func (s *DomainPeerConfig) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDomainPeerConfig = [36]string{
+var jsonFieldsNameOfDomainPeerConfig = [38]string{
 	0:  "exportIdentityProviders",
 	1:  "exportAllIdentityProviders",
 	2:  "exportFacts",
@@ -8478,31 +8762,33 @@ var jsonFieldsNameOfDomainPeerConfig = [36]string{
 	8:  "exportCapabilities",
 	9:  "exportAllCapabilities",
 	10: "exportDomainPolicy",
-	11: "exportCapsuleAccessLog",
-	12: "exportControlLog",
-	13: "exportCapsuleManifest",
-	14: "exportBilling",
-	15: "exportAdminContact",
-	16: "nicknames",
-	17: "importAlias",
-	18: "forwardBilling",
-	19: "forwardAdminCommunications",
-	20: "importIdentityProviders",
-	21: "importAllIdentityProviders",
-	22: "importFacts",
-	23: "importAllFacts",
-	24: "importReadContexts",
-	25: "importAllReadContexts",
-	26: "importWriteContexts",
-	27: "importAllWriteContexts",
-	28: "importCapabilities",
-	29: "importAllCapabilities",
-	30: "importDomainPolicy",
-	31: "importPrecedence",
-	32: "importCapsuleAccessLog",
-	33: "importControlLog",
-	34: "importCapsuleManifest",
-	35: "displayName",
+	11: "exportRootEncryptionKeys",
+	12: "exportCapsuleAccessLog",
+	13: "exportControlLog",
+	14: "exportCapsuleManifest",
+	15: "exportBilling",
+	16: "exportAdminContact",
+	17: "nicknames",
+	18: "importAlias",
+	19: "forwardBilling",
+	20: "forwardAdminCommunications",
+	21: "importIdentityProviders",
+	22: "importAllIdentityProviders",
+	23: "importFacts",
+	24: "importAllFacts",
+	25: "importReadContexts",
+	26: "importAllReadContexts",
+	27: "importWriteContexts",
+	28: "importAllWriteContexts",
+	29: "importCapabilities",
+	30: "importAllCapabilities",
+	31: "importDomainPolicy",
+	32: "importRootEncryptionKeys",
+	33: "importPrecedence",
+	34: "importCapsuleAccessLog",
+	35: "importControlLog",
+	36: "importCapsuleManifest",
+	37: "displayName",
 }
 
 // Decode decodes DomainPeerConfig from json.
@@ -8658,6 +8944,16 @@ func (s *DomainPeerConfig) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"exportDomainPolicy\"")
+			}
+		case "exportRootEncryptionKeys":
+			if err := func() error {
+				s.ExportRootEncryptionKeys.Reset()
+				if err := s.ExportRootEncryptionKeys.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"exportRootEncryptionKeys\"")
 			}
 		case "exportCapsuleAccessLog":
 			if err := func() error {
@@ -8903,6 +9199,16 @@ func (s *DomainPeerConfig) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"importDomainPolicy\"")
 			}
+		case "importRootEncryptionKeys":
+			if err := func() error {
+				s.ImportRootEncryptionKeys.Reset()
+				if err := s.ImportRootEncryptionKeys.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"importRootEncryptionKeys\"")
+			}
 		case "importPrecedence":
 			if err := func() error {
 				s.ImportPrecedence.Reset()
@@ -8944,7 +9250,7 @@ func (s *DomainPeerConfig) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"importCapsuleManifest\"")
 			}
 		case "displayName":
-			requiredBitSet[4] |= 1 << 3
+			requiredBitSet[4] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.DisplayName = string(v)
@@ -8969,7 +9275,7 @@ func (s *DomainPeerConfig) Decode(d *jx.Decoder) error {
 		0b00000000,
 		0b00000000,
 		0b00000000,
-		0b00001000,
+		0b00100000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9907,6 +10213,50 @@ func (s *DomainPublicInfo) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *DomainRenumberPolicyRulesReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainRenumberPolicyRulesReq) encodeFields(e *jx.Encoder) {
+}
+
+var jsonFieldsNameOfDomainRenumberPolicyRulesReq = [0]string{}
+
+// Decode decodes DomainRenumberPolicyRulesReq from json.
+func (s *DomainRenumberPolicyRulesReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainRenumberPolicyRulesReq to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		default:
+			return d.Skip()
+		}
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainRenumberPolicyRulesReq")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainRenumberPolicyRulesReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainRenumberPolicyRulesReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *DomainResourceSummary) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -10331,12 +10681,6 @@ func (s *DomainSettings) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *DomainSettings) encodeFields(e *jx.Encoder) {
 	{
-		if s.DisasterRecovery.Set {
-			e.FieldStart("disasterRecovery")
-			s.DisasterRecovery.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("adminContacts")
 		e.ArrStart()
 		for _, elem := range s.AdminContacts {
@@ -10370,12 +10714,11 @@ func (s *DomainSettings) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDomainSettings = [5]string{
-	0: "disasterRecovery",
-	1: "adminContacts",
-	2: "activeAdminContacts",
-	3: "pendingAdminContacts",
-	4: "defaultDisplayName",
+var jsonFieldsNameOfDomainSettings = [4]string{
+	0: "adminContacts",
+	1: "activeAdminContacts",
+	2: "pendingAdminContacts",
+	3: "defaultDisplayName",
 }
 
 // Decode decodes DomainSettings from json.
@@ -10387,18 +10730,8 @@ func (s *DomainSettings) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "disasterRecovery":
-			if err := func() error {
-				s.DisasterRecovery.Reset()
-				if err := s.DisasterRecovery.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"disasterRecovery\"")
-			}
 		case "adminContacts":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				s.AdminContacts = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -10456,7 +10789,7 @@ func (s *DomainSettings) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"pendingAdminContacts\"")
 			}
 		case "defaultDisplayName":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.DefaultDisplayName = string(v)
@@ -10477,7 +10810,7 @@ func (s *DomainSettings) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00010010,
+		0b00001001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -10519,86 +10852,6 @@ func (s *DomainSettings) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainSettings) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DomainSettingsDisasterRecovery) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DomainSettingsDisasterRecovery) encodeFields(e *jx.Encoder) {
-	{
-		if s.Enable.Set {
-			e.FieldStart("enable")
-			s.Enable.Encode(e)
-		}
-	}
-	{
-		if s.PublicKey.Set {
-			e.FieldStart("publicKey")
-			s.PublicKey.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfDomainSettingsDisasterRecovery = [2]string{
-	0: "enable",
-	1: "publicKey",
-}
-
-// Decode decodes DomainSettingsDisasterRecovery from json.
-func (s *DomainSettingsDisasterRecovery) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DomainSettingsDisasterRecovery to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "enable":
-			if err := func() error {
-				s.Enable.Reset()
-				if err := s.Enable.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"enable\"")
-			}
-		case "publicKey":
-			if err := func() error {
-				s.PublicKey.Reset()
-				if err := s.PublicKey.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"publicKey\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DomainSettingsDisasterRecovery")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DomainSettingsDisasterRecovery) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DomainSettingsDisasterRecovery) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -15814,39 +16067,6 @@ func (s *OptDomainIdentityProviderDetails) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes DomainSettingsDisasterRecovery as json.
-func (o OptDomainSettingsDisasterRecovery) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes DomainSettingsDisasterRecovery from json.
-func (o *OptDomainSettingsDisasterRecovery) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptDomainSettingsDisasterRecovery to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptDomainSettingsDisasterRecovery) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptDomainSettingsDisasterRecovery) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes FactPolicyRulesItemArgumentsItemSource as json.
 func (o OptFactPolicyRulesItemArgumentsItemSource) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -19389,19 +19609,38 @@ func (s *RootEncryptionKeyItem) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("rekID")
-		e.Str(s.RekID)
+		s.RekID.Encode(e)
 	}
 	{
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
+	{
+		e.FieldStart("imported")
+		e.Bool(s.Imported)
+	}
+	{
+		if s.SourceDomainID.Set {
+			e.FieldStart("sourceDomainID")
+			s.SourceDomainID.Encode(e)
+		}
+	}
+	{
+		if s.SourceDomainName.Set {
+			e.FieldStart("sourceDomainName")
+			s.SourceDomainName.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfRootEncryptionKeyItem = [4]string{
+var jsonFieldsNameOfRootEncryptionKeyItem = [7]string{
 	0: "source",
 	1: "resourcePath",
 	2: "rekID",
 	3: "description",
+	4: "imported",
+	5: "sourceDomainID",
+	6: "sourceDomainName",
 }
 
 // Decode decodes RootEncryptionKeyItem from json.
@@ -19440,9 +19679,7 @@ func (s *RootEncryptionKeyItem) Decode(d *jx.Decoder) error {
 		case "rekID":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.RekID = string(v)
-				if err != nil {
+				if err := s.RekID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -19461,6 +19698,38 @@ func (s *RootEncryptionKeyItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "imported":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Bool()
+				s.Imported = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"imported\"")
+			}
+		case "sourceDomainID":
+			if err := func() error {
+				s.SourceDomainID.Reset()
+				if err := s.SourceDomainID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sourceDomainID\"")
+			}
+		case "sourceDomainName":
+			if err := func() error {
+				s.SourceDomainName.Reset()
+				if err := s.SourceDomainName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sourceDomainName\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -19471,7 +19740,7 @@ func (s *RootEncryptionKeyItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -19563,6 +19832,46 @@ func (s RootEncryptionKeyListResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RootEncryptionKeyListResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RootEncryptionKeyReference as json.
+func (s RootEncryptionKeyReference) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes RootEncryptionKeyReference from json.
+func (s *RootEncryptionKeyReference) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RootEncryptionKeyReference to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RootEncryptionKeyReference(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RootEncryptionKeyReference) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RootEncryptionKeyReference) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -82,6 +82,43 @@ func (s *AccessLogEntry) SetFake() {
 			s.ReadInfo.SetFake()
 		}
 	}
+	{
+		{
+			s.CapsuleTags = nil
+			for i := 0; i < 0; i++ {
+				var elem Tag
+				{
+					elem.SetFake()
+				}
+				s.CapsuleTags = append(s.CapsuleTags, elem)
+			}
+		}
+	}
+	{
+		{
+			s.CapsuleSpanTags.SetFake()
+		}
+	}
+	{
+		{
+			s.CapsuleSize = int64(0)
+		}
+	}
+	{
+		{
+			s.CapsuleCreated = time.Now()
+		}
+	}
+	{
+		{
+			s.Issuer = "string"
+		}
+	}
+	{
+		{
+			s.Principal = "string"
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -833,6 +870,11 @@ func (s *CreatePeerDomain) SetFake() {
 	}
 	{
 		{
+			s.LinkRootEncryptionKeys.SetFake()
+		}
+	}
+	{
+		{
 			s.LinkCapsuleAccessLog.SetFake()
 		}
 	}
@@ -948,6 +990,20 @@ func (s *DeleteTags) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *DisasterRecoverySettings) SetFake() {
+	{
+		{
+			s.Enable.SetFake()
+		}
+	}
+	{
+		{
+			s.PublicKey.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *Domain) SetFake() {
 	{
 		{
@@ -984,6 +1040,18 @@ func (s *DomainAuthenticateResponse) SetFake() {
 	{
 		{
 			s.Expiry.SetFake()
+		}
+	}
+	{
+		{
+			s.Advisory = nil
+			for i := 0; i < 0; i++ {
+				var elem string
+				{
+					elem = "string"
+				}
+				s.Advisory = append(s.Advisory, elem)
+			}
 		}
 	}
 }
@@ -1032,6 +1100,16 @@ func (s *DomainControlLogEntry) SetFake() {
 	{
 		{
 			s.Description.SetFake()
+		}
+	}
+	{
+		{
+			s.Issuer = "string"
+		}
+	}
+	{
+		{
+			s.Principal = "string"
 		}
 	}
 }
@@ -1478,6 +1556,11 @@ func (s *DomainPeerConfig) SetFake() {
 	}
 	{
 		{
+			s.ExportRootEncryptionKeys.SetFake()
+		}
+	}
+	{
+		{
 			s.ExportCapsuleAccessLog.SetFake()
 		}
 	}
@@ -1616,6 +1699,11 @@ func (s *DomainPeerConfig) SetFake() {
 	{
 		{
 			s.ImportDomainPolicy.SetFake()
+		}
+	}
+	{
+		{
+			s.ImportRootEncryptionKeys.SetFake()
 		}
 	}
 	{
@@ -1813,6 +1901,10 @@ func (s *DomainPublicInfo) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *DomainRenumberPolicyRulesReq) SetFake() {
+}
+
+// SetFake set fake values.
 func (s *DomainResourceSummary) SetFake() {
 	{
 		{
@@ -1883,11 +1975,6 @@ func (s *DomainRotateRootEncryptionKeysReq) SetFake() {
 func (s *DomainSettings) SetFake() {
 	{
 		{
-			s.DisasterRecovery.SetFake()
-		}
-	}
-	{
-		{
 			s.AdminContacts = nil
 			for i := 0; i < 0; i++ {
 				var elem string
@@ -1925,20 +2012,6 @@ func (s *DomainSettings) SetFake() {
 	{
 		{
 			s.DefaultDisplayName = "string"
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *DomainSettingsDisasterRecovery) SetFake() {
-	{
-		{
-			s.Enable.SetFake()
-		}
-	}
-	{
-		{
-			s.PublicKey.SetFake()
 		}
 	}
 }
@@ -2798,15 +2871,6 @@ func (s *OptDomainIdentityProviderDetails) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *OptDomainSettingsDisasterRecovery) SetFake() {
-	var elem DomainSettingsDisasterRecovery
-	{
-		elem.SetFake()
-	}
-	s.SetTo(elem)
-}
-
-// SetFake set fake values.
 func (s *OptFactPolicyRulesItemArgumentsItemSource) SetFake() {
 	var elem FactPolicyRulesItemArgumentsItemSource
 	{
@@ -3543,12 +3607,27 @@ func (s *RootEncryptionKeyItem) SetFake() {
 	}
 	{
 		{
-			s.RekID = "string"
+			s.RekID.SetFake()
 		}
 	}
 	{
 		{
 			s.Description = "string"
+		}
+	}
+	{
+		{
+			s.Imported = true
+		}
+	}
+	{
+		{
+			s.SourceDomainID.SetFake()
+		}
+	}
+	{
+		{
+			s.SourceDomainName.SetFake()
 		}
 	}
 }
@@ -3567,6 +3646,15 @@ func (s *RootEncryptionKeyListResponse) SetFake() {
 		}
 	}
 	*s = RootEncryptionKeyListResponse(unwrapped)
+}
+
+// SetFake set fake values.
+func (s *RootEncryptionKeyReference) SetFake() {
+	var unwrapped string
+	{
+		unwrapped = "string"
+	}
+	*s = RootEncryptionKeyReference(unwrapped)
 }
 
 // SetFake set fake values.

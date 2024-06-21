@@ -565,6 +565,18 @@ func TestDeleteTags_EncodeDecode(t *testing.T) {
 	var typ2 DeleteTags
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestDisasterRecoverySettings_EncodeDecode(t *testing.T) {
+	var typ DisasterRecoverySettings
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DisasterRecoverySettings
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestDomain_EncodeDecode(t *testing.T) {
 	var typ Domain
 	typ.SetFake()
@@ -999,6 +1011,18 @@ func TestDomainPublicInfo_EncodeDecode(t *testing.T) {
 	var typ2 DomainPublicInfo
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestDomainRenumberPolicyRulesReq_EncodeDecode(t *testing.T) {
+	var typ DomainRenumberPolicyRulesReq
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainRenumberPolicyRulesReq
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestDomainResourceSummary_EncodeDecode(t *testing.T) {
 	var typ DomainResourceSummary
 	typ.SetFake()
@@ -1071,18 +1095,6 @@ func TestDomainSettings_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 DomainSettings
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestDomainSettingsDisasterRecovery_EncodeDecode(t *testing.T) {
-	var typ DomainSettingsDisasterRecovery
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 DomainSettingsDisasterRecovery
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestDomainSettingsPatch_EncodeDecode(t *testing.T) {
@@ -2117,6 +2129,18 @@ func TestRootEncryptionKeyListResponse_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 RootEncryptionKeyListResponse
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestRootEncryptionKeyReference_EncodeDecode(t *testing.T) {
+	var typ RootEncryptionKeyReference
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 RootEncryptionKeyReference
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestRootEncryptionKeyTestResponse_EncodeDecode(t *testing.T) {

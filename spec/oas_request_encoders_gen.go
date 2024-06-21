@@ -265,6 +265,20 @@ func encodeDomainPutCapabilityRequest(
 	return nil
 }
 
+func encodeDomainPutDisasterRecoverySettingsRequest(
+	req *DisasterRecoverySettings,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDomainPutFactTypeRequest(
 	req *NewFactTypeDefinition,
 	r *http.Request,
@@ -287,6 +301,22 @@ func encodeDomainPutVendorSettingsRequest(
 	e := jx.GetEncoder()
 	{
 		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainRenumberPolicyRulesRequest(
+	req *DomainRenumberPolicyRulesReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		if req != nil {
+			req.Encode(e)
+		}
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)

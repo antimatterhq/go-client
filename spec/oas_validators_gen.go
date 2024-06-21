@@ -139,6 +139,45 @@ func (s *AccessLogEntry) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.CapsuleTags == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.CapsuleTags {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "capsuleTags",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.CapsuleSpanTags.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "capsuleSpanTags",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -522,33 +561,6 @@ func (s AvailableServiceAccountRootEncryptionKeyProviderType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
-}
-
-func (s *BYOKKeyInfo) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := (validate.String{
-			MinLength:    256,
-			MinLengthSet: true,
-			MaxLength:    0,
-			MaxLengthSet: false,
-			Email:        false,
-			Hostname:     false,
-			Regex:        nil,
-		}).Validate(string(s.Key)); err != nil {
-			return errors.Wrap(err, "string")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "key",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
 }
 
 func (s BYOKKeyInfoProviderName) Validate() error {
@@ -3900,45 +3912,6 @@ func (s JSONPatchRequestTstValue) Validate() error {
 	}
 }
 
-func (s *KeyInfos) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.KeyInformation.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "keyInformation",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s KeyInfosKeyInformation) Validate() error {
-	switch s.Type {
-	case GCPServiceAccountKeyInfoKeyInfosKeyInformation:
-		return nil // no validation needed
-	case AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation:
-		return nil // no validation needed
-	case AWSServiceAccountKeyInfoKeyInfosKeyInformation:
-		return nil // no validation needed
-	case AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation:
-		return nil // no validation needed
-	case BYOKKeyInfoKeyInfosKeyInformation:
-		if err := s.BYOKKeyInfo.Validate(); err != nil {
-			return err
-		}
-		return nil
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
-}
-
 func (s LogEntryID) Validate() error {
 	alias := (string)(s)
 	if err := (validate.String{
@@ -5519,10 +5492,80 @@ func (s RootEncryptionKeyID) Validate() error {
 	return nil
 }
 
+func (s *RootEncryptionKeyItem) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.RekID.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "rekID",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.SourceDomainID.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "sourceDomainID",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s RootEncryptionKeyListResponse) Validate() error {
 	alias := ([]RootEncryptionKeyItem)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s RootEncryptionKeyReference) Validate() error {
+	alias := (string)(s)
+	if err := (validate.String{
+		MinLength:    0,
+		MinLengthSet: false,
+		MaxLength:    0,
+		MaxLengthSet: false,
+		Email:        false,
+		Hostname:     false,
+		Regex:        regexMap["^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|default|active)$"],
+	}).Validate(string(alias)); err != nil {
+		return errors.Wrap(err, "string")
 	}
 	return nil
 }

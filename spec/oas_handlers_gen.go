@@ -5347,6 +5347,169 @@ func (s *Server) handleDomainGetCapsuleInfoRequest(args [2]string, argsEscaped b
 	}
 }
 
+// handleDomainGetDisasterRecoverySettingsRequest handles domainGetDisasterRecoverySettings operation.
+//
+// Return the current domain's disaster recovery settings.
+//
+// GET /domains/{domainID}/control/keys/disaster-recovery
+func (s *Server) handleDomainGetDisasterRecoverySettingsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDisasterRecoverySettings"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainGetDisasterRecoverySettings",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainGetDisasterRecoverySettings",
+			ID:   "domainGetDisasterRecoverySettings",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainGetDisasterRecoverySettings", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainGetDisasterRecoverySettingsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainGetDisasterRecoverySettingsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainGetDisasterRecoverySettings",
+			OperationSummary: "Get a domain's disaster recovery settings.",
+			OperationID:      "domainGetDisasterRecoverySettings",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainGetDisasterRecoverySettingsParams
+			Response = DomainGetDisasterRecoverySettingsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainGetDisasterRecoverySettingsParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainGetDisasterRecoverySettings(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainGetDisasterRecoverySettings(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainGetDisasterRecoverySettingsResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainGetExternalRootEncryptionKeyProvidersRequest handles domainGetExternalRootEncryptionKeyProviders operation.
 //
 // Returns a list of available root encryption key providers, along with their description and, if
@@ -10887,6 +11050,184 @@ func (s *Server) handleDomainPutCapabilityRequest(args [2]string, argsEscaped bo
 	}
 }
 
+// handleDomainPutDisasterRecoverySettingsRequest handles domainPutDisasterRecoverySettings operation.
+//
+// Create or update the current domain's disaster recovery settings.
+//
+// PUT /domains/{domainID}/control/keys/disaster-recovery
+func (s *Server) handleDomainPutDisasterRecoverySettingsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPutDisasterRecoverySettings"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainPutDisasterRecoverySettings",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainPutDisasterRecoverySettings",
+			ID:   "domainPutDisasterRecoverySettings",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainPutDisasterRecoverySettings", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainPutDisasterRecoverySettingsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainPutDisasterRecoverySettingsRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainPutDisasterRecoverySettingsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainPutDisasterRecoverySettings",
+			OperationSummary: "Create or update a domain's disaster recovery settings.",
+			OperationID:      "domainPutDisasterRecoverySettings",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *DisasterRecoverySettings
+			Params   = DomainPutDisasterRecoverySettingsParams
+			Response = DomainPutDisasterRecoverySettingsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainPutDisasterRecoverySettingsParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainPutDisasterRecoverySettings(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainPutDisasterRecoverySettings(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainPutDisasterRecoverySettingsResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainPutFactTypeRequest handles domainPutFactType operation.
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
@@ -12117,6 +12458,21 @@ func (s *Server) handleDomainRenumberPolicyRulesRequest(args [1]string, argsEsca
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
+	request, close, err := s.decodeDomainRenumberPolicyRulesRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response DomainRenumberPolicyRulesRes
 	if m := s.cfg.Middleware; m != nil {
@@ -12125,7 +12481,7 @@ func (s *Server) handleDomainRenumberPolicyRulesRequest(args [1]string, argsEsca
 			OperationName:    "DomainRenumberPolicyRules",
 			OperationSummary: "Re-assign rule numbers",
 			OperationID:      "domainRenumberPolicyRules",
-			Body:             nil,
+			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "domainID",
@@ -12136,7 +12492,7 @@ func (s *Server) handleDomainRenumberPolicyRulesRequest(args [1]string, argsEsca
 		}
 
 		type (
-			Request  = struct{}
+			Request  = *DomainRenumberPolicyRulesReq
 			Params   = DomainRenumberPolicyRulesParams
 			Response = DomainRenumberPolicyRulesRes
 		)
@@ -12149,12 +12505,12 @@ func (s *Server) handleDomainRenumberPolicyRulesRequest(args [1]string, argsEsca
 			mreq,
 			unpackDomainRenumberPolicyRulesParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainRenumberPolicyRules(ctx, params)
+				response, err = s.h.DomainRenumberPolicyRules(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.DomainRenumberPolicyRules(ctx, params)
+		response, err = s.h.DomainRenumberPolicyRules(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {

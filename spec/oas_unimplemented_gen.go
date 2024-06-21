@@ -334,6 +334,15 @@ func (UnimplementedHandler) DomainGetCapsuleInfo(ctx context.Context, params Dom
 	return r, ht.ErrNotImplemented
 }
 
+// DomainGetDisasterRecoverySettings implements domainGetDisasterRecoverySettings operation.
+//
+// Return the current domain's disaster recovery settings.
+//
+// GET /domains/{domainID}/control/keys/disaster-recovery
+func (UnimplementedHandler) DomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (r DomainGetDisasterRecoverySettingsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainGetExternalRootEncryptionKeyProviders implements domainGetExternalRootEncryptionKeyProviders operation.
 //
 // Returns a list of available root encryption key providers, along with their description and, if
@@ -655,6 +664,15 @@ func (UnimplementedHandler) DomainPutCapability(ctx context.Context, req *NewCap
 	return r, ht.ErrNotImplemented
 }
 
+// DomainPutDisasterRecoverySettings implements domainPutDisasterRecoverySettings operation.
+//
+// Create or update the current domain's disaster recovery settings.
+//
+// PUT /domains/{domainID}/control/keys/disaster-recovery
+func (UnimplementedHandler) DomainPutDisasterRecoverySettings(ctx context.Context, req *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (r DomainPutDisasterRecoverySettingsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainPutFactType implements domainPutFactType operation.
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
@@ -718,7 +736,7 @@ func (UnimplementedHandler) DomainReadContextFlush(ctx context.Context, params D
 // Re-assign rule priority numbers to integer multiples of 10.
 //
 // POST /domains/{domainID}/control/policy/renumber
-func (UnimplementedHandler) DomainRenumberPolicyRules(ctx context.Context, params DomainRenumberPolicyRulesParams) (r DomainRenumberPolicyRulesRes, _ error) {
+func (UnimplementedHandler) DomainRenumberPolicyRules(ctx context.Context, req *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (r DomainRenumberPolicyRulesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

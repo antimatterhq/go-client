@@ -251,6 +251,12 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/capsules/{capsuleID}
 	DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (DomainGetCapsuleInfoRes, error)
+	// DomainGetDisasterRecoverySettings invokes domainGetDisasterRecoverySettings operation.
+	//
+	// Return the current domain's disaster recovery settings.
+	//
+	// GET /domains/{domainID}/control/keys/disaster-recovery
+	DomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (DomainGetDisasterRecoverySettingsRes, error)
 	// DomainGetExternalRootEncryptionKeyProviders invokes domainGetExternalRootEncryptionKeyProviders operation.
 	//
 	// Returns a list of available root encryption key providers, along with their description and, if
@@ -473,6 +479,12 @@ type Invoker interface {
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
+	// DomainPutDisasterRecoverySettings invokes domainPutDisasterRecoverySettings operation.
+	//
+	// Create or update the current domain's disaster recovery settings.
+	//
+	// PUT /domains/{domainID}/control/keys/disaster-recovery
+	DomainPutDisasterRecoverySettings(ctx context.Context, request *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (DomainPutDisasterRecoverySettingsRes, error)
 	// DomainPutFactType invokes domainPutFactType operation.
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
@@ -518,7 +530,7 @@ type Invoker interface {
 	// Re-assign rule priority numbers to integer multiples of 10.
 	//
 	// POST /domains/{domainID}/control/policy/renumber
-	DomainRenumberPolicyRules(ctx context.Context, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error)
+	DomainRenumberPolicyRules(ctx context.Context, request *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error)
 	// DomainRotateRootEncryptionKeys invokes domainRotateRootEncryptionKeys operation.
 	//
 	// Collects key encryption keys not encrypted with the current active root encryption key, decrypts
@@ -965,15 +977,6 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -5377,6 +5380,133 @@ func (c *Client) sendDomainGetCapsuleInfo(ctx context.Context, params DomainGetC
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainGetCapsuleInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainGetDisasterRecoverySettings invokes domainGetDisasterRecoverySettings operation.
+//
+// Return the current domain's disaster recovery settings.
+//
+// GET /domains/{domainID}/control/keys/disaster-recovery
+func (c *Client) DomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (DomainGetDisasterRecoverySettingsRes, error) {
+	res, err := c.sendDomainGetDisasterRecoverySettings(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (res DomainGetDisasterRecoverySettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDisasterRecoverySettings"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetDisasterRecoverySettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/keys/disaster-recovery"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetDisasterRecoverySettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetDisasterRecoverySettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -10167,6 +10297,136 @@ func (c *Client) sendDomainPutCapability(ctx context.Context, request *NewCapabi
 	return result, nil
 }
 
+// DomainPutDisasterRecoverySettings invokes domainPutDisasterRecoverySettings operation.
+//
+// Create or update the current domain's disaster recovery settings.
+//
+// PUT /domains/{domainID}/control/keys/disaster-recovery
+func (c *Client) DomainPutDisasterRecoverySettings(ctx context.Context, request *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (DomainPutDisasterRecoverySettingsRes, error) {
+	res, err := c.sendDomainPutDisasterRecoverySettings(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainPutDisasterRecoverySettings(ctx context.Context, request *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (res DomainPutDisasterRecoverySettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPutDisasterRecoverySettings"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPutDisasterRecoverySettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/keys/disaster-recovery"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainPutDisasterRecoverySettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainPutDisasterRecoverySettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainPutDisasterRecoverySettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainPutFactType invokes domainPutFactType operation.
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
@@ -11519,12 +11779,12 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 // Re-assign rule priority numbers to integer multiples of 10.
 //
 // POST /domains/{domainID}/control/policy/renumber
-func (c *Client) DomainRenumberPolicyRules(ctx context.Context, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error) {
-	res, err := c.sendDomainRenumberPolicyRules(ctx, params)
+func (c *Client) DomainRenumberPolicyRules(ctx context.Context, request *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error) {
+	res, err := c.sendDomainRenumberPolicyRules(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, params DomainRenumberPolicyRulesParams) (res DomainRenumberPolicyRulesRes, err error) {
+func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, request *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (res DomainRenumberPolicyRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRenumberPolicyRules"),
 		semconv.HTTPMethodKey.String("POST"),
@@ -11590,6 +11850,9 @@ func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, params Domai
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainRenumberPolicyRulesRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	{

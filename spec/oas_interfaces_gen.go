@@ -129,6 +129,10 @@ type DomainGetCapsuleInfoRes interface {
 	domainGetCapsuleInfoRes()
 }
 
+type DomainGetDisasterRecoverySettingsRes interface {
+	domainGetDisasterRecoverySettingsRes()
+}
+
 type DomainGetExternalRootEncryptionKeyProvidersRes interface {
 	domainGetExternalRootEncryptionKeyProvidersRes()
 }
@@ -259,6 +263,10 @@ type DomainPolicyFlushRes interface {
 
 type DomainPutCapabilityRes interface {
 	domainPutCapabilityRes()
+}
+
+type DomainPutDisasterRecoverySettingsRes interface {
+	domainPutDisasterRecoverySettingsRes()
 }
 
 type DomainPutFactTypeRes interface {

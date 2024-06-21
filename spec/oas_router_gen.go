@@ -810,6 +810,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 												return
 											}
+										case 'd': // Prefix: "disaster-recovery"
+											if l := len("disaster-recovery"); len(elem) >= l && elem[0:l] == "disaster-recovery" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleDomainGetDisasterRecoverySettingsRequest([1]string{
+														args[0],
+													}, elemIsEscaped, w, r)
+												case "PUT":
+													s.handleDomainPutDisasterRecoverySettingsRequest([1]string{
+														args[0],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, "GET,PUT")
+												}
+
+												return
+											}
 										case 'p': // Prefix: "providers"
 											if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
 												elem = elem[l:]
@@ -2674,6 +2698,37 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 													r.summary = "Set the active root encryption key"
 													r.operationID = "domainSetActiveExternalRootEncryptionKey"
 													r.pathPattern = "/domains/{domainID}/control/keys/active"
+													r.args = args
+													r.count = 1
+													return r, true
+												default:
+													return
+												}
+											}
+										case 'd': // Prefix: "disaster-recovery"
+											if l := len("disaster-recovery"); len(elem) >= l && elem[0:l] == "disaster-recovery" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													// Leaf: DomainGetDisasterRecoverySettings
+													r.name = "DomainGetDisasterRecoverySettings"
+													r.summary = "Get a domain's disaster recovery settings."
+													r.operationID = "domainGetDisasterRecoverySettings"
+													r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
+													r.args = args
+													r.count = 1
+													return r, true
+												case "PUT":
+													// Leaf: DomainPutDisasterRecoverySettings
+													r.name = "DomainPutDisasterRecoverySettings"
+													r.summary = "Create or update a domain's disaster recovery settings."
+													r.operationID = "domainPutDisasterRecoverySettings"
+													r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
 													r.args = args
 													r.count = 1
 													return r, true

@@ -233,6 +233,12 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/capsules/{capsuleID}
 	DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (DomainGetCapsuleInfoRes, error)
+	// DomainGetDisasterRecoverySettings implements domainGetDisasterRecoverySettings operation.
+	//
+	// Return the current domain's disaster recovery settings.
+	//
+	// GET /domains/{domainID}/control/keys/disaster-recovery
+	DomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (DomainGetDisasterRecoverySettingsRes, error)
 	// DomainGetExternalRootEncryptionKeyProviders implements domainGetExternalRootEncryptionKeyProviders operation.
 	//
 	// Returns a list of available root encryption key providers, along with their description and, if
@@ -455,6 +461,12 @@ type Handler interface {
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, req *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
+	// DomainPutDisasterRecoverySettings implements domainPutDisasterRecoverySettings operation.
+	//
+	// Create or update the current domain's disaster recovery settings.
+	//
+	// PUT /domains/{domainID}/control/keys/disaster-recovery
+	DomainPutDisasterRecoverySettings(ctx context.Context, req *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (DomainPutDisasterRecoverySettingsRes, error)
 	// DomainPutFactType implements domainPutFactType operation.
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
@@ -500,7 +512,7 @@ type Handler interface {
 	// Re-assign rule priority numbers to integer multiples of 10.
 	//
 	// POST /domains/{domainID}/control/policy/renumber
-	DomainRenumberPolicyRules(ctx context.Context, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error)
+	DomainRenumberPolicyRules(ctx context.Context, req *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (DomainRenumberPolicyRulesRes, error)
 	// DomainRotateRootEncryptionKeys implements domainRotateRootEncryptionKeys operation.
 	//
 	// Collects key encryption keys not encrypted with the current active root encryption key, decrypts

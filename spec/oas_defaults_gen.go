@@ -66,6 +66,10 @@ func (s *CreatePeerDomain) setDefaults() {
 	}
 	{
 		val := bool(false)
+		s.LinkRootEncryptionKeys.SetTo(val)
+	}
+	{
+		val := bool(false)
 		s.LinkCapsuleAccessLog.SetTo(val)
 	}
 	{
