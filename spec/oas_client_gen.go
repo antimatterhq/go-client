@@ -1452,6 +1452,23 @@ func (c *Client) sendDomainAuthenticate(ctx context.Context, request *DomainAuth
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "tokenLifetime" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tokenLifetime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TokenLifetime.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"

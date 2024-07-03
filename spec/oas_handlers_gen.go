@@ -893,6 +893,10 @@ func (s *Server) handleDomainAuthenticateRequest(args [1]string, argsEscaped boo
 					Name: "tokenExchange",
 					In:   "query",
 				}: params.TokenExchange,
+				{
+					Name: "tokenLifetime",
+					In:   "query",
+				}: params.TokenLifetime,
 			},
 			Raw: r,
 		}

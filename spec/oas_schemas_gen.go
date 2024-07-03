@@ -4442,6 +4442,10 @@ type DomainSettings struct {
 	PendingAdminContacts []string `json:"pendingAdminContacts"`
 	// User friendly custom display name.
 	DefaultDisplayName string `json:"defaultDisplayName"`
+	// The default lifetime in seconds of a domain authentication token generated for this domain.
+	DefaultTokenLifetime OptInt `json:"defaultTokenLifetime"`
+	// The maximum lifetime in seconds that a domain authentication token can be generated for.
+	MaximumTokenLifetime OptInt `json:"maximumTokenLifetime"`
 }
 
 // GetAdminContacts returns the value of AdminContacts.
@@ -4464,6 +4468,16 @@ func (s *DomainSettings) GetDefaultDisplayName() string {
 	return s.DefaultDisplayName
 }
 
+// GetDefaultTokenLifetime returns the value of DefaultTokenLifetime.
+func (s *DomainSettings) GetDefaultTokenLifetime() OptInt {
+	return s.DefaultTokenLifetime
+}
+
+// GetMaximumTokenLifetime returns the value of MaximumTokenLifetime.
+func (s *DomainSettings) GetMaximumTokenLifetime() OptInt {
+	return s.MaximumTokenLifetime
+}
+
 // SetAdminContacts sets the value of AdminContacts.
 func (s *DomainSettings) SetAdminContacts(val []string) {
 	s.AdminContacts = val
@@ -4482,6 +4496,16 @@ func (s *DomainSettings) SetPendingAdminContacts(val []string) {
 // SetDefaultDisplayName sets the value of DefaultDisplayName.
 func (s *DomainSettings) SetDefaultDisplayName(val string) {
 	s.DefaultDisplayName = val
+}
+
+// SetDefaultTokenLifetime sets the value of DefaultTokenLifetime.
+func (s *DomainSettings) SetDefaultTokenLifetime(val OptInt) {
+	s.DefaultTokenLifetime = val
+}
+
+// SetMaximumTokenLifetime sets the value of MaximumTokenLifetime.
+func (s *DomainSettings) SetMaximumTokenLifetime(val OptInt) {
+	s.MaximumTokenLifetime = val
 }
 
 func (*DomainSettings) domainGetSettingsRes()   {}

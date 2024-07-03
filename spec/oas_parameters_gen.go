@@ -479,6 +479,10 @@ type DomainAuthenticateParams struct {
 	DomainID             DomainID
 	IdentityProviderName OptIdentityProviderName
 	TokenExchange        OptBool
+	// Lifetime of token in seconds. Setting this will override the domain default. This cannot be
+	// greater than the domain's maximum token lifetime. The default and maximum token lifetime values
+	// can be seen and set at the `/control/settings` route.
+	TokenLifetime OptInt
 }
 
 func unpackDomainAuthenticateParams(packed middleware.Parameters) (params DomainAuthenticateParams) {
@@ -505,6 +509,15 @@ func unpackDomainAuthenticateParams(packed middleware.Parameters) (params Domain
 		}
 		if v, ok := packed[key]; ok {
 			params.TokenExchange = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tokenLifetime",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TokenLifetime = v.(OptInt)
 		}
 	}
 	return params
@@ -672,6 +685,47 @@ func decodeDomainAuthenticateParams(args [1]string, argsEscaped bool, r *http.Re
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "tokenExchange",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: tokenLifetime.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tokenLifetime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTokenLifetimeVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTokenLifetimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TokenLifetime.SetTo(paramsDotTokenLifetimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tokenLifetime",
 			In:   "query",
 			Err:  err,
 		}

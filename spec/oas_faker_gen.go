@@ -2014,6 +2014,16 @@ func (s *DomainSettings) SetFake() {
 			s.DefaultDisplayName = "string"
 		}
 	}
+	{
+		{
+			s.DefaultTokenLifetime.SetFake()
+		}
+	}
+	{
+		{
+			s.MaximumTokenLifetime.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.

@@ -10712,13 +10712,27 @@ func (s *DomainSettings) encodeFields(e *jx.Encoder) {
 		e.FieldStart("defaultDisplayName")
 		e.Str(s.DefaultDisplayName)
 	}
+	{
+		if s.DefaultTokenLifetime.Set {
+			e.FieldStart("defaultTokenLifetime")
+			s.DefaultTokenLifetime.Encode(e)
+		}
+	}
+	{
+		if s.MaximumTokenLifetime.Set {
+			e.FieldStart("maximumTokenLifetime")
+			s.MaximumTokenLifetime.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfDomainSettings = [4]string{
+var jsonFieldsNameOfDomainSettings = [6]string{
 	0: "adminContacts",
 	1: "activeAdminContacts",
 	2: "pendingAdminContacts",
 	3: "defaultDisplayName",
+	4: "defaultTokenLifetime",
+	5: "maximumTokenLifetime",
 }
 
 // Decode decodes DomainSettings from json.
@@ -10799,6 +10813,26 @@ func (s *DomainSettings) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"defaultDisplayName\"")
+			}
+		case "defaultTokenLifetime":
+			if err := func() error {
+				s.DefaultTokenLifetime.Reset()
+				if err := s.DefaultTokenLifetime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"defaultTokenLifetime\"")
+			}
+		case "maximumTokenLifetime":
+			if err := func() error {
+				s.MaximumTokenLifetime.Reset()
+				if err := s.MaximumTokenLifetime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"maximumTokenLifetime\"")
 			}
 		default:
 			return d.Skip()
