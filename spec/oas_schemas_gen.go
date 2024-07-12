@@ -743,6 +743,71 @@ func (s *AntimatterDelegatedAWSKeyInfoProviderName) UnmarshalText(data []byte) e
 	}
 }
 
+// The details required to use an Azure HSM root encryption key that has been  delegated to
+// Antimatter's Azure account. This will use Antimatter's service  account during set up of the Azure
+// client.
+// Ref: #/components/schemas/AntimatterDelegatedAzureKeyInfo
+type AntimatterDelegatedAzureKeyInfo struct {
+	// The directory ID in containing the managed HSM.
+	TenantID string `json:"tenantID"`
+	// The full URL for the key.
+	KeyURL string `json:"keyURL"`
+}
+
+// GetTenantID returns the value of TenantID.
+func (s *AntimatterDelegatedAzureKeyInfo) GetTenantID() string {
+	return s.TenantID
+}
+
+// GetKeyURL returns the value of KeyURL.
+func (s *AntimatterDelegatedAzureKeyInfo) GetKeyURL() string {
+	return s.KeyURL
+}
+
+// SetTenantID sets the value of TenantID.
+func (s *AntimatterDelegatedAzureKeyInfo) SetTenantID(val string) {
+	s.TenantID = val
+}
+
+// SetKeyURL sets the value of KeyURL.
+func (s *AntimatterDelegatedAzureKeyInfo) SetKeyURL(val string) {
+	s.KeyURL = val
+}
+
+type AntimatterDelegatedAzureKeyInfoProviderName string
+
+const (
+	AntimatterDelegatedAzureKeyInfoProviderNameAzureAm AntimatterDelegatedAzureKeyInfoProviderName = "azure_am"
+)
+
+// AllValues returns all AntimatterDelegatedAzureKeyInfoProviderName values.
+func (AntimatterDelegatedAzureKeyInfoProviderName) AllValues() []AntimatterDelegatedAzureKeyInfoProviderName {
+	return []AntimatterDelegatedAzureKeyInfoProviderName{
+		AntimatterDelegatedAzureKeyInfoProviderNameAzureAm,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AntimatterDelegatedAzureKeyInfoProviderName) MarshalText() ([]byte, error) {
+	switch s {
+	case AntimatterDelegatedAzureKeyInfoProviderNameAzureAm:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AntimatterDelegatedAzureKeyInfoProviderName) UnmarshalText(data []byte) error {
+	switch AntimatterDelegatedAzureKeyInfoProviderName(data) {
+	case AntimatterDelegatedAzureKeyInfoProviderNameAzureAm:
+		*s = AntimatterDelegatedAzureKeyInfoProviderNameAzureAm
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // The details required to use an GCP Key root encryption key that has been  delegated to
 // Antimatter's GCP service account. This will use Antimatter's  service account during set up of the
 // GCP client.
@@ -1064,6 +1129,94 @@ func (s *AvailableServiceAccountRootEncryptionKeyProviderType) UnmarshalText(dat
 	switch AvailableServiceAccountRootEncryptionKeyProviderType(data) {
 	case AvailableServiceAccountRootEncryptionKeyProviderTypeServiceAccountRootEncryptionKeyProvider:
 		*s = AvailableServiceAccountRootEncryptionKeyProviderTypeServiceAccountRootEncryptionKeyProvider
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// The Azure service account information and details required to access the Azure HSM for
+// cryptographic operations.
+// Ref: #/components/schemas/AzureServiceAccountKeyInfo
+type AzureServiceAccountKeyInfo struct {
+	// The Azure service account directory ID.
+	TenantID string `json:"tenantID"`
+	// The name of the key in Azure Key Vault.
+	KeyURL string `json:"keyURL"`
+	// The access key ID's secret access key.
+	ClientID string `json:"clientID"`
+	// The access key ID's secret access key.
+	ClientSecret string `json:"clientSecret"`
+}
+
+// GetTenantID returns the value of TenantID.
+func (s *AzureServiceAccountKeyInfo) GetTenantID() string {
+	return s.TenantID
+}
+
+// GetKeyURL returns the value of KeyURL.
+func (s *AzureServiceAccountKeyInfo) GetKeyURL() string {
+	return s.KeyURL
+}
+
+// GetClientID returns the value of ClientID.
+func (s *AzureServiceAccountKeyInfo) GetClientID() string {
+	return s.ClientID
+}
+
+// GetClientSecret returns the value of ClientSecret.
+func (s *AzureServiceAccountKeyInfo) GetClientSecret() string {
+	return s.ClientSecret
+}
+
+// SetTenantID sets the value of TenantID.
+func (s *AzureServiceAccountKeyInfo) SetTenantID(val string) {
+	s.TenantID = val
+}
+
+// SetKeyURL sets the value of KeyURL.
+func (s *AzureServiceAccountKeyInfo) SetKeyURL(val string) {
+	s.KeyURL = val
+}
+
+// SetClientID sets the value of ClientID.
+func (s *AzureServiceAccountKeyInfo) SetClientID(val string) {
+	s.ClientID = val
+}
+
+// SetClientSecret sets the value of ClientSecret.
+func (s *AzureServiceAccountKeyInfo) SetClientSecret(val string) {
+	s.ClientSecret = val
+}
+
+type AzureServiceAccountKeyInfoProviderName string
+
+const (
+	AzureServiceAccountKeyInfoProviderNameAzureSa AzureServiceAccountKeyInfoProviderName = "azure_sa"
+)
+
+// AllValues returns all AzureServiceAccountKeyInfoProviderName values.
+func (AzureServiceAccountKeyInfoProviderName) AllValues() []AzureServiceAccountKeyInfoProviderName {
+	return []AzureServiceAccountKeyInfoProviderName{
+		AzureServiceAccountKeyInfoProviderNameAzureSa,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AzureServiceAccountKeyInfoProviderName) MarshalText() ([]byte, error) {
+	switch s {
+	case AzureServiceAccountKeyInfoProviderNameAzureSa:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AzureServiceAccountKeyInfoProviderName) UnmarshalText(data []byte) error {
+	switch AzureServiceAccountKeyInfoProviderName(data) {
+	case AzureServiceAccountKeyInfoProviderNameAzureSa:
+		*s = AzureServiceAccountKeyInfoProviderNameAzureSa
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -6044,12 +6197,14 @@ func (s *KeyInfos) SetKeyInformation(val KeyInfosKeyInformation) {
 
 // KeyInfosKeyInformation represents sum type.
 type KeyInfosKeyInformation struct {
-	Type                          KeyInfosKeyInformationType // switch on this field
-	GCPServiceAccountKeyInfo      GCPServiceAccountKeyInfo
-	AntimatterDelegatedGCPKeyInfo AntimatterDelegatedGCPKeyInfo
-	AWSServiceAccountKeyInfo      AWSServiceAccountKeyInfo
-	AntimatterDelegatedAWSKeyInfo AntimatterDelegatedAWSKeyInfo
-	BYOKKeyInfo                   BYOKKeyInfo
+	Type                            KeyInfosKeyInformationType // switch on this field
+	GCPServiceAccountKeyInfo        GCPServiceAccountKeyInfo
+	AntimatterDelegatedGCPKeyInfo   AntimatterDelegatedGCPKeyInfo
+	AWSServiceAccountKeyInfo        AWSServiceAccountKeyInfo
+	AntimatterDelegatedAWSKeyInfo   AntimatterDelegatedAWSKeyInfo
+	AzureServiceAccountKeyInfo      AzureServiceAccountKeyInfo
+	AntimatterDelegatedAzureKeyInfo AntimatterDelegatedAzureKeyInfo
+	BYOKKeyInfo                     BYOKKeyInfo
 }
 
 // KeyInfosKeyInformationType is oneOf type of KeyInfosKeyInformation.
@@ -6057,11 +6212,13 @@ type KeyInfosKeyInformationType string
 
 // Possible values for KeyInfosKeyInformationType.
 const (
-	GCPServiceAccountKeyInfoKeyInfosKeyInformation      KeyInfosKeyInformationType = "gcp_sa"
-	AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation KeyInfosKeyInformationType = "gcp_am"
-	AWSServiceAccountKeyInfoKeyInfosKeyInformation      KeyInfosKeyInformationType = "aws_sa"
-	AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation KeyInfosKeyInformationType = "aws_am"
-	BYOKKeyInfoKeyInfosKeyInformation                   KeyInfosKeyInformationType = "byok"
+	GCPServiceAccountKeyInfoKeyInfosKeyInformation        KeyInfosKeyInformationType = "gcp_sa"
+	AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation   KeyInfosKeyInformationType = "gcp_am"
+	AWSServiceAccountKeyInfoKeyInfosKeyInformation        KeyInfosKeyInformationType = "aws_sa"
+	AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation   KeyInfosKeyInformationType = "aws_am"
+	AzureServiceAccountKeyInfoKeyInfosKeyInformation      KeyInfosKeyInformationType = "azure_sa"
+	AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation KeyInfosKeyInformationType = "azure_am"
+	BYOKKeyInfoKeyInfosKeyInformation                     KeyInfosKeyInformationType = "byok"
 )
 
 // IsGCPServiceAccountKeyInfo reports whether KeyInfosKeyInformation is GCPServiceAccountKeyInfo.
@@ -6082,6 +6239,16 @@ func (s KeyInfosKeyInformation) IsAWSServiceAccountKeyInfo() bool {
 // IsAntimatterDelegatedAWSKeyInfo reports whether KeyInfosKeyInformation is AntimatterDelegatedAWSKeyInfo.
 func (s KeyInfosKeyInformation) IsAntimatterDelegatedAWSKeyInfo() bool {
 	return s.Type == AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation
+}
+
+// IsAzureServiceAccountKeyInfo reports whether KeyInfosKeyInformation is AzureServiceAccountKeyInfo.
+func (s KeyInfosKeyInformation) IsAzureServiceAccountKeyInfo() bool {
+	return s.Type == AzureServiceAccountKeyInfoKeyInfosKeyInformation
+}
+
+// IsAntimatterDelegatedAzureKeyInfo reports whether KeyInfosKeyInformation is AntimatterDelegatedAzureKeyInfo.
+func (s KeyInfosKeyInformation) IsAntimatterDelegatedAzureKeyInfo() bool {
+	return s.Type == AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation
 }
 
 // IsBYOKKeyInfo reports whether KeyInfosKeyInformation is BYOKKeyInfo.
@@ -6170,6 +6337,48 @@ func (s KeyInfosKeyInformation) GetAntimatterDelegatedAWSKeyInfo() (v Antimatter
 func NewAntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation(v AntimatterDelegatedAWSKeyInfo) KeyInfosKeyInformation {
 	var s KeyInfosKeyInformation
 	s.SetAntimatterDelegatedAWSKeyInfo(v)
+	return s
+}
+
+// SetAzureServiceAccountKeyInfo sets KeyInfosKeyInformation to AzureServiceAccountKeyInfo.
+func (s *KeyInfosKeyInformation) SetAzureServiceAccountKeyInfo(v AzureServiceAccountKeyInfo) {
+	s.Type = AzureServiceAccountKeyInfoKeyInfosKeyInformation
+	s.AzureServiceAccountKeyInfo = v
+}
+
+// GetAzureServiceAccountKeyInfo returns AzureServiceAccountKeyInfo and true boolean if KeyInfosKeyInformation is AzureServiceAccountKeyInfo.
+func (s KeyInfosKeyInformation) GetAzureServiceAccountKeyInfo() (v AzureServiceAccountKeyInfo, ok bool) {
+	if !s.IsAzureServiceAccountKeyInfo() {
+		return v, false
+	}
+	return s.AzureServiceAccountKeyInfo, true
+}
+
+// NewAzureServiceAccountKeyInfoKeyInfosKeyInformation returns new KeyInfosKeyInformation from AzureServiceAccountKeyInfo.
+func NewAzureServiceAccountKeyInfoKeyInfosKeyInformation(v AzureServiceAccountKeyInfo) KeyInfosKeyInformation {
+	var s KeyInfosKeyInformation
+	s.SetAzureServiceAccountKeyInfo(v)
+	return s
+}
+
+// SetAntimatterDelegatedAzureKeyInfo sets KeyInfosKeyInformation to AntimatterDelegatedAzureKeyInfo.
+func (s *KeyInfosKeyInformation) SetAntimatterDelegatedAzureKeyInfo(v AntimatterDelegatedAzureKeyInfo) {
+	s.Type = AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation
+	s.AntimatterDelegatedAzureKeyInfo = v
+}
+
+// GetAntimatterDelegatedAzureKeyInfo returns AntimatterDelegatedAzureKeyInfo and true boolean if KeyInfosKeyInformation is AntimatterDelegatedAzureKeyInfo.
+func (s KeyInfosKeyInformation) GetAntimatterDelegatedAzureKeyInfo() (v AntimatterDelegatedAzureKeyInfo, ok bool) {
+	if !s.IsAntimatterDelegatedAzureKeyInfo() {
+		return v, false
+	}
+	return s.AntimatterDelegatedAzureKeyInfo, true
+}
+
+// NewAntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation returns new KeyInfosKeyInformation from AntimatterDelegatedAzureKeyInfo.
+func NewAntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation(v AntimatterDelegatedAzureKeyInfo) KeyInfosKeyInformation {
+	var s KeyInfosKeyInformation
+	s.SetAntimatterDelegatedAzureKeyInfo(v)
 	return s
 }
 
@@ -7207,6 +7416,52 @@ func (o OptAntimatterDelegatedAWSKeyInfoProviderName) Or(d AntimatterDelegatedAW
 	return d
 }
 
+// NewOptAntimatterDelegatedAzureKeyInfoProviderName returns new OptAntimatterDelegatedAzureKeyInfoProviderName with value set to v.
+func NewOptAntimatterDelegatedAzureKeyInfoProviderName(v AntimatterDelegatedAzureKeyInfoProviderName) OptAntimatterDelegatedAzureKeyInfoProviderName {
+	return OptAntimatterDelegatedAzureKeyInfoProviderName{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAntimatterDelegatedAzureKeyInfoProviderName is optional AntimatterDelegatedAzureKeyInfoProviderName.
+type OptAntimatterDelegatedAzureKeyInfoProviderName struct {
+	Value AntimatterDelegatedAzureKeyInfoProviderName
+	Set   bool
+}
+
+// IsSet returns true if OptAntimatterDelegatedAzureKeyInfoProviderName was set.
+func (o OptAntimatterDelegatedAzureKeyInfoProviderName) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAntimatterDelegatedAzureKeyInfoProviderName) Reset() {
+	var v AntimatterDelegatedAzureKeyInfoProviderName
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAntimatterDelegatedAzureKeyInfoProviderName) SetTo(v AntimatterDelegatedAzureKeyInfoProviderName) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAntimatterDelegatedAzureKeyInfoProviderName) Get() (v AntimatterDelegatedAzureKeyInfoProviderName, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAntimatterDelegatedAzureKeyInfoProviderName) Or(d AntimatterDelegatedAzureKeyInfoProviderName) AntimatterDelegatedAzureKeyInfoProviderName {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptAntimatterDelegatedGCPKeyInfoProviderName returns new OptAntimatterDelegatedGCPKeyInfoProviderName with value set to v.
 func NewOptAntimatterDelegatedGCPKeyInfoProviderName(v AntimatterDelegatedGCPKeyInfoProviderName) OptAntimatterDelegatedGCPKeyInfoProviderName {
 	return OptAntimatterDelegatedGCPKeyInfoProviderName{
@@ -7339,6 +7594,52 @@ func (o OptAvailableServiceAccountRootEncryptionKeyProviderType) Get() (v Availa
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAvailableServiceAccountRootEncryptionKeyProviderType) Or(d AvailableServiceAccountRootEncryptionKeyProviderType) AvailableServiceAccountRootEncryptionKeyProviderType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAzureServiceAccountKeyInfoProviderName returns new OptAzureServiceAccountKeyInfoProviderName with value set to v.
+func NewOptAzureServiceAccountKeyInfoProviderName(v AzureServiceAccountKeyInfoProviderName) OptAzureServiceAccountKeyInfoProviderName {
+	return OptAzureServiceAccountKeyInfoProviderName{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAzureServiceAccountKeyInfoProviderName is optional AzureServiceAccountKeyInfoProviderName.
+type OptAzureServiceAccountKeyInfoProviderName struct {
+	Value AzureServiceAccountKeyInfoProviderName
+	Set   bool
+}
+
+// IsSet returns true if OptAzureServiceAccountKeyInfoProviderName was set.
+func (o OptAzureServiceAccountKeyInfoProviderName) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAzureServiceAccountKeyInfoProviderName) Reset() {
+	var v AzureServiceAccountKeyInfoProviderName
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAzureServiceAccountKeyInfoProviderName) SetTo(v AzureServiceAccountKeyInfoProviderName) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAzureServiceAccountKeyInfoProviderName) Get() (v AzureServiceAccountKeyInfoProviderName, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAzureServiceAccountKeyInfoProviderName) Or(d AzureServiceAccountKeyInfoProviderName) AzureServiceAccountKeyInfoProviderName {
 	if v, ok := o.Get(); ok {
 		return v
 	}

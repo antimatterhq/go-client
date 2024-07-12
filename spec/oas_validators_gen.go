@@ -536,6 +536,15 @@ func (s AntimatterDelegatedAWSKeyInfoProviderName) Validate() error {
 	}
 }
 
+func (s AntimatterDelegatedAzureKeyInfoProviderName) Validate() error {
+	switch s {
+	case "azure_am":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s AntimatterDelegatedGCPKeyInfoProviderName) Validate() error {
 	switch s {
 	case "gcp_am":
@@ -557,6 +566,15 @@ func (s AvailableDelegatedRootEncryptionKeyProviderType) Validate() error {
 func (s AvailableServiceAccountRootEncryptionKeyProviderType) Validate() error {
 	switch s {
 	case "ServiceAccountRootEncryptionKeyProvider":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s AzureServiceAccountKeyInfoProviderName) Validate() error {
+	switch s {
+	case "azure_sa":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

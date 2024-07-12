@@ -315,6 +315,20 @@ func (s *AntimatterDelegatedAWSKeyInfo) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *AntimatterDelegatedAzureKeyInfo) SetFake() {
+	{
+		{
+			s.TenantID = "string"
+		}
+	}
+	{
+		{
+			s.KeyURL = "string"
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *AntimatterDelegatedGCPKeyInfo) SetFake() {
 	{
 		{
@@ -403,6 +417,30 @@ func (s *AvailableServiceAccountRootEncryptionKeyProvider) SetFake() {
 	{
 		{
 			s.Description = "string"
+		}
+	}
+}
+
+// SetFake set fake values.
+func (s *AzureServiceAccountKeyInfo) SetFake() {
+	{
+		{
+			s.TenantID = "string"
+		}
+	}
+	{
+		{
+			s.KeyURL = "string"
+		}
+	}
+	{
+		{
+			s.ClientID = "string"
+		}
+	}
+	{
+		{
+			s.ClientSecret = "string"
 		}
 	}
 }

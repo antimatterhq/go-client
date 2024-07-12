@@ -181,6 +181,18 @@ func TestAntimatterDelegatedAWSKeyInfo_EncodeDecode(t *testing.T) {
 	var typ2 AntimatterDelegatedAWSKeyInfo
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestAntimatterDelegatedAzureKeyInfo_EncodeDecode(t *testing.T) {
+	var typ AntimatterDelegatedAzureKeyInfo
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 AntimatterDelegatedAzureKeyInfo
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestAntimatterDelegatedGCPKeyInfo_EncodeDecode(t *testing.T) {
 	var typ AntimatterDelegatedGCPKeyInfo
 	typ.SetFake()
@@ -239,6 +251,18 @@ func TestAvailableServiceAccountRootEncryptionKeyProvider_EncodeDecode(t *testin
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 AvailableServiceAccountRootEncryptionKeyProvider
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestAzureServiceAccountKeyInfo_EncodeDecode(t *testing.T) {
+	var typ AzureServiceAccountKeyInfo
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 AzureServiceAccountKeyInfo
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestBYOKKeyInfo_EncodeDecode(t *testing.T) {

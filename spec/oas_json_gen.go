@@ -1773,6 +1773,121 @@ func (s *AntimatterDelegatedAWSKeyInfo) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *AntimatterDelegatedAzureKeyInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AntimatterDelegatedAzureKeyInfo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("tenantID")
+		e.Str(s.TenantID)
+	}
+	{
+		e.FieldStart("keyURL")
+		e.Str(s.KeyURL)
+	}
+}
+
+var jsonFieldsNameOfAntimatterDelegatedAzureKeyInfo = [2]string{
+	0: "tenantID",
+	1: "keyURL",
+}
+
+// Decode decodes AntimatterDelegatedAzureKeyInfo from json.
+func (s *AntimatterDelegatedAzureKeyInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AntimatterDelegatedAzureKeyInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "tenantID":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.TenantID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tenantID\"")
+			}
+		case "keyURL":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.KeyURL = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"keyURL\"")
+			}
+		case "providerName":
+			return d.Skip()
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AntimatterDelegatedAzureKeyInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAntimatterDelegatedAzureKeyInfo) {
+					name = jsonFieldsNameOfAntimatterDelegatedAzureKeyInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AntimatterDelegatedAzureKeyInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AntimatterDelegatedAzureKeyInfo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *AntimatterDelegatedGCPKeyInfo) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -2362,6 +2477,155 @@ func (s *AvailableServiceAccountRootEncryptionKeyProvider) MarshalJSON() ([]byte
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *AvailableServiceAccountRootEncryptionKeyProvider) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *AzureServiceAccountKeyInfo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AzureServiceAccountKeyInfo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("tenantID")
+		e.Str(s.TenantID)
+	}
+	{
+		e.FieldStart("keyURL")
+		e.Str(s.KeyURL)
+	}
+	{
+		e.FieldStart("clientID")
+		e.Str(s.ClientID)
+	}
+	{
+		e.FieldStart("clientSecret")
+		e.Str(s.ClientSecret)
+	}
+}
+
+var jsonFieldsNameOfAzureServiceAccountKeyInfo = [4]string{
+	0: "tenantID",
+	1: "keyURL",
+	2: "clientID",
+	3: "clientSecret",
+}
+
+// Decode decodes AzureServiceAccountKeyInfo from json.
+func (s *AzureServiceAccountKeyInfo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AzureServiceAccountKeyInfo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "tenantID":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.TenantID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tenantID\"")
+			}
+		case "keyURL":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.KeyURL = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"keyURL\"")
+			}
+		case "clientID":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"clientID\"")
+			}
+		case "clientSecret":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientSecret = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"clientSecret\"")
+			}
+		case "providerName":
+			return d.Skip()
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AzureServiceAccountKeyInfo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAzureServiceAccountKeyInfo) {
+					name = jsonFieldsNameOfAzureServiceAccountKeyInfo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AzureServiceAccountKeyInfo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AzureServiceAccountKeyInfo) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -14047,6 +14311,14 @@ func (s KeyInfosKeyInformation) encodeFields(e *jx.Encoder) {
 		e.FieldStart("providerName")
 		e.Str("aws_sa")
 		s.AWSServiceAccountKeyInfo.encodeFields(e)
+	case AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation:
+		e.FieldStart("providerName")
+		e.Str("azure_am")
+		s.AntimatterDelegatedAzureKeyInfo.encodeFields(e)
+	case AzureServiceAccountKeyInfoKeyInfosKeyInformation:
+		e.FieldStart("providerName")
+		e.Str("azure_sa")
+		s.AzureServiceAccountKeyInfo.encodeFields(e)
 	case BYOKKeyInfoKeyInfosKeyInformation:
 		e.FieldStart("providerName")
 		e.Str("byok")
@@ -14091,6 +14363,12 @@ func (s *KeyInfosKeyInformation) Decode(d *jx.Decoder) error {
 				case "aws_sa":
 					s.Type = AWSServiceAccountKeyInfoKeyInfosKeyInformation
 					found = true
+				case "azure_am":
+					s.Type = AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation
+					found = true
+				case "azure_sa":
+					s.Type = AzureServiceAccountKeyInfoKeyInfosKeyInformation
+					found = true
 				case "byok":
 					s.Type = BYOKKeyInfoKeyInfosKeyInformation
 					found = true
@@ -14128,6 +14406,14 @@ func (s *KeyInfosKeyInformation) Decode(d *jx.Decoder) error {
 		}
 	case AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation:
 		if err := s.AntimatterDelegatedAWSKeyInfo.Decode(d); err != nil {
+			return err
+		}
+	case AzureServiceAccountKeyInfoKeyInfosKeyInformation:
+		if err := s.AzureServiceAccountKeyInfo.Decode(d); err != nil {
+			return err
+		}
+	case AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation:
+		if err := s.AntimatterDelegatedAzureKeyInfo.Decode(d); err != nil {
 			return err
 		}
 	case BYOKKeyInfoKeyInfosKeyInformation:
