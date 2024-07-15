@@ -143,6 +143,17 @@ func (UnimplementedHandler) DomainDataTaggingHookInvoke(ctx context.Context, req
 	return r, ht.ErrNotImplemented
 }
 
+// DomainDataTaggingHookTest implements domainDataTaggingHookTest operation.
+//
+// Invoke a hook that operates on data and returns tags. This endpoint is intended for testing
+// purposes when creating regex or llm rules before adding them to write contexts, or for one-off
+// classification of data without configuring a write context and so forth.
+//
+// POST /domains/{domainID}/hooks/data-tagging/{hookName}/test
+func (UnimplementedHandler) DomainDataTaggingHookTest(ctx context.Context, req *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (r DomainDataTaggingHookTestRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainDeleteCapability implements domainDeleteCapability operation.
 //
 // Delete a capability. All domain policy rules that reference the capability must have already been
@@ -255,6 +266,15 @@ func (UnimplementedHandler) DomainDeleteReadContextRule(ctx context.Context, par
 //
 // DELETE /domains/{domainID}/control/write-context/{contextName}
 func (UnimplementedHandler) DomainDeleteWriteContext(ctx context.Context, params DomainDeleteWriteContextParams) (r DomainDeleteWriteContextRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainDeleteWriteContextClassifierRule implements domainDeleteWriteContextClassifierRule operation.
+//
+// Delete a classifier rule for the write context.
+//
+// DELETE /domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}
+func (UnimplementedHandler) DomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (r DomainDeleteWriteContextClassifierRuleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -487,6 +507,15 @@ func (UnimplementedHandler) DomainGetVendorSettings(ctx context.Context, params 
 	return r, ht.ErrNotImplemented
 }
 
+// DomainGetWriteContextClassifierRules implements domainGetWriteContextClassifierRules operation.
+//
+// Get a full listing of all classifier rules for the context.
+//
+// GET /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (UnimplementedHandler) DomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (r DomainGetWriteContextClassifierRulesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainGetWriteContextRegexRules implements domainGetWriteContextRegexRules operation.
 //
 // Get a full listing of all regex rules for the context.
@@ -503,6 +532,15 @@ func (UnimplementedHandler) DomainGetWriteContextRegexRules(ctx context.Context,
 //
 // POST /domains/{domainID}/control/identities/{identityProviderName}/principals
 func (UnimplementedHandler) DomainInsertIdentityProviderPrincipal(ctx context.Context, req *DomainIdentityProviderPrincipalParams, params DomainInsertIdentityProviderPrincipalParams) (r DomainInsertIdentityProviderPrincipalRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainInsertWriteContextClassifierRule implements domainInsertWriteContextClassifierRule operation.
+//
+// Create a new classifier rule for a write context.
+//
+// POST /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (UnimplementedHandler) DomainInsertWriteContextClassifierRule(ctx context.Context, req *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (r DomainInsertWriteContextClassifierRuleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

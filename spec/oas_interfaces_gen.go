@@ -49,6 +49,10 @@ type DomainDataTaggingHookInvokeRes interface {
 	domainDataTaggingHookInvokeRes()
 }
 
+type DomainDataTaggingHookTestRes interface {
+	domainDataTaggingHookTestRes()
+}
+
 type DomainDeleteCapabilityRes interface {
 	domainDeleteCapabilityRes()
 }
@@ -91,6 +95,10 @@ type DomainDeleteReadContextRes interface {
 
 type DomainDeleteReadContextRuleRes interface {
 	domainDeleteReadContextRuleRes()
+}
+
+type DomainDeleteWriteContextClassifierRuleRes interface {
+	domainDeleteWriteContextClassifierRuleRes()
 }
 
 type DomainDeleteWriteContextRegexRuleRes interface {
@@ -193,12 +201,20 @@ type DomainGetVendorSettingsRes interface {
 	domainGetVendorSettingsRes()
 }
 
+type DomainGetWriteContextClassifierRulesRes interface {
+	domainGetWriteContextClassifierRulesRes()
+}
+
 type DomainGetWriteContextRegexRulesRes interface {
 	domainGetWriteContextRegexRulesRes()
 }
 
 type DomainInsertIdentityProviderPrincipalRes interface {
 	domainInsertIdentityProviderPrincipalRes()
+}
+
+type DomainInsertWriteContextClassifierRuleRes interface {
+	domainInsertWriteContextClassifierRuleRes()
 }
 
 type DomainInsertWriteContextRegexRuleRes interface {

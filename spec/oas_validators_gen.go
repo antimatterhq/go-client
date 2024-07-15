@@ -1252,6 +1252,88 @@ func (s *CapsuleSealRequest) Validate() error {
 	return nil
 }
 
+func (s *ClassifierRule) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ID.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "id",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.SpanTags == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.SpanTags {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "spanTags",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.CapsuleTags == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.CapsuleTags {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "capsuleTags",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *CreatePeerDomain) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1681,6 +1763,36 @@ func (s *DomainControlLogResults) Validate() error {
 	return nil
 }
 
+func (s *DomainDataTaggingHookTestReq) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Rule.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "rule",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Input.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "input",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *DomainFactList) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -1708,6 +1820,39 @@ func (s *DomainFactList) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "factTypes",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DomainGetWriteContextClassifierRulesOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Rules {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "rules",
 			Error: err,
 		})
 	}
@@ -2130,6 +2275,25 @@ func (s *DomainInsertIdentityProviderPrincipalOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "principalID",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DomainInsertWriteContextClassifierRuleOK) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.RuleID.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "ruleID",
 			Error: err,
 		})
 	}
@@ -6161,6 +6325,54 @@ func (s VersionConstraint) Validate() error {
 	return nil
 }
 
+func (s *WriteContextClassifierTag) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Name.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Value.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *WriteContextConfigInfo) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -6528,54 +6740,6 @@ func (s *WriteContextRegexRule) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "capsuleTags",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *WriteContextRegexTag) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Name.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "name",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.Value.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "value",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.Type.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
 			Error: err,
 		})
 	}

@@ -120,6 +120,14 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/hooks/data-tagging/{hookName}/invoke
 	DomainDataTaggingHookInvoke(ctx context.Context, request *DataTaggingHookInput, params DomainDataTaggingHookInvokeParams) (DomainDataTaggingHookInvokeRes, error)
+	// DomainDataTaggingHookTest invokes domainDataTaggingHookTest operation.
+	//
+	// Invoke a hook that operates on data and returns tags. This endpoint is intended for testing
+	// purposes when creating regex or llm rules before adding them to write contexts, or for one-off
+	// classification of data without configuring a write context and so forth.
+	//
+	// POST /domains/{domainID}/hooks/data-tagging/{hookName}/test
+	DomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability invokes domainDeleteCapability operation.
 	//
 	// Delete a capability. All domain policy rules that reference the capability must have already been
@@ -199,6 +207,12 @@ type Invoker interface {
 	//
 	// DELETE /domains/{domainID}/control/write-context/{contextName}
 	DomainDeleteWriteContext(ctx context.Context, params DomainDeleteWriteContextParams) (DomainDeleteWriteContextRes, error)
+	// DomainDeleteWriteContextClassifierRule invokes domainDeleteWriteContextClassifierRule operation.
+	//
+	// Delete a classifier rule for the write context.
+	//
+	// DELETE /domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}
+	DomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (DomainDeleteWriteContextClassifierRuleRes, error)
 	// DomainDeleteWriteContextRegexRule invokes domainDeleteWriteContextRegexRule operation.
 	//
 	// Delete a regex classifier rule for the context.
@@ -356,6 +370,12 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/control/vendor/settings
 	DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (DomainGetVendorSettingsRes, error)
+	// DomainGetWriteContextClassifierRules invokes domainGetWriteContextClassifierRules operation.
+	//
+	// Get a full listing of all classifier rules for the context.
+	//
+	// GET /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+	DomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (DomainGetWriteContextClassifierRulesRes, error)
 	// DomainGetWriteContextRegexRules invokes domainGetWriteContextRegexRules operation.
 	//
 	// Get a full listing of all regex rules for the context.
@@ -369,6 +389,12 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/control/identities/{identityProviderName}/principals
 	DomainInsertIdentityProviderPrincipal(ctx context.Context, request *DomainIdentityProviderPrincipalParams, params DomainInsertIdentityProviderPrincipalParams) (DomainInsertIdentityProviderPrincipalRes, error)
+	// DomainInsertWriteContextClassifierRule invokes domainInsertWriteContextClassifierRule operation.
+	//
+	// Create a new classifier rule for a write context.
+	//
+	// POST /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+	DomainInsertWriteContextClassifierRule(ctx context.Context, request *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (DomainInsertWriteContextClassifierRuleRes, error)
 	// DomainInsertWriteContextRegexRule invokes domainInsertWriteContextRegexRule operation.
 	//
 	// Create a new regex rule for a write context.
@@ -2376,6 +2402,169 @@ func (c *Client) sendDomainDataTaggingHookInvoke(ctx context.Context, request *D
 	return result, nil
 }
 
+// DomainDataTaggingHookTest invokes domainDataTaggingHookTest operation.
+//
+// Invoke a hook that operates on data and returns tags. This endpoint is intended for testing
+// purposes when creating regex or llm rules before adding them to write contexts, or for one-off
+// classification of data without configuring a write context and so forth.
+//
+// POST /domains/{domainID}/hooks/data-tagging/{hookName}/test
+func (c *Client) DomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error) {
+	res, err := c.sendDomainDataTaggingHookTest(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (res DomainDataTaggingHookTestRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataTaggingHookTest"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/test"),
+	}
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDataTaggingHookTest",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/hooks/data-tagging/"
+	{
+		// Encode "hookName" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "hookName",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.HookName); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainDataTaggingHookTestRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDataTaggingHookTest", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDataTaggingHookTestResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainDeleteCapability invokes domainDeleteCapability operation.
 //
 // Delete a capability. All domain policy rules that reference the capability must have already been
@@ -4243,6 +4432,176 @@ func (c *Client) sendDomainDeleteWriteContext(ctx context.Context, params Domain
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainDeleteWriteContextResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainDeleteWriteContextClassifierRule invokes domainDeleteWriteContextClassifierRule operation.
+//
+// Delete a classifier rule for the write context.
+//
+// DELETE /domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}
+func (c *Client) DomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (DomainDeleteWriteContextClassifierRuleRes, error) {
+	res, err := c.sendDomainDeleteWriteContextClassifierRule(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (res DomainDeleteWriteContextClassifierRuleRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteWriteContextClassifierRule"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDeleteWriteContextClassifierRule",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/write-context/"
+	{
+		// Encode "contextName" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "contextName",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.ContextName); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/classifier-rule/"
+	{
+		// Encode "ruleID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "ruleID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.RuleID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDeleteWriteContextClassifierRule", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDeleteWriteContextClassifierRuleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7666,6 +8025,155 @@ func (c *Client) sendDomainGetVendorSettings(ctx context.Context, params DomainG
 	return result, nil
 }
 
+// DomainGetWriteContextClassifierRules invokes domainGetWriteContextClassifierRules operation.
+//
+// Get a full listing of all classifier rules for the context.
+//
+// GET /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (c *Client) DomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (DomainGetWriteContextClassifierRulesRes, error) {
+	res, err := c.sendDomainGetWriteContextClassifierRules(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (res DomainGetWriteContextClassifierRulesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetWriteContextClassifierRules"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetWriteContextClassifierRules",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/write-context/"
+	{
+		// Encode "contextName" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "contextName",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.ContextName); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/classifier-rule"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetWriteContextClassifierRules", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetWriteContextClassifierRulesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainGetWriteContextRegexRules invokes domainGetWriteContextRegexRules operation.
 //
 // Get a full listing of all regex rules for the context.
@@ -7970,6 +8478,167 @@ func (c *Client) sendDomainInsertIdentityProviderPrincipal(ctx context.Context, 
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainInsertIdentityProviderPrincipalResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainInsertWriteContextClassifierRule invokes domainInsertWriteContextClassifierRule operation.
+//
+// Create a new classifier rule for a write context.
+//
+// POST /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (c *Client) DomainInsertWriteContextClassifierRule(ctx context.Context, request *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (DomainInsertWriteContextClassifierRuleRes, error) {
+	res, err := c.sendDomainInsertWriteContextClassifierRule(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainInsertWriteContextClassifierRule(ctx context.Context, request *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (res DomainInsertWriteContextClassifierRuleRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainInsertWriteContextClassifierRule"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
+	}
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainInsertWriteContextClassifierRule",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/write-context/"
+	{
+		// Encode "contextName" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "contextName",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.ContextName); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/classifier-rule"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainInsertWriteContextClassifierRuleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainInsertWriteContextClassifierRule", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainInsertWriteContextClassifierRuleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

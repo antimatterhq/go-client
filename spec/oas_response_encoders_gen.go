@@ -1160,6 +1160,100 @@ func encodeDomainDataTaggingHookInvokeResponse(response DomainDataTaggingHookInv
 	}
 }
 
+func encodeDomainDataTaggingHookTestResponse(response DomainDataTaggingHookTestRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DataTaggingHookResponse:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceExhaustedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(429)
+		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeDomainDeleteCapabilityResponse(response DomainDeleteCapabilityRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DomainDeleteCapabilityOK:
@@ -2139,6 +2233,93 @@ func encodeDomainDeleteReadContextRuleResponse(response DomainDeleteReadContextR
 func encodeDomainDeleteWriteContextResponse(response DomainDeleteWriteContextRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DomainDeleteWriteContextOK:
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceExhaustedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(429)
+		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeDomainDeleteWriteContextClassifierRuleResponse(response DomainDeleteWriteContextClassifierRuleRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DomainDeleteWriteContextClassifierRuleOK:
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
 
@@ -4504,6 +4685,100 @@ func encodeDomainGetVendorSettingsResponse(response DomainGetVendorSettingsRes, 
 	}
 }
 
+func encodeDomainGetWriteContextClassifierRulesResponse(response DomainGetWriteContextClassifierRulesRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DomainGetWriteContextClassifierRulesOK:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceExhaustedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(429)
+		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeDomainGetWriteContextRegexRulesResponse(response DomainGetWriteContextRegexRulesRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DomainGetWriteContextRegexRulesOKApplicationJSON:
@@ -4601,6 +4876,100 @@ func encodeDomainGetWriteContextRegexRulesResponse(response DomainGetWriteContex
 func encodeDomainInsertIdentityProviderPrincipalResponse(response DomainInsertIdentityProviderPrincipalRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DomainInsertIdentityProviderPrincipalOK:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceExhaustedError:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(429)
+		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeDomainInsertWriteContextClassifierRuleResponse(response DomainInsertWriteContextClassifierRuleRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DomainInsertWriteContextClassifierRuleOK:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

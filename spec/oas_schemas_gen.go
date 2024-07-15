@@ -1928,6 +1928,77 @@ func (s *CapsuleSealRequest) SetCreateToken(val CapsuleOperationToken) {
 	s.CreateToken = val
 }
 
+// Configuration for a classification hook.
+// Ref: #/components/schemas/ClassifierRule
+type ClassifierRule struct {
+	ID          OptRuleID                   `json:"id"`
+	Comment     OptString                   `json:"comment"`
+	SpanTags    []WriteContextClassifierTag `json:"spanTags"`
+	CapsuleTags []WriteContextClassifierTag `json:"capsuleTags"`
+	LlmConfig   OptLLMClassifierConfig      `json:"llmConfig"`
+	RegexConfig OptRegexClassifierConfig    `json:"regexConfig"`
+}
+
+// GetID returns the value of ID.
+func (s *ClassifierRule) GetID() OptRuleID {
+	return s.ID
+}
+
+// GetComment returns the value of Comment.
+func (s *ClassifierRule) GetComment() OptString {
+	return s.Comment
+}
+
+// GetSpanTags returns the value of SpanTags.
+func (s *ClassifierRule) GetSpanTags() []WriteContextClassifierTag {
+	return s.SpanTags
+}
+
+// GetCapsuleTags returns the value of CapsuleTags.
+func (s *ClassifierRule) GetCapsuleTags() []WriteContextClassifierTag {
+	return s.CapsuleTags
+}
+
+// GetLlmConfig returns the value of LlmConfig.
+func (s *ClassifierRule) GetLlmConfig() OptLLMClassifierConfig {
+	return s.LlmConfig
+}
+
+// GetRegexConfig returns the value of RegexConfig.
+func (s *ClassifierRule) GetRegexConfig() OptRegexClassifierConfig {
+	return s.RegexConfig
+}
+
+// SetID sets the value of ID.
+func (s *ClassifierRule) SetID(val OptRuleID) {
+	s.ID = val
+}
+
+// SetComment sets the value of Comment.
+func (s *ClassifierRule) SetComment(val OptString) {
+	s.Comment = val
+}
+
+// SetSpanTags sets the value of SpanTags.
+func (s *ClassifierRule) SetSpanTags(val []WriteContextClassifierTag) {
+	s.SpanTags = val
+}
+
+// SetCapsuleTags sets the value of CapsuleTags.
+func (s *ClassifierRule) SetCapsuleTags(val []WriteContextClassifierTag) {
+	s.CapsuleTags = val
+}
+
+// SetLlmConfig sets the value of LlmConfig.
+func (s *ClassifierRule) SetLlmConfig(val OptLLMClassifierConfig) {
+	s.LlmConfig = val
+}
+
+// SetRegexConfig sets the value of RegexConfig.
+func (s *ClassifierRule) SetRegexConfig(val OptRegexClassifierConfig) {
+	s.RegexConfig = val
+}
+
 // Returned when attempting to delete a resource that is still in use by  other resources.
 // Ref: #/components/schemas/ConflictError
 type ConflictError struct {
@@ -2257,6 +2328,7 @@ func (s *DataTaggingHookResponse) SetRecords(val []DataTaggingHookResponseRecord
 }
 
 func (*DataTaggingHookResponse) domainDataTaggingHookInvokeRes() {}
+func (*DataTaggingHookResponse) domainDataTaggingHookTestRes()   {}
 
 type DataTaggingHookResponseRecordsItem struct {
 	// The elements that have been processed, matching what was given as input.
@@ -2594,6 +2666,31 @@ func (*DomainControlLogResults) domainQueryControlLogRes() {}
 
 type DomainCreateCapsuleReq struct{}
 
+type DomainDataTaggingHookTestReq struct {
+	Rule  ClassifierRule       `json:"rule"`
+	Input DataTaggingHookInput `json:"input"`
+}
+
+// GetRule returns the value of Rule.
+func (s *DomainDataTaggingHookTestReq) GetRule() ClassifierRule {
+	return s.Rule
+}
+
+// GetInput returns the value of Input.
+func (s *DomainDataTaggingHookTestReq) GetInput() DataTaggingHookInput {
+	return s.Input
+}
+
+// SetRule sets the value of Rule.
+func (s *DomainDataTaggingHookTestReq) SetRule(val ClassifierRule) {
+	s.Rule = val
+}
+
+// SetInput sets the value of Input.
+func (s *DomainDataTaggingHookTestReq) SetInput(val DataTaggingHookInput) {
+	s.Input = val
+}
+
 // DomainDeleteCapabilityOK is response for DomainDeleteCapability operation.
 type DomainDeleteCapabilityOK struct{}
 
@@ -2654,6 +2751,11 @@ type DomainDeleteReadContextRuleOK struct{}
 
 func (*DomainDeleteReadContextRuleOK) domainDeleteReadContextRuleRes() {}
 
+// DomainDeleteWriteContextClassifierRuleOK is response for DomainDeleteWriteContextClassifierRule operation.
+type DomainDeleteWriteContextClassifierRuleOK struct{}
+
+func (*DomainDeleteWriteContextClassifierRuleOK) domainDeleteWriteContextClassifierRuleRes() {}
+
 // DomainDeleteWriteContextOK is response for DomainDeleteWriteContext operation.
 type DomainDeleteWriteContextOK struct{}
 
@@ -2690,6 +2792,22 @@ type DomainFlushEncryptionKeysOK struct{}
 func (*DomainFlushEncryptionKeysOK) domainFlushEncryptionKeysRes() {}
 
 type DomainFlushEncryptionKeysReq struct{}
+
+type DomainGetWriteContextClassifierRulesOK struct {
+	Rules []ClassifierRule `json:"rules"`
+}
+
+// GetRules returns the value of Rules.
+func (s *DomainGetWriteContextClassifierRulesOK) GetRules() []ClassifierRule {
+	return s.Rules
+}
+
+// SetRules sets the value of Rules.
+func (s *DomainGetWriteContextClassifierRulesOK) SetRules(val []ClassifierRule) {
+	s.Rules = val
+}
+
+func (*DomainGetWriteContextClassifierRulesOK) domainGetWriteContextClassifierRulesRes() {}
 
 type DomainGetWriteContextRegexRulesOKApplicationJSON []WriteContextRegexRule
 
@@ -3440,6 +3558,22 @@ func (s *DomainInsertIdentityProviderPrincipalOK) SetApiKey(val OptString) {
 }
 
 func (*DomainInsertIdentityProviderPrincipalOK) domainInsertIdentityProviderPrincipalRes() {}
+
+type DomainInsertWriteContextClassifierRuleOK struct {
+	RuleID RuleID `json:"ruleID"`
+}
+
+// GetRuleID returns the value of RuleID.
+func (s *DomainInsertWriteContextClassifierRuleOK) GetRuleID() RuleID {
+	return s.RuleID
+}
+
+// SetRuleID sets the value of RuleID.
+func (s *DomainInsertWriteContextClassifierRuleOK) SetRuleID(val RuleID) {
+	s.RuleID = val
+}
+
+func (*DomainInsertWriteContextClassifierRuleOK) domainInsertWriteContextClassifierRuleRes() {}
 
 type DomainInsertWriteContextRegexRuleOK struct {
 	RuleID RuleID `json:"ruleID"`
@@ -5468,6 +5602,7 @@ func (*InvalidRequestError) domainCreateCapsuleRes()                         {}
 func (*InvalidRequestError) domainCreatePeerDomainRes()                      {}
 func (*InvalidRequestError) domainCreatePolicyRuleRes()                      {}
 func (*InvalidRequestError) domainDataTaggingHookInvokeRes()                 {}
+func (*InvalidRequestError) domainDataTaggingHookTestRes()                   {}
 func (*InvalidRequestError) domainDeleteCapabilityRes()                      {}
 func (*InvalidRequestError) domainDeleteCapsuleTagsRes()                     {}
 func (*InvalidRequestError) domainDeleteExternalRootEncryptionKeyRes()       {}
@@ -5479,6 +5614,7 @@ func (*InvalidRequestError) domainDeletePeerRes()                            {}
 func (*InvalidRequestError) domainDeletePolicyRuleRes()                      {}
 func (*InvalidRequestError) domainDeleteReadContextRes()                     {}
 func (*InvalidRequestError) domainDeleteReadContextRuleRes()                 {}
+func (*InvalidRequestError) domainDeleteWriteContextClassifierRuleRes()      {}
 func (*InvalidRequestError) domainDeleteWriteContextRegexRuleRes()           {}
 func (*InvalidRequestError) domainDeleteWriteContextRes()                    {}
 func (*InvalidRequestError) domainDescribeWriteContextRes()                  {}
@@ -5504,8 +5640,10 @@ func (*InvalidRequestError) domainGetSettingsRes()                           {}
 func (*InvalidRequestError) domainGetStatusRes()                             {}
 func (*InvalidRequestError) domainGetTagInfoRes()                            {}
 func (*InvalidRequestError) domainGetVendorSettingsRes()                     {}
+func (*InvalidRequestError) domainGetWriteContextClassifierRulesRes()        {}
 func (*InvalidRequestError) domainGetWriteContextRegexRulesRes()             {}
 func (*InvalidRequestError) domainInsertIdentityProviderPrincipalRes()       {}
+func (*InvalidRequestError) domainInsertWriteContextClassifierRuleRes()      {}
 func (*InvalidRequestError) domainInsertWriteContextRegexRuleRes()           {}
 func (*InvalidRequestError) domainListCapsulesRes()                          {}
 func (*InvalidRequestError) domainListExternalRootEncryptionKeyRes()         {}
@@ -6401,6 +6539,33 @@ func NewBYOKKeyInfoKeyInfosKeyInformation(v BYOKKeyInfo) KeyInfosKeyInformation 
 	var s KeyInfosKeyInformation
 	s.SetBYOKKeyInfo(v)
 	return s
+}
+
+// Configuration settings for llm-classifier.
+// Ref: #/components/schemas/LLMClassifierConfig
+type LLMClassifierConfig struct {
+	Model  string `json:"model"`
+	Prompt string `json:"prompt"`
+}
+
+// GetModel returns the value of Model.
+func (s *LLMClassifierConfig) GetModel() string {
+	return s.Model
+}
+
+// GetPrompt returns the value of Prompt.
+func (s *LLMClassifierConfig) GetPrompt() string {
+	return s.Prompt
+}
+
+// SetModel sets the value of Model.
+func (s *LLMClassifierConfig) SetModel(val string) {
+	s.Model = val
+}
+
+// SetPrompt sets the value of Prompt.
+func (s *LLMClassifierConfig) SetPrompt(val string) {
+	s.Prompt = val
 }
 
 type LogEntryID string
@@ -7922,6 +8087,144 @@ func (o OptDomainID) Or(d DomainID) DomainID {
 	return d
 }
 
+// NewOptDomainIdentityAPIKeyPrincipalParamsType returns new OptDomainIdentityAPIKeyPrincipalParamsType with value set to v.
+func NewOptDomainIdentityAPIKeyPrincipalParamsType(v DomainIdentityAPIKeyPrincipalParamsType) OptDomainIdentityAPIKeyPrincipalParamsType {
+	return OptDomainIdentityAPIKeyPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityAPIKeyPrincipalParamsType is optional DomainIdentityAPIKeyPrincipalParamsType.
+type OptDomainIdentityAPIKeyPrincipalParamsType struct {
+	Value DomainIdentityAPIKeyPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityAPIKeyPrincipalParamsType was set.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityAPIKeyPrincipalParamsType) Reset() {
+	var v DomainIdentityAPIKeyPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityAPIKeyPrincipalParamsType) SetTo(v DomainIdentityAPIKeyPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) Get() (v DomainIdentityAPIKeyPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) Or(d DomainIdentityAPIKeyPrincipalParamsType) DomainIdentityAPIKeyPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDomainIdentityEmailPrincipalParamsType returns new OptDomainIdentityEmailPrincipalParamsType with value set to v.
+func NewOptDomainIdentityEmailPrincipalParamsType(v DomainIdentityEmailPrincipalParamsType) OptDomainIdentityEmailPrincipalParamsType {
+	return OptDomainIdentityEmailPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityEmailPrincipalParamsType is optional DomainIdentityEmailPrincipalParamsType.
+type OptDomainIdentityEmailPrincipalParamsType struct {
+	Value DomainIdentityEmailPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityEmailPrincipalParamsType was set.
+func (o OptDomainIdentityEmailPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityEmailPrincipalParamsType) Reset() {
+	var v DomainIdentityEmailPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityEmailPrincipalParamsType) SetTo(v DomainIdentityEmailPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityEmailPrincipalParamsType) Get() (v DomainIdentityEmailPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityEmailPrincipalParamsType) Or(d DomainIdentityEmailPrincipalParamsType) DomainIdentityEmailPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDomainIdentityHostedDomainPrincipalParamsType returns new OptDomainIdentityHostedDomainPrincipalParamsType with value set to v.
+func NewOptDomainIdentityHostedDomainPrincipalParamsType(v DomainIdentityHostedDomainPrincipalParamsType) OptDomainIdentityHostedDomainPrincipalParamsType {
+	return OptDomainIdentityHostedDomainPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityHostedDomainPrincipalParamsType is optional DomainIdentityHostedDomainPrincipalParamsType.
+type OptDomainIdentityHostedDomainPrincipalParamsType struct {
+	Value DomainIdentityHostedDomainPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityHostedDomainPrincipalParamsType was set.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityHostedDomainPrincipalParamsType) Reset() {
+	var v DomainIdentityHostedDomainPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityHostedDomainPrincipalParamsType) SetTo(v DomainIdentityHostedDomainPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) Get() (v DomainIdentityHostedDomainPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) Or(d DomainIdentityHostedDomainPrincipalParamsType) DomainIdentityHostedDomainPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDomainIdentityProviderDetails returns new OptDomainIdentityProviderDetails with value set to v.
 func NewOptDomainIdentityProviderDetails(v DomainIdentityProviderDetails) OptDomainIdentityProviderDetails {
 	return OptDomainIdentityProviderDetails{
@@ -8474,6 +8777,52 @@ func (o OptInt32) Or(d int32) int32 {
 	return d
 }
 
+// NewOptLLMClassifierConfig returns new OptLLMClassifierConfig with value set to v.
+func NewOptLLMClassifierConfig(v LLMClassifierConfig) OptLLMClassifierConfig {
+	return OptLLMClassifierConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLLMClassifierConfig is optional LLMClassifierConfig.
+type OptLLMClassifierConfig struct {
+	Value LLMClassifierConfig
+	Set   bool
+}
+
+// IsSet returns true if OptLLMClassifierConfig was set.
+func (o OptLLMClassifierConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLLMClassifierConfig) Reset() {
+	var v LLMClassifierConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLLMClassifierConfig) SetTo(v LLMClassifierConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLLMClassifierConfig) Get() (v LLMClassifierConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLLMClassifierConfig) Or(d LLMClassifierConfig) LLMClassifierConfig {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptLogEntryID returns new OptLogEntryID with value set to v.
 func NewOptLogEntryID(v LogEntryID) OptLogEntryID {
 	return OptLogEntryID{
@@ -8790,6 +9139,52 @@ func (o OptReadContextRuleFactsItemOperator) Get() (v ReadContextRuleFactsItemOp
 
 // Or returns value if set, or given parameter if does not.
 func (o OptReadContextRuleFactsItemOperator) Or(d ReadContextRuleFactsItemOperator) ReadContextRuleFactsItemOperator {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptRegexClassifierConfig returns new OptRegexClassifierConfig with value set to v.
+func NewOptRegexClassifierConfig(v RegexClassifierConfig) OptRegexClassifierConfig {
+	return OptRegexClassifierConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRegexClassifierConfig is optional RegexClassifierConfig.
+type OptRegexClassifierConfig struct {
+	Value RegexClassifierConfig
+	Set   bool
+}
+
+// IsSet returns true if OptRegexClassifierConfig was set.
+func (o OptRegexClassifierConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRegexClassifierConfig) Reset() {
+	var v RegexClassifierConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRegexClassifierConfig) SetTo(v RegexClassifierConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRegexClassifierConfig) Get() (v RegexClassifierConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRegexClassifierConfig) Or(d RegexClassifierConfig) RegexClassifierConfig {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9373,6 +9768,7 @@ func (*PermanentRedirect) domainCreateCapsuleRes()                         {}
 func (*PermanentRedirect) domainCreatePeerDomainRes()                      {}
 func (*PermanentRedirect) domainCreatePolicyRuleRes()                      {}
 func (*PermanentRedirect) domainDataTaggingHookInvokeRes()                 {}
+func (*PermanentRedirect) domainDataTaggingHookTestRes()                   {}
 func (*PermanentRedirect) domainDeleteCapabilityRes()                      {}
 func (*PermanentRedirect) domainDeleteCapsuleTagsRes()                     {}
 func (*PermanentRedirect) domainDeleteExternalRootEncryptionKeyRes()       {}
@@ -9384,6 +9780,7 @@ func (*PermanentRedirect) domainDeletePeerRes()                            {}
 func (*PermanentRedirect) domainDeletePolicyRuleRes()                      {}
 func (*PermanentRedirect) domainDeleteReadContextRes()                     {}
 func (*PermanentRedirect) domainDeleteReadContextRuleRes()                 {}
+func (*PermanentRedirect) domainDeleteWriteContextClassifierRuleRes()      {}
 func (*PermanentRedirect) domainDeleteWriteContextRegexRuleRes()           {}
 func (*PermanentRedirect) domainDeleteWriteContextRes()                    {}
 func (*PermanentRedirect) domainDescribeWriteContextRes()                  {}
@@ -9409,8 +9806,10 @@ func (*PermanentRedirect) domainGetSettingsRes()                           {}
 func (*PermanentRedirect) domainGetStatusRes()                             {}
 func (*PermanentRedirect) domainGetTagInfoRes()                            {}
 func (*PermanentRedirect) domainGetVendorSettingsRes()                     {}
+func (*PermanentRedirect) domainGetWriteContextClassifierRulesRes()        {}
 func (*PermanentRedirect) domainGetWriteContextRegexRulesRes()             {}
 func (*PermanentRedirect) domainInsertIdentityProviderPrincipalRes()       {}
+func (*PermanentRedirect) domainInsertWriteContextClassifierRuleRes()      {}
 func (*PermanentRedirect) domainInsertWriteContextRegexRuleRes()           {}
 func (*PermanentRedirect) domainListCapsulesRes()                          {}
 func (*PermanentRedirect) domainListExternalRootEncryptionKeyRes()         {}
@@ -10621,6 +11020,33 @@ func (s *ReadContextShortDetails) SetSourceDomainName(val OptString) {
 	s.SourceDomainName = val
 }
 
+// Configuration settings for regex-classifier.
+// Ref: #/components/schemas/RegexClassifierConfig
+type RegexClassifierConfig struct {
+	Pattern    string `json:"pattern"`
+	MatchOnKey bool   `json:"matchOnKey"`
+}
+
+// GetPattern returns the value of Pattern.
+func (s *RegexClassifierConfig) GetPattern() string {
+	return s.Pattern
+}
+
+// GetMatchOnKey returns the value of MatchOnKey.
+func (s *RegexClassifierConfig) GetMatchOnKey() bool {
+	return s.MatchOnKey
+}
+
+// SetPattern sets the value of Pattern.
+func (s *RegexClassifierConfig) SetPattern(val string) {
+	s.Pattern = val
+}
+
+// SetMatchOnKey sets the value of MatchOnKey.
+func (s *RegexClassifierConfig) SetMatchOnKey(val bool) {
+	s.MatchOnKey = val
+}
+
 // Returned when the server is unable to process the request due to resource exhaustion or rate
 // limiting.
 // Ref: #/components/schemas/ResourceExhaustedError
@@ -10674,6 +11100,7 @@ func (*ResourceExhaustedError) domainCreateCapsuleRes()                         
 func (*ResourceExhaustedError) domainCreatePeerDomainRes()                      {}
 func (*ResourceExhaustedError) domainCreatePolicyRuleRes()                      {}
 func (*ResourceExhaustedError) domainDataTaggingHookInvokeRes()                 {}
+func (*ResourceExhaustedError) domainDataTaggingHookTestRes()                   {}
 func (*ResourceExhaustedError) domainDeleteCapabilityRes()                      {}
 func (*ResourceExhaustedError) domainDeleteCapsuleTagsRes()                     {}
 func (*ResourceExhaustedError) domainDeleteExternalRootEncryptionKeyRes()       {}
@@ -10685,6 +11112,7 @@ func (*ResourceExhaustedError) domainDeletePeerRes()                            
 func (*ResourceExhaustedError) domainDeletePolicyRuleRes()                      {}
 func (*ResourceExhaustedError) domainDeleteReadContextRes()                     {}
 func (*ResourceExhaustedError) domainDeleteReadContextRuleRes()                 {}
+func (*ResourceExhaustedError) domainDeleteWriteContextClassifierRuleRes()      {}
 func (*ResourceExhaustedError) domainDeleteWriteContextRegexRuleRes()           {}
 func (*ResourceExhaustedError) domainDeleteWriteContextRes()                    {}
 func (*ResourceExhaustedError) domainDescribeWriteContextRes()                  {}
@@ -10710,8 +11138,10 @@ func (*ResourceExhaustedError) domainGetSettingsRes()                           
 func (*ResourceExhaustedError) domainGetStatusRes()                             {}
 func (*ResourceExhaustedError) domainGetTagInfoRes()                            {}
 func (*ResourceExhaustedError) domainGetVendorSettingsRes()                     {}
+func (*ResourceExhaustedError) domainGetWriteContextClassifierRulesRes()        {}
 func (*ResourceExhaustedError) domainGetWriteContextRegexRulesRes()             {}
 func (*ResourceExhaustedError) domainInsertIdentityProviderPrincipalRes()       {}
+func (*ResourceExhaustedError) domainInsertWriteContextClassifierRuleRes()      {}
 func (*ResourceExhaustedError) domainInsertWriteContextRegexRuleRes()           {}
 func (*ResourceExhaustedError) domainListCapsulesRes()                          {}
 func (*ResourceExhaustedError) domainListExternalRootEncryptionKeyRes()         {}
@@ -10806,6 +11236,7 @@ func (*ResourceNotFoundError) domainCreateCapsuleRes()                         {
 func (*ResourceNotFoundError) domainCreatePeerDomainRes()                      {}
 func (*ResourceNotFoundError) domainCreatePolicyRuleRes()                      {}
 func (*ResourceNotFoundError) domainDataTaggingHookInvokeRes()                 {}
+func (*ResourceNotFoundError) domainDataTaggingHookTestRes()                   {}
 func (*ResourceNotFoundError) domainDeleteCapabilityRes()                      {}
 func (*ResourceNotFoundError) domainDeleteCapsuleTagsRes()                     {}
 func (*ResourceNotFoundError) domainDeleteExternalRootEncryptionKeyRes()       {}
@@ -10817,6 +11248,7 @@ func (*ResourceNotFoundError) domainDeletePeerRes()                            {
 func (*ResourceNotFoundError) domainDeletePolicyRuleRes()                      {}
 func (*ResourceNotFoundError) domainDeleteReadContextRes()                     {}
 func (*ResourceNotFoundError) domainDeleteReadContextRuleRes()                 {}
+func (*ResourceNotFoundError) domainDeleteWriteContextClassifierRuleRes()      {}
 func (*ResourceNotFoundError) domainDeleteWriteContextRegexRuleRes()           {}
 func (*ResourceNotFoundError) domainDeleteWriteContextRes()                    {}
 func (*ResourceNotFoundError) domainDescribeWriteContextRes()                  {}
@@ -10842,8 +11274,10 @@ func (*ResourceNotFoundError) domainGetSettingsRes()                           {
 func (*ResourceNotFoundError) domainGetStatusRes()                             {}
 func (*ResourceNotFoundError) domainGetTagInfoRes()                            {}
 func (*ResourceNotFoundError) domainGetVendorSettingsRes()                     {}
+func (*ResourceNotFoundError) domainGetWriteContextClassifierRulesRes()        {}
 func (*ResourceNotFoundError) domainGetWriteContextRegexRulesRes()             {}
 func (*ResourceNotFoundError) domainInsertIdentityProviderPrincipalRes()       {}
+func (*ResourceNotFoundError) domainInsertWriteContextClassifierRuleRes()      {}
 func (*ResourceNotFoundError) domainInsertWriteContextRegexRuleRes()           {}
 func (*ResourceNotFoundError) domainListCapsulesRes()                          {}
 func (*ResourceNotFoundError) domainListExternalRootEncryptionKeyRes()         {}
@@ -11523,6 +11957,7 @@ func (*UnauthorizedError) domainCreateCapsuleRes()                         {}
 func (*UnauthorizedError) domainCreatePeerDomainRes()                      {}
 func (*UnauthorizedError) domainCreatePolicyRuleRes()                      {}
 func (*UnauthorizedError) domainDataTaggingHookInvokeRes()                 {}
+func (*UnauthorizedError) domainDataTaggingHookTestRes()                   {}
 func (*UnauthorizedError) domainDeleteCapabilityRes()                      {}
 func (*UnauthorizedError) domainDeleteCapsuleTagsRes()                     {}
 func (*UnauthorizedError) domainDeleteExternalRootEncryptionKeyRes()       {}
@@ -11534,6 +11969,7 @@ func (*UnauthorizedError) domainDeletePeerRes()                            {}
 func (*UnauthorizedError) domainDeletePolicyRuleRes()                      {}
 func (*UnauthorizedError) domainDeleteReadContextRes()                     {}
 func (*UnauthorizedError) domainDeleteReadContextRuleRes()                 {}
+func (*UnauthorizedError) domainDeleteWriteContextClassifierRuleRes()      {}
 func (*UnauthorizedError) domainDeleteWriteContextRegexRuleRes()           {}
 func (*UnauthorizedError) domainDeleteWriteContextRes()                    {}
 func (*UnauthorizedError) domainDescribeWriteContextRes()                  {}
@@ -11559,8 +11995,10 @@ func (*UnauthorizedError) domainGetSettingsRes()                           {}
 func (*UnauthorizedError) domainGetStatusRes()                             {}
 func (*UnauthorizedError) domainGetTagInfoRes()                            {}
 func (*UnauthorizedError) domainGetVendorSettingsRes()                     {}
+func (*UnauthorizedError) domainGetWriteContextClassifierRulesRes()        {}
 func (*UnauthorizedError) domainGetWriteContextRegexRulesRes()             {}
 func (*UnauthorizedError) domainInsertIdentityProviderPrincipalRes()       {}
+func (*UnauthorizedError) domainInsertWriteContextClassifierRuleRes()      {}
 func (*UnauthorizedError) domainInsertWriteContextRegexRuleRes()           {}
 func (*UnauthorizedError) domainListCapsulesRes()                          {}
 func (*UnauthorizedError) domainListExternalRootEncryptionKeyRes()         {}
@@ -11726,13 +12164,51 @@ func (*VerifyContactResponse) domainContactVerifyRes() {}
 
 type VersionConstraint string
 
+// Tag descriptor for a write context regex rule.
+// Ref: #/components/schemas/WriteContextClassifierTag
+type WriteContextClassifierTag struct {
+	Name  TagNameField     `json:"name"`
+	Value OptTagValueField `json:"value"`
+	Type  TagTypeField     `json:"type"`
+}
+
+// GetName returns the value of Name.
+func (s *WriteContextClassifierTag) GetName() TagNameField {
+	return s.Name
+}
+
+// GetValue returns the value of Value.
+func (s *WriteContextClassifierTag) GetValue() OptTagValueField {
+	return s.Value
+}
+
+// GetType returns the value of Type.
+func (s *WriteContextClassifierTag) GetType() TagTypeField {
+	return s.Type
+}
+
+// SetName sets the value of Name.
+func (s *WriteContextClassifierTag) SetName(val TagNameField) {
+	s.Name = val
+}
+
+// SetValue sets the value of Value.
+func (s *WriteContextClassifierTag) SetValue(val OptTagValueField) {
+	s.Value = val
+}
+
+// SetType sets the value of Type.
+func (s *WriteContextClassifierTag) SetType(val TagTypeField) {
+	s.Type = val
+}
+
 // Information about write context config rules.
 // Ref: #/components/schemas/WriteContextConfigInfo
 type WriteContextConfigInfo struct {
 	// Number of seconds for which the client may reuse a given encryption
 	// key for sealing multiple capsules.
 	KeyReuseTTL        OptInt32                                  `json:"keyReuseTTL"`
-	DefaultCapsuleTags []WriteContextRegexTag                    `json:"defaultCapsuleTags"`
+	DefaultCapsuleTags []WriteContextClassifierTag               `json:"defaultCapsuleTags"`
 	RequiredHooks      []WriteContextConfigInfoRequiredHooksItem `json:"requiredHooks"`
 }
 
@@ -11742,7 +12218,7 @@ func (s *WriteContextConfigInfo) GetKeyReuseTTL() OptInt32 {
 }
 
 // GetDefaultCapsuleTags returns the value of DefaultCapsuleTags.
-func (s *WriteContextConfigInfo) GetDefaultCapsuleTags() []WriteContextRegexTag {
+func (s *WriteContextConfigInfo) GetDefaultCapsuleTags() []WriteContextClassifierTag {
 	return s.DefaultCapsuleTags
 }
 
@@ -11757,7 +12233,7 @@ func (s *WriteContextConfigInfo) SetKeyReuseTTL(val OptInt32) {
 }
 
 // SetDefaultCapsuleTags sets the value of DefaultCapsuleTags.
-func (s *WriteContextConfigInfo) SetDefaultCapsuleTags(val []WriteContextRegexTag) {
+func (s *WriteContextConfigInfo) SetDefaultCapsuleTags(val []WriteContextClassifierTag) {
 	s.DefaultCapsuleTags = val
 }
 
@@ -11957,11 +12433,11 @@ type WriteContextReference string
 // Regex classifier rule for a write context.
 // Ref: #/components/schemas/WriteContextRegexRule
 type WriteContextRegexRule struct {
-	ID          OptRuleID              `json:"id"`
-	Pattern     string                 `json:"pattern"`
-	MatchOnKey  bool                   `json:"matchOnKey"`
-	SpanTags    []WriteContextRegexTag `json:"spanTags"`
-	CapsuleTags []WriteContextRegexTag `json:"capsuleTags"`
+	ID          OptRuleID                   `json:"id"`
+	Pattern     string                      `json:"pattern"`
+	MatchOnKey  bool                        `json:"matchOnKey"`
+	SpanTags    []WriteContextClassifierTag `json:"spanTags"`
+	CapsuleTags []WriteContextClassifierTag `json:"capsuleTags"`
 }
 
 // GetID returns the value of ID.
@@ -11980,12 +12456,12 @@ func (s *WriteContextRegexRule) GetMatchOnKey() bool {
 }
 
 // GetSpanTags returns the value of SpanTags.
-func (s *WriteContextRegexRule) GetSpanTags() []WriteContextRegexTag {
+func (s *WriteContextRegexRule) GetSpanTags() []WriteContextClassifierTag {
 	return s.SpanTags
 }
 
 // GetCapsuleTags returns the value of CapsuleTags.
-func (s *WriteContextRegexRule) GetCapsuleTags() []WriteContextRegexTag {
+func (s *WriteContextRegexRule) GetCapsuleTags() []WriteContextClassifierTag {
 	return s.CapsuleTags
 }
 
@@ -12005,49 +12481,11 @@ func (s *WriteContextRegexRule) SetMatchOnKey(val bool) {
 }
 
 // SetSpanTags sets the value of SpanTags.
-func (s *WriteContextRegexRule) SetSpanTags(val []WriteContextRegexTag) {
+func (s *WriteContextRegexRule) SetSpanTags(val []WriteContextClassifierTag) {
 	s.SpanTags = val
 }
 
 // SetCapsuleTags sets the value of CapsuleTags.
-func (s *WriteContextRegexRule) SetCapsuleTags(val []WriteContextRegexTag) {
+func (s *WriteContextRegexRule) SetCapsuleTags(val []WriteContextClassifierTag) {
 	s.CapsuleTags = val
-}
-
-// Tag descriptor for a write context regex rule.
-// Ref: #/components/schemas/WriteContextRegexTag
-type WriteContextRegexTag struct {
-	Name  TagNameField     `json:"name"`
-	Value OptTagValueField `json:"value"`
-	Type  TagTypeField     `json:"type"`
-}
-
-// GetName returns the value of Name.
-func (s *WriteContextRegexTag) GetName() TagNameField {
-	return s.Name
-}
-
-// GetValue returns the value of Value.
-func (s *WriteContextRegexTag) GetValue() OptTagValueField {
-	return s.Value
-}
-
-// GetType returns the value of Type.
-func (s *WriteContextRegexTag) GetType() TagTypeField {
-	return s.Type
-}
-
-// SetName sets the value of Name.
-func (s *WriteContextRegexTag) SetName(val TagNameField) {
-	s.Name = val
-}
-
-// SetValue sets the value of Value.
-func (s *WriteContextRegexTag) SetValue(val OptTagValueField) {
-	s.Value = val
-}
-
-// SetType sets the value of Type.
-func (s *WriteContextRegexTag) SetType(val TagTypeField) {
-	s.Type = val
 }

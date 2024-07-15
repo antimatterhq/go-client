@@ -1444,26 +1444,92 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												break
 											}
 											switch elem[0] {
-											case 'c': // Prefix: "config"
-												if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+											case 'c': // Prefix: "c"
+												if l := len("c"); len(elem) >= l && elem[0:l] == "c" {
 													elem = elem[l:]
 												} else {
 													break
 												}
 
 												if len(elem) == 0 {
-													// Leaf node.
-													switch r.Method {
-													case "PUT":
-														s.handleDomainUpsertWriteContextConfigurationRequest([2]string{
-															args[0],
-															args[1],
-														}, elemIsEscaped, w, r)
-													default:
-														s.notAllowed(w, r, "PUT")
+													break
+												}
+												switch elem[0] {
+												case 'l': // Prefix: "lassifier-rule"
+													if l := len("lassifier-rule"); len(elem) >= l && elem[0:l] == "lassifier-rule" {
+														elem = elem[l:]
+													} else {
+														break
 													}
 
-													return
+													if len(elem) == 0 {
+														switch r.Method {
+														case "GET":
+															s.handleDomainGetWriteContextClassifierRulesRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														case "POST":
+															s.handleDomainInsertWriteContextClassifierRuleRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, "GET,POST")
+														}
+
+														return
+													}
+													switch elem[0] {
+													case '/': // Prefix: "/"
+														if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+															elem = elem[l:]
+														} else {
+															break
+														}
+
+														// Param: "ruleID"
+														// Leaf parameter
+														args[2] = elem
+														elem = ""
+
+														if len(elem) == 0 {
+															// Leaf node.
+															switch r.Method {
+															case "DELETE":
+																s.handleDomainDeleteWriteContextClassifierRuleRequest([3]string{
+																	args[0],
+																	args[1],
+																	args[2],
+																}, elemIsEscaped, w, r)
+															default:
+																s.notAllowed(w, r, "DELETE")
+															}
+
+															return
+														}
+													}
+												case 'o': // Prefix: "onfig"
+													if l := len("onfig"); len(elem) >= l && elem[0:l] == "onfig" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "PUT":
+															s.handleDomainUpsertWriteContextConfigurationRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, "PUT")
+														}
+
+														return
+													}
 												}
 											case 'r': // Prefix: "regex-rule"
 												if l := len("regex-rule"); len(elem) >= l && elem[0:l] == "regex-rule" {
@@ -1584,26 +1650,59 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									break
 								}
 								switch elem[0] {
-								case '/': // Prefix: "/invoke"
-									if l := len("/invoke"); len(elem) >= l && elem[0:l] == "/invoke" {
+								case '/': // Prefix: "/"
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
-										// Leaf node.
-										switch r.Method {
-										case "POST":
-											s.handleDomainDataTaggingHookInvokeRequest([2]string{
-												args[0],
-												args[1],
-											}, elemIsEscaped, w, r)
-										default:
-											s.notAllowed(w, r, "POST")
+										break
+									}
+									switch elem[0] {
+									case 'i': // Prefix: "invoke"
+										if l := len("invoke"); len(elem) >= l && elem[0:l] == "invoke" {
+											elem = elem[l:]
+										} else {
+											break
 										}
 
-										return
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleDomainDataTaggingHookInvokeRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
+										}
+									case 't': // Prefix: "test"
+										if l := len("test"); len(elem) >= l && elem[0:l] == "test" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleDomainDataTaggingHookTestRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
+										}
 									}
 								}
 							}
@@ -3421,26 +3520,96 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 												break
 											}
 											switch elem[0] {
-											case 'c': // Prefix: "config"
-												if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+											case 'c': // Prefix: "c"
+												if l := len("c"); len(elem) >= l && elem[0:l] == "c" {
 													elem = elem[l:]
 												} else {
 													break
 												}
 
 												if len(elem) == 0 {
-													switch method {
-													case "PUT":
-														// Leaf: DomainUpsertWriteContextConfiguration
-														r.name = "DomainUpsertWriteContextConfiguration"
-														r.summary = "Update a write context configuration"
-														r.operationID = "domainUpsertWriteContextConfiguration"
-														r.pathPattern = "/domains/{domainID}/control/write-context/{contextName}/config"
-														r.args = args
-														r.count = 2
-														return r, true
-													default:
-														return
+													break
+												}
+												switch elem[0] {
+												case 'l': // Prefix: "lassifier-rule"
+													if l := len("lassifier-rule"); len(elem) >= l && elem[0:l] == "lassifier-rule" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														switch method {
+														case "GET":
+															r.name = "DomainGetWriteContextClassifierRules"
+															r.summary = ""
+															r.operationID = "domainGetWriteContextClassifierRules"
+															r.pathPattern = "/domains/{domainID}/control/write-context/{contextName}/classifier-rule"
+															r.args = args
+															r.count = 2
+															return r, true
+														case "POST":
+															r.name = "DomainInsertWriteContextClassifierRule"
+															r.summary = "Insert a write context classifier rule"
+															r.operationID = "domainInsertWriteContextClassifierRule"
+															r.pathPattern = "/domains/{domainID}/control/write-context/{contextName}/classifier-rule"
+															r.args = args
+															r.count = 2
+															return r, true
+														default:
+															return
+														}
+													}
+													switch elem[0] {
+													case '/': // Prefix: "/"
+														if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+															elem = elem[l:]
+														} else {
+															break
+														}
+
+														// Param: "ruleID"
+														// Leaf parameter
+														args[2] = elem
+														elem = ""
+
+														if len(elem) == 0 {
+															switch method {
+															case "DELETE":
+																// Leaf: DomainDeleteWriteContextClassifierRule
+																r.name = "DomainDeleteWriteContextClassifierRule"
+																r.summary = ""
+																r.operationID = "domainDeleteWriteContextClassifierRule"
+																r.pathPattern = "/domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}"
+																r.args = args
+																r.count = 3
+																return r, true
+															default:
+																return
+															}
+														}
+													}
+												case 'o': // Prefix: "onfig"
+													if l := len("onfig"); len(elem) >= l && elem[0:l] == "onfig" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														switch method {
+														case "PUT":
+															// Leaf: DomainUpsertWriteContextConfiguration
+															r.name = "DomainUpsertWriteContextConfiguration"
+															r.summary = "Update a write context configuration"
+															r.operationID = "domainUpsertWriteContextConfiguration"
+															r.pathPattern = "/domains/{domainID}/control/write-context/{contextName}/config"
+															r.args = args
+															r.count = 2
+															return r, true
+														default:
+															return
+														}
 													}
 												}
 											case 'r': // Prefix: "regex-rule"
@@ -3570,26 +3739,60 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									break
 								}
 								switch elem[0] {
-								case '/': // Prefix: "/invoke"
-									if l := len("/invoke"); len(elem) >= l && elem[0:l] == "/invoke" {
+								case '/': // Prefix: "/"
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
-										switch method {
-										case "POST":
-											// Leaf: DomainDataTaggingHookInvoke
-											r.name = "DomainDataTaggingHookInvoke"
-											r.summary = "Invoke a hook"
-											r.operationID = "domainDataTaggingHookInvoke"
-											r.pathPattern = "/domains/{domainID}/hooks/data-tagging/{hookName}/invoke"
-											r.args = args
-											r.count = 2
-											return r, true
-										default:
-											return
+										break
+									}
+									switch elem[0] {
+									case 'i': // Prefix: "invoke"
+										if l := len("invoke"); len(elem) >= l && elem[0:l] == "invoke" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "POST":
+												// Leaf: DomainDataTaggingHookInvoke
+												r.name = "DomainDataTaggingHookInvoke"
+												r.summary = "Invoke a hook"
+												r.operationID = "domainDataTaggingHookInvoke"
+												r.pathPattern = "/domains/{domainID}/hooks/data-tagging/{hookName}/invoke"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+									case 't': // Prefix: "test"
+										if l := len("test"); len(elem) >= l && elem[0:l] == "test" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "POST":
+												// Leaf: DomainDataTaggingHookTest
+												r.name = "DomainDataTaggingHookTest"
+												r.summary = "Test a classifier rule with real input"
+												r.operationID = "domainDataTaggingHookTest"
+												r.pathPattern = "/domains/{domainID}/hooks/data-tagging/{hookName}/test"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
 										}
 									}
 								}

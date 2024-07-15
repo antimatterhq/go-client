@@ -493,6 +493,18 @@ func TestCapsuleSealRequest_EncodeDecode(t *testing.T) {
 	var typ2 CapsuleSealRequest
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestClassifierRule_EncodeDecode(t *testing.T) {
+	var typ ClassifierRule
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 ClassifierRule
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestConflictError_EncodeDecode(t *testing.T) {
 	var typ ConflictError
 	typ.SetFake()
@@ -711,6 +723,18 @@ func TestDomainCreateCapsuleReq_EncodeDecode(t *testing.T) {
 	var typ2 DomainCreateCapsuleReq
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestDomainDataTaggingHookTestReq_EncodeDecode(t *testing.T) {
+	var typ DomainDataTaggingHookTestReq
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainDataTaggingHookTestReq
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestDomainExternalRootEncryptionKeyTestReq_EncodeDecode(t *testing.T) {
 	var typ DomainExternalRootEncryptionKeyTestReq
 	typ.SetFake()
@@ -745,6 +769,18 @@ func TestDomainFlushEncryptionKeysReq_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 DomainFlushEncryptionKeysReq
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestDomainGetWriteContextClassifierRulesOK_EncodeDecode(t *testing.T) {
+	var typ DomainGetWriteContextClassifierRulesOK
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainGetWriteContextClassifierRulesOK
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestDomainGetWriteContextRegexRulesOKApplicationJSON_EncodeDecode(t *testing.T) {
@@ -937,6 +973,18 @@ func TestDomainInsertIdentityProviderPrincipalOK_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 DomainInsertIdentityProviderPrincipalOK
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestDomainInsertWriteContextClassifierRuleOK_EncodeDecode(t *testing.T) {
+	var typ DomainInsertWriteContextClassifierRuleOK
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainInsertWriteContextClassifierRuleOK
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestDomainInsertWriteContextRegexRuleOK_EncodeDecode(t *testing.T) {
@@ -1565,6 +1613,18 @@ func TestKeyInfosKeyInformation_EncodeDecode(t *testing.T) {
 	var typ2 KeyInfosKeyInformation
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestLLMClassifierConfig_EncodeDecode(t *testing.T) {
+	var typ LLMClassifierConfig
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 LLMClassifierConfig
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestLogEntryID_EncodeDecode(t *testing.T) {
 	var typ LogEntryID
 	typ.SetFake()
@@ -2095,6 +2155,18 @@ func TestReadContextShortDetails_EncodeDecode(t *testing.T) {
 	var typ2 ReadContextShortDetails
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestRegexClassifierConfig_EncodeDecode(t *testing.T) {
+	var typ RegexClassifierConfig
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 RegexClassifierConfig
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestResourceExhaustedError_EncodeDecode(t *testing.T) {
 	var typ ResourceExhaustedError
 	typ.SetFake()
@@ -2443,6 +2515,18 @@ func TestVersionConstraint_EncodeDecode(t *testing.T) {
 	var typ2 VersionConstraint
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestWriteContextClassifierTag_EncodeDecode(t *testing.T) {
+	var typ WriteContextClassifierTag
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 WriteContextClassifierTag
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestWriteContextConfigInfo_EncodeDecode(t *testing.T) {
 	var typ WriteContextConfigInfo
 	typ.SetFake()
@@ -2537,17 +2621,5 @@ func TestWriteContextRegexRule_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 WriteContextRegexRule
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestWriteContextRegexTag_EncodeDecode(t *testing.T) {
-	var typ WriteContextRegexTag
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 WriteContextRegexTag
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }

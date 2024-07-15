@@ -1947,6 +1947,190 @@ func (s *Server) handleDomainDataTaggingHookInvokeRequest(args [2]string, argsEs
 	}
 }
 
+// handleDomainDataTaggingHookTestRequest handles domainDataTaggingHookTest operation.
+//
+// Invoke a hook that operates on data and returns tags. This endpoint is intended for testing
+// purposes when creating regex or llm rules before adding them to write contexts, or for one-off
+// classification of data without configuring a write context and so forth.
+//
+// POST /domains/{domainID}/hooks/data-tagging/{hookName}/test
+func (s *Server) handleDomainDataTaggingHookTestRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataTaggingHookTest"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/test"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDataTaggingHookTest",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDataTaggingHookTest",
+			ID:   "domainDataTaggingHookTest",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDataTaggingHookTest", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDataTaggingHookTestParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainDataTaggingHookTestRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainDataTaggingHookTestRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDataTaggingHookTest",
+			OperationSummary: "Test a classifier rule with real input",
+			OperationID:      "domainDataTaggingHookTest",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "hookName",
+					In:   "path",
+				}: params.HookName,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *DomainDataTaggingHookTestReq
+			Params   = DomainDataTaggingHookTestParams
+			Response = DomainDataTaggingHookTestRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDataTaggingHookTestParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDataTaggingHookTest(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDataTaggingHookTest(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDataTaggingHookTestResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainDeleteCapabilityRequest handles domainDeleteCapability operation.
 //
 // Delete a capability. All domain policy rules that reference the capability must have already been
@@ -3981,6 +4165,177 @@ func (s *Server) handleDomainDeleteWriteContextRequest(args [2]string, argsEscap
 	}
 
 	if err := encodeDomainDeleteWriteContextResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainDeleteWriteContextClassifierRuleRequest handles domainDeleteWriteContextClassifierRule operation.
+//
+// Delete a classifier rule for the write context.
+//
+// DELETE /domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}
+func (s *Server) handleDomainDeleteWriteContextClassifierRuleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteWriteContextClassifierRule"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDeleteWriteContextClassifierRule",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDeleteWriteContextClassifierRule",
+			ID:   "domainDeleteWriteContextClassifierRule",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDeleteWriteContextClassifierRule", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDeleteWriteContextClassifierRuleParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainDeleteWriteContextClassifierRuleRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDeleteWriteContextClassifierRule",
+			OperationSummary: "",
+			OperationID:      "domainDeleteWriteContextClassifierRule",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "contextName",
+					In:   "path",
+				}: params.ContextName,
+				{
+					Name: "ruleID",
+					In:   "path",
+				}: params.RuleID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainDeleteWriteContextClassifierRuleParams
+			Response = DomainDeleteWriteContextClassifierRuleRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDeleteWriteContextClassifierRuleParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDeleteWriteContextClassifierRule(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDeleteWriteContextClassifierRule(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDeleteWriteContextClassifierRuleResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -7970,6 +8325,173 @@ func (s *Server) handleDomainGetVendorSettingsRequest(args [1]string, argsEscape
 	}
 }
 
+// handleDomainGetWriteContextClassifierRulesRequest handles domainGetWriteContextClassifierRules operation.
+//
+// Get a full listing of all classifier rules for the context.
+//
+// GET /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (s *Server) handleDomainGetWriteContextClassifierRulesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetWriteContextClassifierRules"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainGetWriteContextClassifierRules",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainGetWriteContextClassifierRules",
+			ID:   "domainGetWriteContextClassifierRules",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainGetWriteContextClassifierRules", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainGetWriteContextClassifierRulesParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainGetWriteContextClassifierRulesRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainGetWriteContextClassifierRules",
+			OperationSummary: "",
+			OperationID:      "domainGetWriteContextClassifierRules",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "contextName",
+					In:   "path",
+				}: params.ContextName,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainGetWriteContextClassifierRulesParams
+			Response = DomainGetWriteContextClassifierRulesRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainGetWriteContextClassifierRulesParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainGetWriteContextClassifierRules(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainGetWriteContextClassifierRules(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainGetWriteContextClassifierRulesResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainGetWriteContextRegexRulesRequest handles domainGetWriteContextRegexRules operation.
 //
 // Get a full listing of all regex rules for the context.
@@ -8312,6 +8834,188 @@ func (s *Server) handleDomainInsertIdentityProviderPrincipalRequest(args [2]stri
 	}
 
 	if err := encodeDomainInsertIdentityProviderPrincipalResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainInsertWriteContextClassifierRuleRequest handles domainInsertWriteContextClassifierRule operation.
+//
+// Create a new classifier rule for a write context.
+//
+// POST /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+func (s *Server) handleDomainInsertWriteContextClassifierRuleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainInsertWriteContextClassifierRule"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainInsertWriteContextClassifierRule",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainInsertWriteContextClassifierRule",
+			ID:   "domainInsertWriteContextClassifierRule",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainInsertWriteContextClassifierRule", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainInsertWriteContextClassifierRuleParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainInsertWriteContextClassifierRuleRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainInsertWriteContextClassifierRuleRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainInsertWriteContextClassifierRule",
+			OperationSummary: "Insert a write context classifier rule",
+			OperationID:      "domainInsertWriteContextClassifierRule",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "contextName",
+					In:   "path",
+				}: params.ContextName,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *ClassifierRule
+			Params   = DomainInsertWriteContextClassifierRuleParams
+			Response = DomainInsertWriteContextClassifierRuleRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainInsertWriteContextClassifierRuleParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainInsertWriteContextClassifierRule(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainInsertWriteContextClassifierRule(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainInsertWriteContextClassifierRuleResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

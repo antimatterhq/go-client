@@ -4715,6 +4715,207 @@ func (s *CapsuleSealRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *ClassifierRule) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ClassifierRule) encodeFields(e *jx.Encoder) {
+	{
+		if s.ID.Set {
+			e.FieldStart("id")
+			s.ID.Encode(e)
+		}
+	}
+	{
+		if s.Comment.Set {
+			e.FieldStart("comment")
+			s.Comment.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("spanTags")
+		e.ArrStart()
+		for _, elem := range s.SpanTags {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("capsuleTags")
+		e.ArrStart()
+		for _, elem := range s.CapsuleTags {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.LlmConfig.Set {
+			e.FieldStart("llmConfig")
+			s.LlmConfig.Encode(e)
+		}
+	}
+	{
+		if s.RegexConfig.Set {
+			e.FieldStart("regexConfig")
+			s.RegexConfig.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfClassifierRule = [6]string{
+	0: "id",
+	1: "comment",
+	2: "spanTags",
+	3: "capsuleTags",
+	4: "llmConfig",
+	5: "regexConfig",
+}
+
+// Decode decodes ClassifierRule from json.
+func (s *ClassifierRule) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ClassifierRule to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			if err := func() error {
+				s.ID.Reset()
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "comment":
+			if err := func() error {
+				s.Comment.Reset()
+				if err := s.Comment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"comment\"")
+			}
+		case "spanTags":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.SpanTags = make([]WriteContextClassifierTag, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem WriteContextClassifierTag
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.SpanTags = append(s.SpanTags, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"spanTags\"")
+			}
+		case "capsuleTags":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.CapsuleTags = make([]WriteContextClassifierTag, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem WriteContextClassifierTag
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.CapsuleTags = append(s.CapsuleTags, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capsuleTags\"")
+			}
+		case "llmConfig":
+			if err := func() error {
+				s.LlmConfig.Reset()
+				if err := s.LlmConfig.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"llmConfig\"")
+			}
+		case "regexConfig":
+			if err := func() error {
+				s.RegexConfig.Reset()
+				if err := s.RegexConfig.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"regexConfig\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ClassifierRule")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001100,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfClassifierRule) {
+					name = jsonFieldsNameOfClassifierRule[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ClassifierRule) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ClassifierRule) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *ConflictError) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -6859,6 +7060,115 @@ func (s *DomainCreateCapsuleReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *DomainDataTaggingHookTestReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainDataTaggingHookTestReq) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("rule")
+		s.Rule.Encode(e)
+	}
+	{
+		e.FieldStart("input")
+		s.Input.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDomainDataTaggingHookTestReq = [2]string{
+	0: "rule",
+	1: "input",
+}
+
+// Decode decodes DomainDataTaggingHookTestReq from json.
+func (s *DomainDataTaggingHookTestReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainDataTaggingHookTestReq to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "rule":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Rule.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rule\"")
+			}
+		case "input":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Input.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"input\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainDataTaggingHookTestReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDomainDataTaggingHookTestReq) {
+					name = jsonFieldsNameOfDomainDataTaggingHookTestReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainDataTaggingHookTestReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainDataTaggingHookTestReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *DomainExternalRootEncryptionKeyTestReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -7048,6 +7358,80 @@ func (s *DomainFlushEncryptionKeysReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainFlushEncryptionKeysReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DomainGetWriteContextClassifierRulesOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainGetWriteContextClassifierRulesOK) encodeFields(e *jx.Encoder) {
+	{
+		if s.Rules != nil {
+			e.FieldStart("rules")
+			e.ArrStart()
+			for _, elem := range s.Rules {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfDomainGetWriteContextClassifierRulesOK = [1]string{
+	0: "rules",
+}
+
+// Decode decodes DomainGetWriteContextClassifierRulesOK from json.
+func (s *DomainGetWriteContextClassifierRulesOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainGetWriteContextClassifierRulesOK to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "rules":
+			if err := func() error {
+				s.Rules = make([]ClassifierRule, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ClassifierRule
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Rules = append(s.Rules, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rules\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainGetWriteContextClassifierRulesOK")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainGetWriteContextClassifierRulesOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainGetWriteContextClassifierRulesOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8635,6 +9019,100 @@ func (s *DomainInsertIdentityProviderPrincipalOK) MarshalJSON() ([]byte, error) 
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainInsertIdentityProviderPrincipalOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DomainInsertWriteContextClassifierRuleOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainInsertWriteContextClassifierRuleOK) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("ruleID")
+		s.RuleID.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDomainInsertWriteContextClassifierRuleOK = [1]string{
+	0: "ruleID",
+}
+
+// Decode decodes DomainInsertWriteContextClassifierRuleOK from json.
+func (s *DomainInsertWriteContextClassifierRuleOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainInsertWriteContextClassifierRuleOK to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "ruleID":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.RuleID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ruleID\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainInsertWriteContextClassifierRuleOK")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDomainInsertWriteContextClassifierRuleOK) {
+					name = jsonFieldsNameOfDomainInsertWriteContextClassifierRuleOK[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainInsertWriteContextClassifierRuleOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainInsertWriteContextClassifierRuleOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -14439,6 +14917,119 @@ func (s *KeyInfosKeyInformation) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *LLMClassifierConfig) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *LLMClassifierConfig) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("model")
+		e.Str(s.Model)
+	}
+	{
+		e.FieldStart("prompt")
+		e.Str(s.Prompt)
+	}
+}
+
+var jsonFieldsNameOfLLMClassifierConfig = [2]string{
+	0: "model",
+	1: "prompt",
+}
+
+// Decode decodes LLMClassifierConfig from json.
+func (s *LLMClassifierConfig) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode LLMClassifierConfig to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "model":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Model = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"model\"")
+			}
+		case "prompt":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Prompt = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"prompt\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode LLMClassifierConfig")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfLLMClassifierConfig) {
+					name = jsonFieldsNameOfLLMClassifierConfig[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *LLMClassifierConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *LLMClassifierConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes LogEntryID as json.
 func (s LogEntryID) Encode(e *jx.Encoder) {
 	unwrapped := string(s)
@@ -16670,6 +17261,39 @@ func (s *OptInt32) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes LLMClassifierConfig as json.
+func (o OptLLMClassifierConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes LLMClassifierConfig from json.
+func (o *OptLLMClassifierConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptLLMClassifierConfig to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptLLMClassifierConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptLLMClassifierConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes LogEntryID as json.
 func (o OptLogEntryID) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -16897,6 +17521,39 @@ func (s OptReadContextRuleFactsItemOperator) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptReadContextRuleFactsItemOperator) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RegexClassifierConfig as json.
+func (o OptRegexClassifierConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes RegexClassifierConfig from json.
+func (o *OptRegexClassifierConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptRegexClassifierConfig to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptRegexClassifierConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptRegexClassifierConfig) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -19657,6 +20314,119 @@ func (s *ReadContextShortDetails) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ReadContextShortDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RegexClassifierConfig) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RegexClassifierConfig) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("pattern")
+		e.Str(s.Pattern)
+	}
+	{
+		e.FieldStart("matchOnKey")
+		e.Bool(s.MatchOnKey)
+	}
+}
+
+var jsonFieldsNameOfRegexClassifierConfig = [2]string{
+	0: "pattern",
+	1: "matchOnKey",
+}
+
+// Decode decodes RegexClassifierConfig from json.
+func (s *RegexClassifierConfig) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RegexClassifierConfig to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "pattern":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Pattern = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pattern\"")
+			}
+		case "matchOnKey":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.MatchOnKey = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"matchOnKey\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RegexClassifierConfig")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRegexClassifierConfig) {
+					name = jsonFieldsNameOfRegexClassifierConfig[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RegexClassifierConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RegexClassifierConfig) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -22451,6 +23221,132 @@ func (s *VersionConstraint) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *WriteContextClassifierTag) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *WriteContextClassifierTag) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		s.Name.Encode(e)
+	}
+	{
+		if s.Value.Set {
+			e.FieldStart("value")
+			s.Value.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfWriteContextClassifierTag = [3]string{
+	0: "name",
+	1: "value",
+	2: "type",
+}
+
+// Decode decodes WriteContextClassifierTag from json.
+func (s *WriteContextClassifierTag) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WriteContextClassifierTag to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "value":
+			if err := func() error {
+				s.Value.Reset()
+				if err := s.Value.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"value\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode WriteContextClassifierTag")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000101,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfWriteContextClassifierTag) {
+					name = jsonFieldsNameOfWriteContextClassifierTag[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *WriteContextClassifierTag) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WriteContextClassifierTag) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *WriteContextConfigInfo) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -22513,9 +23409,9 @@ func (s *WriteContextConfigInfo) Decode(d *jx.Decoder) error {
 			}
 		case "defaultCapsuleTags":
 			if err := func() error {
-				s.DefaultCapsuleTags = make([]WriteContextRegexTag, 0)
+				s.DefaultCapsuleTags = make([]WriteContextClassifierTag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem WriteContextRegexTag
+					var elem WriteContextClassifierTag
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -23242,9 +24138,9 @@ func (s *WriteContextRegexRule) Decode(d *jx.Decoder) error {
 		case "spanTags":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.SpanTags = make([]WriteContextRegexTag, 0)
+				s.SpanTags = make([]WriteContextClassifierTag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem WriteContextRegexTag
+					var elem WriteContextClassifierTag
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -23260,9 +24156,9 @@ func (s *WriteContextRegexRule) Decode(d *jx.Decoder) error {
 		case "capsuleTags":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				s.CapsuleTags = make([]WriteContextRegexTag, 0)
+				s.CapsuleTags = make([]WriteContextClassifierTag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem WriteContextRegexTag
+					var elem WriteContextClassifierTag
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -23327,132 +24223,6 @@ func (s *WriteContextRegexRule) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *WriteContextRegexRule) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WriteContextRegexTag) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WriteContextRegexTag) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("name")
-		s.Name.Encode(e)
-	}
-	{
-		if s.Value.Set {
-			e.FieldStart("value")
-			s.Value.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("type")
-		s.Type.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfWriteContextRegexTag = [3]string{
-	0: "name",
-	1: "value",
-	2: "type",
-}
-
-// Decode decodes WriteContextRegexTag from json.
-func (s *WriteContextRegexTag) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WriteContextRegexTag to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "name":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Name.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "value":
-			if err := func() error {
-				s.Value.Reset()
-				if err := s.Value.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"value\"")
-			}
-		case "type":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.Type.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WriteContextRegexTag")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000101,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWriteContextRegexTag) {
-					name = jsonFieldsNameOfWriteContextRegexTag[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WriteContextRegexTag) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WriteContextRegexTag) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

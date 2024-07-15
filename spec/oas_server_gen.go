@@ -102,6 +102,14 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/hooks/data-tagging/{hookName}/invoke
 	DomainDataTaggingHookInvoke(ctx context.Context, req *DataTaggingHookInput, params DomainDataTaggingHookInvokeParams) (DomainDataTaggingHookInvokeRes, error)
+	// DomainDataTaggingHookTest implements domainDataTaggingHookTest operation.
+	//
+	// Invoke a hook that operates on data and returns tags. This endpoint is intended for testing
+	// purposes when creating regex or llm rules before adding them to write contexts, or for one-off
+	// classification of data without configuring a write context and so forth.
+	//
+	// POST /domains/{domainID}/hooks/data-tagging/{hookName}/test
+	DomainDataTaggingHookTest(ctx context.Context, req *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability implements domainDeleteCapability operation.
 	//
 	// Delete a capability. All domain policy rules that reference the capability must have already been
@@ -181,6 +189,12 @@ type Handler interface {
 	//
 	// DELETE /domains/{domainID}/control/write-context/{contextName}
 	DomainDeleteWriteContext(ctx context.Context, params DomainDeleteWriteContextParams) (DomainDeleteWriteContextRes, error)
+	// DomainDeleteWriteContextClassifierRule implements domainDeleteWriteContextClassifierRule operation.
+	//
+	// Delete a classifier rule for the write context.
+	//
+	// DELETE /domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}
+	DomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (DomainDeleteWriteContextClassifierRuleRes, error)
 	// DomainDeleteWriteContextRegexRule implements domainDeleteWriteContextRegexRule operation.
 	//
 	// Delete a regex classifier rule for the context.
@@ -338,6 +352,12 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/control/vendor/settings
 	DomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (DomainGetVendorSettingsRes, error)
+	// DomainGetWriteContextClassifierRules implements domainGetWriteContextClassifierRules operation.
+	//
+	// Get a full listing of all classifier rules for the context.
+	//
+	// GET /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+	DomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (DomainGetWriteContextClassifierRulesRes, error)
 	// DomainGetWriteContextRegexRules implements domainGetWriteContextRegexRules operation.
 	//
 	// Get a full listing of all regex rules for the context.
@@ -351,6 +371,12 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/control/identities/{identityProviderName}/principals
 	DomainInsertIdentityProviderPrincipal(ctx context.Context, req *DomainIdentityProviderPrincipalParams, params DomainInsertIdentityProviderPrincipalParams) (DomainInsertIdentityProviderPrincipalRes, error)
+	// DomainInsertWriteContextClassifierRule implements domainInsertWriteContextClassifierRule operation.
+	//
+	// Create a new classifier rule for a write context.
+	//
+	// POST /domains/{domainID}/control/write-context/{contextName}/classifier-rule
+	DomainInsertWriteContextClassifierRule(ctx context.Context, req *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (DomainInsertWriteContextClassifierRuleRes, error)
 	// DomainInsertWriteContextRegexRule implements domainInsertWriteContextRegexRule operation.
 	//
 	// Create a new regex rule for a write context.

@@ -819,6 +819,54 @@ func (s *CapsuleSealRequest) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *ClassifierRule) SetFake() {
+	{
+		{
+			s.ID.SetFake()
+		}
+	}
+	{
+		{
+			s.Comment.SetFake()
+		}
+	}
+	{
+		{
+			s.SpanTags = nil
+			for i := 0; i < 0; i++ {
+				var elem WriteContextClassifierTag
+				{
+					elem.SetFake()
+				}
+				s.SpanTags = append(s.SpanTags, elem)
+			}
+		}
+	}
+	{
+		{
+			s.CapsuleTags = nil
+			for i := 0; i < 0; i++ {
+				var elem WriteContextClassifierTag
+				{
+					elem.SetFake()
+				}
+				s.CapsuleTags = append(s.CapsuleTags, elem)
+			}
+		}
+	}
+	{
+		{
+			s.LlmConfig.SetFake()
+		}
+	}
+	{
+		{
+			s.RegexConfig.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *ConflictError) SetFake() {
 	{
 		{
@@ -1189,6 +1237,20 @@ func (s *DomainCreateCapsuleReq) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *DomainDataTaggingHookTestReq) SetFake() {
+	{
+		{
+			s.Rule.SetFake()
+		}
+	}
+	{
+		{
+			s.Input.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *DomainExternalRootEncryptionKeyTestReq) SetFake() {
 }
 
@@ -1210,6 +1272,22 @@ func (s *DomainFactList) SetFake() {
 
 // SetFake set fake values.
 func (s *DomainFlushEncryptionKeysReq) SetFake() {
+}
+
+// SetFake set fake values.
+func (s *DomainGetWriteContextClassifierRulesOK) SetFake() {
+	{
+		{
+			s.Rules = nil
+			for i := 0; i < 0; i++ {
+				var elem ClassifierRule
+				{
+					elem.SetFake()
+				}
+				s.Rules = append(s.Rules, elem)
+			}
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -1487,6 +1565,15 @@ func (s *DomainInsertIdentityProviderPrincipalOK) SetFake() {
 	{
 		{
 			s.ApiKey.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
+func (s *DomainInsertWriteContextClassifierRuleOK) SetFake() {
+	{
+		{
+			s.RuleID.SetFake()
 		}
 	}
 }
@@ -2569,6 +2656,20 @@ func (s *KeyInfosKeyInformation) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *LLMClassifierConfig) SetFake() {
+	{
+		{
+			s.Model = "string"
+		}
+	}
+	{
+		{
+			s.Prompt = "string"
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *LogEntryID) SetFake() {
 	var unwrapped string
 	{
@@ -2988,6 +3089,15 @@ func (s *OptInt32) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *OptLLMClassifierConfig) SetFake() {
+	var elem LLMClassifierConfig
+	{
+		elem.SetFake()
+	}
+	s.SetTo(elem)
+}
+
+// SetFake set fake values.
 func (s *OptLogEntryID) SetFake() {
 	var elem LogEntryID
 	{
@@ -3044,6 +3154,15 @@ func (s *OptReadContextRuleFactsItemArgumentsItemSource) SetFake() {
 // SetFake set fake values.
 func (s *OptReadContextRuleFactsItemOperator) SetFake() {
 	var elem ReadContextRuleFactsItemOperator
+	{
+		elem.SetFake()
+	}
+	s.SetTo(elem)
+}
+
+// SetFake set fake values.
+func (s *OptRegexClassifierConfig) SetFake() {
+	var elem RegexClassifierConfig
 	{
 		elem.SetFake()
 	}
@@ -3619,6 +3738,20 @@ func (s *ReadContextShortDetails) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *RegexClassifierConfig) SetFake() {
+	{
+		{
+			s.Pattern = "string"
+		}
+	}
+	{
+		{
+			s.MatchOnKey = true
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *ResourceExhaustedError) SetFake() {
 	{
 		{
@@ -4081,6 +4214,25 @@ func (s *VersionConstraint) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *WriteContextClassifierTag) SetFake() {
+	{
+		{
+			s.Name.SetFake()
+		}
+	}
+	{
+		{
+			s.Value.SetFake()
+		}
+	}
+	{
+		{
+			s.Type.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *WriteContextConfigInfo) SetFake() {
 	{
 		{
@@ -4091,7 +4243,7 @@ func (s *WriteContextConfigInfo) SetFake() {
 		{
 			s.DefaultCapsuleTags = nil
 			for i := 0; i < 0; i++ {
-				var elem WriteContextRegexTag
+				var elem WriteContextClassifierTag
 				{
 					elem.SetFake()
 				}
@@ -4231,7 +4383,7 @@ func (s *WriteContextRegexRule) SetFake() {
 		{
 			s.SpanTags = nil
 			for i := 0; i < 0; i++ {
-				var elem WriteContextRegexTag
+				var elem WriteContextClassifierTag
 				{
 					elem.SetFake()
 				}
@@ -4243,31 +4395,12 @@ func (s *WriteContextRegexRule) SetFake() {
 		{
 			s.CapsuleTags = nil
 			for i := 0; i < 0; i++ {
-				var elem WriteContextRegexTag
+				var elem WriteContextClassifierTag
 				{
 					elem.SetFake()
 				}
 				s.CapsuleTags = append(s.CapsuleTags, elem)
 			}
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *WriteContextRegexTag) SetFake() {
-	{
-		{
-			s.Name.SetFake()
-		}
-	}
-	{
-		{
-			s.Value.SetFake()
-		}
-	}
-	{
-		{
-			s.Type.SetFake()
 		}
 	}
 }

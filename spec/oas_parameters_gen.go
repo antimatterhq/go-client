@@ -1565,6 +1565,154 @@ func decodeDomainDataTaggingHookInvokeParams(args [2]string, argsEscaped bool, r
 	return params, nil
 }
 
+// DomainDataTaggingHookTestParams is parameters of domainDataTaggingHookTest operation.
+type DomainDataTaggingHookTestParams struct {
+	DomainID DomainID
+	HookName HookName
+}
+
+func unpackDomainDataTaggingHookTestParams(packed middleware.Parameters) (params DomainDataTaggingHookTestParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "hookName",
+			In:   "path",
+		}
+		params.HookName = packed[key].(HookName)
+	}
+	return params
+}
+
+func decodeDomainDataTaggingHookTestParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainDataTaggingHookTestParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: hookName.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "hookName",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotHookNameVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotHookNameVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.HookName = HookName(paramsDotHookNameVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.HookName.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hookName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainDeleteCapabilityParams is parameters of domainDeleteCapability operation.
 type DomainDeleteCapabilityParams struct {
 	DomainID DomainID
@@ -3603,6 +3751,222 @@ func decodeDomainDeleteWriteContextParams(args [2]string, argsEscaped bool, r *h
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "contextName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainDeleteWriteContextClassifierRuleParams is parameters of domainDeleteWriteContextClassifierRule operation.
+type DomainDeleteWriteContextClassifierRuleParams struct {
+	DomainID    DomainID
+	ContextName WriteContextName
+	RuleID      RuleID
+}
+
+func unpackDomainDeleteWriteContextClassifierRuleParams(packed middleware.Parameters) (params DomainDeleteWriteContextClassifierRuleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "contextName",
+			In:   "path",
+		}
+		params.ContextName = packed[key].(WriteContextName)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ruleID",
+			In:   "path",
+		}
+		params.RuleID = packed[key].(RuleID)
+	}
+	return params
+}
+
+func decodeDomainDeleteWriteContextClassifierRuleParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainDeleteWriteContextClassifierRuleParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: contextName.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "contextName",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotContextNameVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotContextNameVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ContextName = WriteContextName(paramsDotContextNameVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.ContextName.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "contextName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: ruleID.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ruleID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotRuleIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotRuleIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.RuleID = RuleID(paramsDotRuleIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.RuleID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ruleID",
 			In:   "path",
 			Err:  err,
 		}
@@ -6737,6 +7101,154 @@ func decodeDomainGetVendorSettingsParams(args [1]string, argsEscaped bool, r *ht
 	return params, nil
 }
 
+// DomainGetWriteContextClassifierRulesParams is parameters of domainGetWriteContextClassifierRules operation.
+type DomainGetWriteContextClassifierRulesParams struct {
+	DomainID    DomainID
+	ContextName WriteContextName
+}
+
+func unpackDomainGetWriteContextClassifierRulesParams(packed middleware.Parameters) (params DomainGetWriteContextClassifierRulesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "contextName",
+			In:   "path",
+		}
+		params.ContextName = packed[key].(WriteContextName)
+	}
+	return params
+}
+
+func decodeDomainGetWriteContextClassifierRulesParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainGetWriteContextClassifierRulesParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: contextName.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "contextName",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotContextNameVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotContextNameVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ContextName = WriteContextName(paramsDotContextNameVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.ContextName.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "contextName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainGetWriteContextRegexRulesParams is parameters of domainGetWriteContextRegexRules operation.
 type DomainGetWriteContextRegexRulesParams struct {
 	DomainID    DomainID
@@ -7026,6 +7538,154 @@ func decodeDomainInsertIdentityProviderPrincipalParams(args [2]string, argsEscap
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "identityProviderName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainInsertWriteContextClassifierRuleParams is parameters of domainInsertWriteContextClassifierRule operation.
+type DomainInsertWriteContextClassifierRuleParams struct {
+	DomainID    DomainID
+	ContextName WriteContextName
+}
+
+func unpackDomainInsertWriteContextClassifierRuleParams(packed middleware.Parameters) (params DomainInsertWriteContextClassifierRuleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "contextName",
+			In:   "path",
+		}
+		params.ContextName = packed[key].(WriteContextName)
+	}
+	return params
+}
+
+func decodeDomainInsertWriteContextClassifierRuleParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainInsertWriteContextClassifierRuleParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: contextName.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "contextName",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotContextNameVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotContextNameVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ContextName = WriteContextName(paramsDotContextNameVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.ContextName.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "contextName",
 			In:   "path",
 			Err:  err,
 		}

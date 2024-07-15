@@ -151,6 +151,20 @@ func encodeDomainDataTaggingHookInvokeRequest(
 	return nil
 }
 
+func encodeDomainDataTaggingHookTestRequest(
+	req *DomainDataTaggingHookTestReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDomainDeleteCapsuleTagsRequest(
 	req *DeleteTags,
 	r *http.Request,
@@ -197,6 +211,20 @@ func encodeDomainFlushEncryptionKeysRequest(
 
 func encodeDomainInsertIdentityProviderPrincipalRequest(
 	req *DomainIdentityProviderPrincipalParams,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainInsertWriteContextClassifierRuleRequest(
+	req *ClassifierRule,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
