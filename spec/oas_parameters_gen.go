@@ -102,6 +102,7 @@ func decodeCapsuleGetByIdParams(args [1]string, argsEscaped bool, r *http.Reques
 type DomainAddAccessLogEntryParams struct {
 	DomainID  DomainID
 	CapsuleID CapsuleID
+	OpenToken CapsuleOperationToken
 }
 
 func unpackDomainAddAccessLogEntryParams(packed middleware.Parameters) (params DomainAddAccessLogEntryParams) {
@@ -119,10 +120,18 @@ func unpackDomainAddAccessLogEntryParams(packed middleware.Parameters) (params D
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "openToken",
+			In:   "query",
+		}
+		params.OpenToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainAddAccessLogEntryParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainAddAccessLogEntryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -240,6 +249,57 @@ func decodeDomainAddAccessLogEntryParams(args [2]string, argsEscaped bool, r *ht
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: openToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "openToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOpenTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOpenTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OpenToken = CapsuleOperationToken(paramsDotOpenTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.OpenToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "openToken",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -4341,7 +4401,7 @@ func decodeDomainDescribeWriteContextParams(args [2]string, argsEscaped bool, r 
 // DomainExternalRootEncryptionKeyTestParams is parameters of domainExternalRootEncryptionKeyTest operation.
 type DomainExternalRootEncryptionKeyTestParams struct {
 	DomainID            DomainID
-	RootEncryptionKeyID RootEncryptionKeyID
+	RootEncryptionKeyID RootEncryptionKeyReference
 }
 
 func unpackDomainExternalRootEncryptionKeyTestParams(packed middleware.Parameters) (params DomainExternalRootEncryptionKeyTestParams) {
@@ -4357,7 +4417,7 @@ func unpackDomainExternalRootEncryptionKeyTestParams(packed middleware.Parameter
 			Name: "rootEncryptionKeyID",
 			In:   "path",
 		}
-		params.RootEncryptionKeyID = packed[key].(RootEncryptionKeyID)
+		params.RootEncryptionKeyID = packed[key].(RootEncryptionKeyReference)
 	}
 	return params
 }
@@ -4459,7 +4519,7 @@ func decodeDomainExternalRootEncryptionKeyTestParams(args [2]string, argsEscaped
 				}(); err != nil {
 					return err
 				}
-				params.RootEncryptionKeyID = RootEncryptionKeyID(paramsDotRootEncryptionKeyIDVal)
+				params.RootEncryptionKeyID = RootEncryptionKeyReference(paramsDotRootEncryptionKeyIDVal)
 				return nil
 			}(); err != nil {
 				return err
@@ -9423,86 +9483,6 @@ func decodeDomainOpenCapsuleParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// DomainPatchSettingsParams is parameters of domainPatchSettings operation.
-type DomainPatchSettingsParams struct {
-	DomainID DomainID
-}
-
-func unpackDomainPatchSettingsParams(packed middleware.Parameters) (params DomainPatchSettingsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domainID",
-			In:   "path",
-		}
-		params.DomainID = packed[key].(DomainID)
-	}
-	return params
-}
-
-func decodeDomainPatchSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPatchSettingsParams, _ error) {
-	// Decode path: domainID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domainID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotDomainIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotDomainIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.DomainID = DomainID(paramsDotDomainIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.DomainID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domainID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // DomainPolicyFlushParams is parameters of domainPolicyFlush operation.
 type DomainPolicyFlushParams struct {
 	DomainID DomainID
@@ -10014,6 +9994,86 @@ func decodeDomainPutFactTypeParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
+// DomainPutSettingsParams is parameters of domainPutSettings operation.
+type DomainPutSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainPutSettingsParams(packed middleware.Parameters) (params DomainPutSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainPutSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPutSettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainPutVendorSettingsParams is parameters of domainPutVendorSettings operation.
 type DomainPutVendorSettingsParams struct {
 	DomainID DomainID
@@ -10128,7 +10188,7 @@ type DomainQueryAccessLogParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName
@@ -10859,7 +10919,7 @@ type DomainQueryAccessLogSingleCapsuleParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName
@@ -12445,8 +12505,9 @@ func decodeDomainRotateRootEncryptionKeysParams(args [1]string, argsEscaped bool
 
 // DomainSealCapsuleParams is parameters of domainSealCapsule operation.
 type DomainSealCapsuleParams struct {
-	DomainID  DomainID
-	CapsuleID CapsuleID
+	DomainID    DomainID
+	CapsuleID   CapsuleID
+	CreateToken CapsuleOperationToken
 }
 
 func unpackDomainSealCapsuleParams(packed middleware.Parameters) (params DomainSealCapsuleParams) {
@@ -12464,10 +12525,18 @@ func unpackDomainSealCapsuleParams(packed middleware.Parameters) (params DomainS
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "createToken",
+			In:   "query",
+		}
+		params.CreateToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainSealCapsuleParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainSealCapsuleParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -12585,6 +12654,57 @@ func decodeDomainSealCapsuleParams(args [2]string, argsEscaped bool, r *http.Req
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: createToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCreateTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCreateTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CreateToken = CapsuleOperationToken(paramsDotCreateTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.CreateToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "createToken",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -13994,8 +14114,9 @@ func decodeDomainUpsertReadContextParams(args [2]string, argsEscaped bool, r *ht
 
 // DomainUpsertSpanTagsParams is parameters of domainUpsertSpanTags operation.
 type DomainUpsertSpanTagsParams struct {
-	DomainID  DomainID
-	CapsuleID CapsuleID
+	DomainID    DomainID
+	CapsuleID   CapsuleID
+	CreateToken CapsuleOperationToken
 }
 
 func unpackDomainUpsertSpanTagsParams(packed middleware.Parameters) (params DomainUpsertSpanTagsParams) {
@@ -14013,10 +14134,18 @@ func unpackDomainUpsertSpanTagsParams(packed middleware.Parameters) (params Doma
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "createToken",
+			In:   "query",
+		}
+		params.CreateToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainUpsertSpanTagsParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainUpsertSpanTagsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -14134,6 +14263,57 @@ func decodeDomainUpsertSpanTagsParams(args [2]string, argsEscaped bool, r *http.
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: createToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCreateTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCreateTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CreateToken = CapsuleOperationToken(paramsDotCreateTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.CreateToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "createToken",
+			In:   "query",
 			Err:  err,
 		}
 	}

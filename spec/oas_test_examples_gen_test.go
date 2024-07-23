@@ -133,6 +133,18 @@ func TestActiveRootEncryptionKeyID_EncodeDecode(t *testing.T) {
 	var typ2 ActiveRootEncryptionKeyID
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestActiveRootEncryptionKeyResponse_EncodeDecode(t *testing.T) {
+	var typ ActiveRootEncryptionKeyResponse
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 ActiveRootEncryptionKeyResponse
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestAddCapsuleLogEntryRequest_EncodeDecode(t *testing.T) {
 	var typ AddCapsuleLogEntryRequest
 	typ.SetFake()
@@ -783,8 +795,8 @@ func TestDomainGetWriteContextClassifierRulesOK_EncodeDecode(t *testing.T) {
 	var typ2 DomainGetWriteContextClassifierRulesOK
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
-func TestDomainGetWriteContextRegexRulesOKApplicationJSON_EncodeDecode(t *testing.T) {
-	var typ DomainGetWriteContextRegexRulesOKApplicationJSON
+func TestDomainGetWriteContextRegexRulesOK_EncodeDecode(t *testing.T) {
+	var typ DomainGetWriteContextRegexRulesOK
 	typ.SetFake()
 
 	e := jx.Encoder{}
@@ -792,7 +804,7 @@ func TestDomainGetWriteContextRegexRulesOKApplicationJSON_EncodeDecode(t *testin
 	data := e.Bytes()
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
-	var typ2 DomainGetWriteContextRegexRulesOKApplicationJSON
+	var typ2 DomainGetWriteContextRegexRulesOK
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestDomainHooksList_EncodeDecode(t *testing.T) {
@@ -961,6 +973,18 @@ func TestDomainIdentityProviderType_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 DomainIdentityProviderType
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestDomainIdentityTenantIDPrincipalParams_EncodeDecode(t *testing.T) {
+	var typ DomainIdentityTenantIDPrincipalParams
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainIdentityTenantIDPrincipalParams
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestDomainInsertIdentityProviderPrincipalOK_EncodeDecode(t *testing.T) {
@@ -1169,18 +1193,6 @@ func TestDomainSettings_EncodeDecode(t *testing.T) {
 	var typ2 DomainSettings
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
-func TestDomainSettingsPatch_EncodeDecode(t *testing.T) {
-	var typ DomainSettingsPatch
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 DomainSettingsPatch
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
 func TestDomainStatus_EncodeDecode(t *testing.T) {
 	var typ DomainStatus
 	typ.SetFake()
@@ -1227,6 +1239,18 @@ func TestDomainTagInfoResults_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 DomainTagInfoResults
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestDomainUpsertCapsuleTagsReq_EncodeDecode(t *testing.T) {
+	var typ DomainUpsertCapsuleTagsReq
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 DomainUpsertCapsuleTagsReq
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestError_EncodeDecode(t *testing.T) {
@@ -1481,114 +1505,6 @@ func TestInvalidRequestError_EncodeDecode(t *testing.T) {
 	var typ2 InvalidRequestError
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
-func TestJSONPatchRequestAdd_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestAdd
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestAdd
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestAddValue_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestAddValue
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestAddValue
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestCopy_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestCopy
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestCopy
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestMove_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestMove
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestMove
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestRemove_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestRemove
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestRemove
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestReplace_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestReplace
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestReplace
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestReplaceValue_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestReplaceValue
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestReplaceValue
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestTst_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestTst
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestTst
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestJSONPatchRequestTstValue_EncodeDecode(t *testing.T) {
-	var typ JSONPatchRequestTstValue
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 JSONPatchRequestTstValue
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
 func TestKeyInfos_EncodeDecode(t *testing.T) {
 	var typ KeyInfos
 	typ.SetFake()
@@ -1635,6 +1551,18 @@ func TestLogEntryID_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 LogEntryID
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
+func TestMicrosoftOAuthDomainIdentityProviderDetails_EncodeDecode(t *testing.T) {
+	var typ MicrosoftOAuthDomainIdentityProviderDetails
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 MicrosoftOAuthDomainIdentityProviderDetails
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestNewAccessLogEntry_EncodeDecode(t *testing.T) {
@@ -1735,6 +1663,18 @@ func TestNewDomainResponse_EncodeDecode(t *testing.T) {
 	var typ2 NewDomainResponse
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
+func TestNewDomainSettings_EncodeDecode(t *testing.T) {
+	var typ NewDomainSettings
+	typ.SetFake()
+
+	e := jx.Encoder{}
+	typ.Encode(&e)
+	data := e.Bytes()
+	require.True(t, std.Valid(data), "Encoded: %s", data)
+
+	var typ2 NewDomainSettings
+	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
+}
 func TestNewFact_EncodeDecode(t *testing.T) {
 	var typ NewFact
 	typ.SetFake()
@@ -1829,30 +1769,6 @@ func TestNewVendorSettings_EncodeDecode(t *testing.T) {
 	require.True(t, std.Valid(data), "Encoded: %s", data)
 
 	var typ2 NewVendorSettings
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestPatchRequest_EncodeDecode(t *testing.T) {
-	var typ PatchRequest
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 PatchRequest
-	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
-}
-func TestPatchRequestItem_EncodeDecode(t *testing.T) {
-	var typ PatchRequestItem
-	typ.SetFake()
-
-	e := jx.Encoder{}
-	typ.Encode(&e)
-	data := e.Bytes()
-	require.True(t, std.Valid(data), "Encoded: %s", data)
-
-	var typ2 PatchRequestItem
 	require.NoError(t, typ2.Decode(jx.DecodeBytes(data)))
 }
 func TestPolicyRuleOperation_EncodeDecode(t *testing.T) {

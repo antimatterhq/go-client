@@ -9,6 +9,11 @@ import (
 
 // SetFake set fake values.
 func (s *APIKeyDomainIdentityProviderDetails) SetFake() {
+	{
+		{
+			s.Version.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -222,15 +227,24 @@ func (s *ActiveRootEncryptionKeyID) SetFake() {
 			s.KeyID.SetFake()
 		}
 	}
+	{
+		{
+			s.RotateBatch.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
+func (s *ActiveRootEncryptionKeyResponse) SetFake() {
+	{
+		{
+			s.HasMore.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
 func (s *AddCapsuleLogEntryRequest) SetFake() {
-	{
-		{
-			s.OpenToken.SetFake()
-		}
-	}
 	{
 		{
 			s.Entry.SetFake()
@@ -636,6 +650,11 @@ func (s *CapsuleCreateResponse) SetFake() {
 			s.WriteContextConfiguration.SetFake()
 		}
 	}
+	{
+		{
+			s.DisasterRecoveryToken.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -763,12 +782,12 @@ func (s *CapsuleOpenResponse) SetFake() {
 func (s *CapsuleOpenResponseReadContextConfiguration) SetFake() {
 	{
 		{
-			s.DisableReadLogging.SetFake()
+			s.DisableReadLogging = true
 		}
 	}
 	{
 		{
-			s.KeyCacheTTL.SetFake()
+			s.KeyCacheTTL = int32(0)
 		}
 	}
 	{
@@ -809,11 +828,6 @@ func (s *CapsuleSealRequest) SetFake() {
 	{
 		{
 			s.Size = int64(0)
-		}
-	}
-	{
-		{
-			s.CreateToken.SetFake()
 		}
 	}
 }
@@ -1125,7 +1139,7 @@ func (s *DomainAuthenticateResponse) SetFake() {
 	}
 	{
 		{
-			s.Expiry.SetFake()
+			s.Expiry = time.Now()
 		}
 	}
 	{
@@ -1291,19 +1305,19 @@ func (s *DomainGetWriteContextClassifierRulesOK) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *DomainGetWriteContextRegexRulesOKApplicationJSON) SetFake() {
-	var unwrapped []WriteContextRegexRule
+func (s *DomainGetWriteContextRegexRulesOK) SetFake() {
 	{
-		unwrapped = nil
-		for i := 0; i < 0; i++ {
-			var elem WriteContextRegexRule
-			{
-				elem.SetFake()
+		{
+			s.Rules = nil
+			for i := 0; i < 0; i++ {
+				var elem WriteContextRegexRule
+				{
+					elem.SetFake()
+				}
+				s.Rules = append(s.Rules, elem)
 			}
-			unwrapped = append(unwrapped, elem)
 		}
 	}
-	*s = DomainGetWriteContextRegexRulesOKApplicationJSON(unwrapped)
 }
 
 // SetFake set fake values.
@@ -1327,11 +1341,6 @@ func (s *DomainHooksListHooksItem) SetFake() {
 	{
 		{
 			s.Name.SetFake()
-		}
-	}
-	{
-		{
-			s.URL = "string"
 		}
 	}
 	{
@@ -1438,12 +1447,21 @@ func (s *DomainIdentityPrincipalDetails) SetFake() {
 
 // SetFake set fake values.
 func (s *DomainIdentityProviderDetails) SetFake() {
-	var variant APIKeyDomainIdentityProviderDetails
-
 	{
-		variant.SetFake()
+		{
+			s.GoogleOAuth.SetFake()
+		}
 	}
-	s.SetAPIKeyDomainIdentityProviderDetails(variant)
+	{
+		{
+			s.MicrosoftOAuth.SetFake()
+		}
+	}
+	{
+		{
+			s.APIKey.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -1552,7 +1570,25 @@ func (s *DomainIdentityProviderPrincipalType) SetFake() {
 
 // SetFake set fake values.
 func (s *DomainIdentityProviderType) SetFake() {
-	*s = DomainIdentityProviderTypeGoogleOAuth
+	var unwrapped string
+	{
+		unwrapped = "string"
+	}
+	*s = DomainIdentityProviderType(unwrapped)
+}
+
+// SetFake set fake values.
+func (s *DomainIdentityTenantIDPrincipalParams) SetFake() {
+	{
+		{
+			s.TenantID = "string"
+		}
+	}
+	{
+		{
+			s.Comment.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -2100,18 +2136,6 @@ func (s *DomainRotateRootEncryptionKeysReq) SetFake() {
 func (s *DomainSettings) SetFake() {
 	{
 		{
-			s.AdminContacts = nil
-			for i := 0; i < 0; i++ {
-				var elem string
-				{
-					elem = "string"
-				}
-				s.AdminContacts = append(s.AdminContacts, elem)
-			}
-		}
-	}
-	{
-		{
 			s.ActiveAdminContacts = nil
 			for i := 0; i < 0; i++ {
 				var elem string
@@ -2147,15 +2171,6 @@ func (s *DomainSettings) SetFake() {
 	{
 		{
 			s.MaximumTokenLifetime.SetFake()
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *DomainSettingsPatch) SetFake() {
-	{
-		{
-			s.Patch.SetFake()
 		}
 	}
 }
@@ -2217,6 +2232,22 @@ func (s *DomainTagInfoResults) SetFake() {
 	{
 		{
 			s.HasMore = true
+		}
+	}
+}
+
+// SetFake set fake values.
+func (s *DomainUpsertCapsuleTagsReq) SetFake() {
+	{
+		{
+			s.Tags = nil
+			for i := 0; i < 0; i++ {
+				var elem Tag
+				{
+					elem.SetFake()
+				}
+				s.Tags = append(s.Tags, elem)
+			}
 		}
 	}
 }
@@ -2330,11 +2361,6 @@ func (s *FactPolicyRulesItem) SetFake() {
 
 // SetFake set fake values.
 func (s *FactPolicyRulesItemArgumentsItem) SetFake() {
-	{
-		{
-			s.Any.SetFake()
-		}
-	}
 	{
 		{
 			s.Source.SetFake()
@@ -2533,105 +2559,6 @@ func (s *InvalidRequestError) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *JSONPatchRequestAdd) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-	{
-		{
-			s.Value.SetFake()
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestAddValue) SetFake() {
-	var variant string
-
-	{
-		variant = "string"
-	}
-	s.SetString(variant)
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestCopy) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestMove) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestRemove) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestReplace) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-	{
-		{
-			s.Value.SetFake()
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestReplaceValue) SetFake() {
-	var variant string
-
-	{
-		variant = "string"
-	}
-	s.SetString(variant)
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestTst) SetFake() {
-	{
-		{
-			s.Path = "string"
-		}
-	}
-	{
-		{
-			s.Value.SetFake()
-		}
-	}
-}
-
-// SetFake set fake values.
-func (s *JSONPatchRequestTstValue) SetFake() {
-	var variant string
-
-	{
-		variant = "string"
-	}
-	s.SetString(variant)
-}
-
-// SetFake set fake values.
 func (s *KeyInfos) SetFake() {
 	{
 		{
@@ -2676,6 +2603,15 @@ func (s *LogEntryID) SetFake() {
 		unwrapped = "string"
 	}
 	*s = LogEntryID(unwrapped)
+}
+
+// SetFake set fake values.
+func (s *MicrosoftOAuthDomainIdentityProviderDetails) SetFake() {
+	{
+		{
+			s.ClientID.SetFake()
+		}
+	}
 }
 
 // SetFake set fake values.
@@ -2839,6 +2775,49 @@ func (s *NewDomainResponse) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *NewDomainSettings) SetFake() {
+	{
+		{
+			s.ActiveAdminContacts = nil
+			for i := 0; i < 0; i++ {
+				var elem string
+				{
+					elem = "string"
+				}
+				s.ActiveAdminContacts = append(s.ActiveAdminContacts, elem)
+			}
+		}
+	}
+	{
+		{
+			s.PendingAdminContacts = nil
+			for i := 0; i < 0; i++ {
+				var elem string
+				{
+					elem = "string"
+				}
+				s.PendingAdminContacts = append(s.PendingAdminContacts, elem)
+			}
+		}
+	}
+	{
+		{
+			s.DefaultDisplayName.SetFake()
+		}
+	}
+	{
+		{
+			s.DefaultTokenLifetime.SetFake()
+		}
+	}
+	{
+		{
+			s.MaximumTokenLifetime.SetFake()
+		}
+	}
+}
+
+// SetFake set fake values.
 func (s *NewFact) SetFake() {
 	{
 		{
@@ -2963,6 +2942,15 @@ func (s *NewVendorSettings) SetFake() {
 }
 
 // SetFake set fake values.
+func (s *OptAPIKeyDomainIdentityProviderDetails) SetFake() {
+	var elem APIKeyDomainIdentityProviderDetails
+	{
+		elem.SetFake()
+	}
+	s.SetTo(elem)
+}
+
+// SetFake set fake values.
 func (s *OptAccessLogEntryCreateInfo) SetFake() {
 	var elem AccessLogEntryCreateInfo
 	{
@@ -3017,15 +3005,6 @@ func (s *OptCapabilityRule) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *OptDateTime) SetFake() {
-	var elem time.Time
-	{
-		elem = time.Now()
-	}
-	s.SetTo(elem)
-}
-
-// SetFake set fake values.
 func (s *OptDomainID) SetFake() {
 	var elem DomainID
 	{
@@ -3044,17 +3023,8 @@ func (s *OptDomainIdentityProviderDetails) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *OptFactPolicyRulesItemArgumentsItemSource) SetFake() {
-	var elem FactPolicyRulesItemArgumentsItemSource
-	{
-		elem.SetFake()
-	}
-	s.SetTo(elem)
-}
-
-// SetFake set fake values.
-func (s *OptHookName) SetFake() {
-	var elem HookName
+func (s *OptGoogleOAuthDomainIdentityProviderDetails) SetFake() {
+	var elem GoogleOAuthDomainIdentityProviderDetails
 	{
 		elem.SetFake()
 	}
@@ -3100,6 +3070,15 @@ func (s *OptLLMClassifierConfig) SetFake() {
 // SetFake set fake values.
 func (s *OptLogEntryID) SetFake() {
 	var elem LogEntryID
+	{
+		elem.SetFake()
+	}
+	s.SetTo(elem)
+}
+
+// SetFake set fake values.
+func (s *OptMicrosoftOAuthDomainIdentityProviderDetails) SetFake() {
+	var elem MicrosoftOAuthDomainIdentityProviderDetails
 	{
 		elem.SetFake()
 	}
@@ -3206,15 +3185,6 @@ func (s *OptTagValueField) SetFake() {
 }
 
 // SetFake set fake values.
-func (s *OptVersionConstraint) SetFake() {
-	var elem VersionConstraint
-	{
-		elem.SetFake()
-	}
-	s.SetTo(elem)
-}
-
-// SetFake set fake values.
 func (s *OptWriteContextName) SetFake() {
 	var elem WriteContextName
 	{
@@ -3230,32 +3200,6 @@ func (s *OptWriteContextReference) SetFake() {
 		elem.SetFake()
 	}
 	s.SetTo(elem)
-}
-
-// SetFake set fake values.
-func (s *PatchRequest) SetFake() {
-	var unwrapped []PatchRequestItem
-	{
-		unwrapped = nil
-		for i := 0; i < 0; i++ {
-			var elem PatchRequestItem
-			{
-				elem.SetFake()
-			}
-			unwrapped = append(unwrapped, elem)
-		}
-	}
-	*s = PatchRequest(unwrapped)
-}
-
-// SetFake set fake values.
-func (s *PatchRequestItem) SetFake() {
-	var variant JSONPatchRequestAdd
-
-	{
-		variant.SetFake()
-	}
-	s.SetJSONPatchRequestAdd(variant)
 }
 
 // SetFake set fake values.
@@ -3410,12 +3354,12 @@ func (s *ReadContextDetails) SetFake() {
 	}
 	{
 		{
-			s.DisableReadLogging.SetFake()
+			s.DisableReadLogging = true
 		}
 	}
 	{
 		{
-			s.KeyCacheTTL.SetFake()
+			s.KeyCacheTTL = int32(0)
 		}
 	}
 	{
@@ -3700,12 +3644,12 @@ func (s *ReadContextShortDetails) SetFake() {
 	}
 	{
 		{
-			s.DisableReadLogging.SetFake()
+			s.DisableReadLogging = true
 		}
 	}
 	{
 		{
-			s.KeyCacheTTL.SetFake()
+			s.KeyCacheTTL = int32(0)
 		}
 	}
 	{
@@ -3839,18 +3783,18 @@ func (s *RootEncryptionKeyItem) SetFake() {
 
 // SetFake set fake values.
 func (s *RootEncryptionKeyListResponse) SetFake() {
-	var unwrapped []RootEncryptionKeyItem
 	{
-		unwrapped = nil
-		for i := 0; i < 0; i++ {
-			var elem RootEncryptionKeyItem
-			{
-				elem.SetFake()
+		{
+			s.Keys = nil
+			for i := 0; i < 0; i++ {
+				var elem RootEncryptionKeyItem
+				{
+					elem.SetFake()
+				}
+				s.Keys = append(s.Keys, elem)
 			}
-			unwrapped = append(unwrapped, elem)
 		}
 	}
-	*s = RootEncryptionKeyListResponse(unwrapped)
 }
 
 // SetFake set fake values.
@@ -4152,11 +4096,6 @@ func (s *UpsertSpanTagsRequest) SetFake() {
 	{
 		{
 			s.Summary.SetFake()
-		}
-	}
-	{
-		{
-			s.CreateToken.SetFake()
 		}
 	}
 }

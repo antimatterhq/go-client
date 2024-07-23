@@ -265,20 +265,6 @@ func encodeDomainOpenCapsuleRequest(
 	return nil
 }
 
-func encodeDomainPatchSettingsRequest(
-	req *DomainSettingsPatch,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := jx.GetEncoder()
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
 func encodeDomainPutCapabilityRequest(
 	req *NewCapabilityDefinition,
 	r *http.Request,
@@ -309,6 +295,20 @@ func encodeDomainPutDisasterRecoverySettingsRequest(
 
 func encodeDomainPutFactTypeRequest(
 	req *NewFactTypeDefinition,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := jx.GetEncoder()
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainPutSettingsRequest(
+	req *NewDomainSettings,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -450,17 +450,13 @@ func encodeDomainUpdateReadContextRuleRequest(
 }
 
 func encodeDomainUpsertCapsuleTagsRequest(
-	req []Tag,
+	req *DomainUpsertCapsuleTagsReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
 	e := jx.GetEncoder()
 	{
-		e.ArrStart()
-		for _, elem := range req {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
+		req.Encode(e)
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)
@@ -482,7 +478,7 @@ func encodeDomainUpsertFactRequest(
 }
 
 func encodeDomainUpsertIdentityProviderRequest(
-	req DomainIdentityProviderDetails,
+	req *DomainIdentityProviderDetails,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

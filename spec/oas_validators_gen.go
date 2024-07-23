@@ -10,15 +10,6 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s APIKeyDomainIdentityProviderDetailsType) Validate() error {
-	switch s {
-	case "APIKey":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s AWSServiceAccountKeyInfoProviderName) Validate() error {
 	switch s {
 	case "aws_sa":
@@ -344,17 +335,6 @@ func (s *ActiveRootEncryptionKeyID) Validate() error {
 
 func (s *AddCapsuleLogEntryRequest) Validate() error {
 	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.OpenToken.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "openToken",
-			Error: err,
-		})
-	}
 	if err := func() error {
 		if err := s.Entry.Validate(); err != nil {
 			return err
@@ -1146,24 +1126,17 @@ func (s *CapsuleOpenResponse) Validate() error {
 func (s *CapsuleOpenResponseReadContextConfiguration) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if value, ok := s.KeyCacheTTL.Get(); ok {
-			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        true,
-					Min:           0,
-					MaxSet:        false,
-					Max:           0,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(value)); err != nil {
-					return errors.Wrap(err, "int")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        false,
+			Max:           0,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+		}).Validate(int64(s.KeyCacheTTL)); err != nil {
+			return errors.Wrap(err, "int")
 		}
 		return nil
 	}(); err != nil {
@@ -1232,17 +1205,6 @@ func (s *CapsuleSealRequest) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "spanTags",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.CreateToken.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "createToken",
 			Error: err,
 		})
 	}
@@ -1862,24 +1824,32 @@ func (s *DomainGetWriteContextClassifierRulesOK) Validate() error {
 	return nil
 }
 
-func (s DomainGetWriteContextRegexRulesOKApplicationJSON) Validate() error {
-	alias := ([]WriteContextRegexRule)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
+func (s *DomainGetWriteContextRegexRulesOK) Validate() error {
 	var failures []validate.FieldError
-	for i, elem := range alias {
-		if err := func() error {
-			if err := elem.Validate(); err != nil {
-				return err
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Rules {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
 			}
-			return nil
-		}(); err != nil {
-			failures = append(failures, validate.FieldError{
-				Name:  fmt.Sprintf("[%d]", i),
-				Error: err,
-			})
 		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "rules",
+			Error: err,
+		})
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
@@ -2042,6 +2012,8 @@ func (s DomainIdentityPrincipalDetails) Validate() error {
 		return nil
 	case DomainIdentityHostedDomainPrincipalParamsDomainIdentityPrincipalDetails:
 		return nil // no validation needed
+	case DomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails:
+		return nil // no validation needed
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
 	}
@@ -2057,17 +2029,6 @@ func (s *DomainIdentityProviderInfo) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "name",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.Type.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
 			Error: err,
 		})
 	}
@@ -2247,18 +2208,16 @@ func (s DomainIdentityProviderPrincipalType) Validate() error {
 		return nil
 	case "HostedDomain":
 		return nil
+	case "TenantID":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
 
-func (s DomainIdentityProviderType) Validate() error {
+func (s DomainIdentityTenantIDPrincipalParamsType) Validate() error {
 	switch s {
-	case "GoogleOAuth":
-		return nil
-	case "GCPServiceAccount":
-		return nil
-	case "APIKey":
+	case "TenantID":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3156,42 +3115,6 @@ func (s DomainResourceSummarySchemaItemPlaceholderValues) Validate() error {
 func (s *DomainSettings) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.AdminContacts == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.AdminContacts {
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:    0,
-					MinLengthSet: false,
-					MaxLength:    0,
-					MaxLengthSet: false,
-					Email:        true,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(elem)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "adminContacts",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		var failures []validate.FieldError
 		for i, elem := range s.ActiveAdminContacts {
 			if err := func() error {
@@ -3282,25 +3205,6 @@ func (s *DomainSettings) Validate() error {
 	return nil
 }
 
-func (s *DomainSettingsPatch) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Patch.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "patch",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *DomainStatus) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -3370,6 +3274,39 @@ func (s *DomainTagInfoResults) Validate() error {
 		if s.Tags == nil {
 			return errors.New("nil is invalid value")
 		}
+		var failures []validate.FieldError
+		for i, elem := range s.Tags {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "tags",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DomainUpsertCapsuleTagsReq) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
 		var failures []validate.FieldError
 		for i, elem := range s.Tags {
 			if err := func() error {
@@ -3620,15 +3557,8 @@ func (s *FactPolicyRulesItem) Validate() error {
 func (s *FactPolicyRulesItemArgumentsItem) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if value, ok := s.Source.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := s.Source.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -3666,6 +3596,8 @@ func (s FactPolicyRulesItemArgumentsItemSource) Validate() error {
 	case "domainIdentity":
 		return nil
 	case "literal":
+		return nil
+	case "any":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3862,15 +3794,6 @@ func (s GCPServiceAccountKeyInfoProviderName) Validate() error {
 	}
 }
 
-func (s GoogleOAuthDomainIdentityProviderDetailsType) Validate() error {
-	switch s {
-	case "GoogleOAuth":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s HookName) Validate() error {
 	alias := (string)(s)
 	if err := (validate.String{
@@ -3933,165 +3856,6 @@ func (s ImportAlias) Validate() error {
 		return errors.Wrap(err, "string")
 	}
 	return nil
-}
-
-func (s *JSONPatchRequestAdd) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Value.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "value",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s JSONPatchRequestAddOp) Validate() error {
-	switch s {
-	case "add":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s JSONPatchRequestAddValue) Validate() error {
-	switch s.Type {
-	case StringJSONPatchRequestAddValue:
-		return nil // no validation needed
-	case Float64JSONPatchRequestAddValue:
-		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	case BoolJSONPatchRequestAddValue:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
-}
-
-func (s JSONPatchRequestCopyOp) Validate() error {
-	switch s {
-	case "copy":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s JSONPatchRequestMoveOp) Validate() error {
-	switch s {
-	case "move":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s JSONPatchRequestRemoveOp) Validate() error {
-	switch s {
-	case "remove":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s *JSONPatchRequestReplace) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Value.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "value",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s JSONPatchRequestReplaceOp) Validate() error {
-	switch s {
-	case "replace":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s JSONPatchRequestReplaceValue) Validate() error {
-	switch s.Type {
-	case StringJSONPatchRequestReplaceValue:
-		return nil // no validation needed
-	case Float64JSONPatchRequestReplaceValue:
-		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	case BoolJSONPatchRequestReplaceValue:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
-}
-
-func (s *JSONPatchRequestTst) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Value.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "value",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s JSONPatchRequestTstOp) Validate() error {
-	switch s {
-	case "test":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s JSONPatchRequestTstValue) Validate() error {
-	switch s.Type {
-	case StringJSONPatchRequestTstValue:
-		return nil // no validation needed
-	case Float64JSONPatchRequestTstValue:
-		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	case BoolJSONPatchRequestTstValue:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
 }
 
 func (s LogEntryID) Validate() error {
@@ -4378,6 +4142,106 @@ func (s *NewDomainResponse) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "id",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *NewDomainSettings) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.ActiveAdminContacts {
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    0,
+					MaxLengthSet: false,
+					Email:        true,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(elem)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "activeAdminContacts",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.PendingAdminContacts {
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    0,
+					MaxLengthSet: false,
+					Email:        true,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(elem)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pendingAdminContacts",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.DefaultDisplayName.Get(); ok {
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    40,
+					MaxLengthSet: true,
+					Email:        false,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(value)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "defaultDisplayName",
 			Error: err,
 		})
 	}
@@ -4710,59 +4574,6 @@ func (s *NewVendorSettings) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s PatchRequest) Validate() error {
-	alias := ([]PatchRequestItem)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
-	var failures []validate.FieldError
-	for i, elem := range alias {
-		if err := func() error {
-			if err := elem.Validate(); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			failures = append(failures, validate.FieldError{
-				Name:  fmt.Sprintf("[%d]", i),
-				Error: err,
-			})
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s PatchRequestItem) Validate() error {
-	switch s.Type {
-	case JSONPatchRequestAddPatchRequestItem:
-		if err := s.JSONPatchRequestAdd.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case JSONPatchRequestReplacePatchRequestItem:
-		if err := s.JSONPatchRequestReplace.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case JSONPatchRequestTstPatchRequestItem:
-		if err := s.JSONPatchRequestTst.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case JSONPatchRequestRemovePatchRequestItem:
-		return nil // no validation needed
-	case JSONPatchRequestMovePatchRequestItem:
-		return nil // no validation needed
-	case JSONPatchRequestCopyPatchRequestItem:
-		return nil // no validation needed
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
-	}
 }
 
 func (s PolicyRuleOperation) Validate() error {
@@ -5112,24 +4923,17 @@ func (s *ReadContextDetails) Validate() error {
 		})
 	}
 	if err := func() error {
-		if value, ok := s.KeyCacheTTL.Get(); ok {
-			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        true,
-					Min:           0,
-					MaxSet:        false,
-					Max:           0,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(value)); err != nil {
-					return errors.Wrap(err, "int")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        false,
+			Max:           0,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+		}).Validate(int64(s.KeyCacheTTL)); err != nil {
+			return errors.Wrap(err, "int")
 		}
 		return nil
 	}(); err != nil {
@@ -5297,15 +5101,8 @@ func (s ReadContextReference) Validate() error {
 func (s *ReadContextRequiredHook) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
-		if value, ok := s.Hook.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := s.Hook.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -5315,15 +5112,8 @@ func (s *ReadContextRequiredHook) Validate() error {
 		})
 	}
 	if err := func() error {
-		if value, ok := s.Constraint.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := s.Constraint.Validate(); err != nil {
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -5623,24 +5413,17 @@ func (s *ReadContextShortDetails) Validate() error {
 		})
 	}
 	if err := func() error {
-		if value, ok := s.KeyCacheTTL.Get(); ok {
-			if err := func() error {
-				if err := (validate.Int{
-					MinSet:        true,
-					Min:           0,
-					MaxSet:        false,
-					Max:           0,
-					MinExclusive:  false,
-					MaxExclusive:  false,
-					MultipleOfSet: false,
-					MultipleOf:    0,
-				}).Validate(int64(value)); err != nil {
-					return errors.Wrap(err, "int")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        false,
+			Max:           0,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+		}).Validate(int64(s.KeyCacheTTL)); err != nil {
+			return errors.Wrap(err, "int")
 		}
 		return nil
 	}(); err != nil {
@@ -5737,24 +5520,32 @@ func (s *RootEncryptionKeyItem) Validate() error {
 	return nil
 }
 
-func (s RootEncryptionKeyListResponse) Validate() error {
-	alias := ([]RootEncryptionKeyItem)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
+func (s *RootEncryptionKeyListResponse) Validate() error {
 	var failures []validate.FieldError
-	for i, elem := range alias {
-		if err := func() error {
-			if err := elem.Validate(); err != nil {
-				return err
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Keys {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
 			}
-			return nil
-		}(); err != nil {
-			failures = append(failures, validate.FieldError{
-				Name:  fmt.Sprintf("[%d]", i),
-				Error: err,
-			})
 		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "keys",
+			Error: err,
+		})
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
@@ -6251,17 +6042,6 @@ func (s *UpsertSpanTagsRequest) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "summary",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.CreateToken.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "createToken",
 			Error: err,
 		})
 	}

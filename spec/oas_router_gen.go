@@ -481,6 +481,179 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											return
 										}
 									}
+								case 'e': // Prefix: "encryption/"
+									if l := len("encryption/"); len(elem) >= l && elem[0:l] == "encryption/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "active-key"
+										if l := len("active-key"); len(elem) >= l && elem[0:l] == "active-key" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleDomainGetActiveExternalRootEncryptionKeyRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											case "POST":
+												s.handleDomainSetActiveExternalRootEncryptionKeyRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "GET,POST")
+											}
+
+											return
+										}
+									case 'f': // Prefix: "flush"
+										if l := len("flush"); len(elem) >= l && elem[0:l] == "flush" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleDomainFlushEncryptionKeysRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
+										}
+									case 'k': // Prefix: "keys"
+										if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch r.Method {
+											case "GET":
+												s.handleDomainListExternalRootEncryptionKeyRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											case "POST":
+												s.handleDomainAddExternalRootEncryptionKeyRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "GET,POST")
+											}
+
+											return
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "rootEncryptionKeyID"
+											// Match until "/"
+											idx := strings.IndexByte(elem, '/')
+											if idx < 0 {
+												idx = len(elem)
+											}
+											args[1] = elem[:idx]
+											elem = elem[idx:]
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "DELETE":
+													s.handleDomainDeleteExternalRootEncryptionKeyRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, "DELETE")
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/test"
+												if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "POST":
+														s.handleDomainExternalRootEncryptionKeyTestRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, "POST")
+													}
+
+													return
+												}
+											}
+										}
+									case 'p': // Prefix: "providers"
+										if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleDomainGetExternalRootEncryptionKeyProvidersRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "GET")
+											}
+
+											return
+										}
+									case 'r': // Prefix: "rotate"
+										if l := len("rotate"); len(elem) >= l && elem[0:l] == "rotate" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleDomainRotateRootEncryptionKeysRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
+										}
+									}
 								case 'f': // Prefix: "facts"
 									if l := len("facts"); len(elem) >= l && elem[0:l] == "facts" {
 										elem = elem[l:]
@@ -751,175 +924,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											}
 										}
 									}
-								case 'k': // Prefix: "keys"
-									if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+								case 'k': // Prefix: "keys/disaster-recovery"
+									if l := len("keys/disaster-recovery"); len(elem) >= l && elem[0:l] == "keys/disaster-recovery" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
+										// Leaf node.
 										switch r.Method {
 										case "GET":
-											s.handleDomainListExternalRootEncryptionKeyRequest([1]string{
+											s.handleDomainGetDisasterRecoverySettingsRequest([1]string{
 												args[0],
 											}, elemIsEscaped, w, r)
-										case "POST":
-											s.handleDomainAddExternalRootEncryptionKeyRequest([1]string{
+										case "PUT":
+											s.handleDomainPutDisasterRecoverySettingsRequest([1]string{
 												args[0],
 											}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "GET,POST")
+											s.notAllowed(w, r, "GET,PUT")
 										}
 
 										return
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/"
-										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											break
-										}
-										switch elem[0] {
-										case 'a': // Prefix: "active"
-											if l := len("active"); len(elem) >= l && elem[0:l] == "active" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "GET":
-													s.handleDomainGetActiveExternalRootEncryptionKeyRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												case "POST":
-													s.handleDomainSetActiveExternalRootEncryptionKeyRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "GET,POST")
-												}
-
-												return
-											}
-										case 'd': // Prefix: "disaster-recovery"
-											if l := len("disaster-recovery"); len(elem) >= l && elem[0:l] == "disaster-recovery" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "GET":
-													s.handleDomainGetDisasterRecoverySettingsRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												case "PUT":
-													s.handleDomainPutDisasterRecoverySettingsRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "GET,PUT")
-												}
-
-												return
-											}
-										case 'p': // Prefix: "providers"
-											if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "GET":
-													s.handleDomainGetExternalRootEncryptionKeyProvidersRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "GET")
-												}
-
-												return
-											}
-										case 'r': // Prefix: "rotate"
-											if l := len("rotate"); len(elem) >= l && elem[0:l] == "rotate" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "POST":
-													s.handleDomainRotateRootEncryptionKeysRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "POST")
-												}
-
-												return
-											}
-										}
-										// Param: "rootEncryptionKeyID"
-										// Match until "/"
-										idx := strings.IndexByte(elem, '/')
-										if idx < 0 {
-											idx = len(elem)
-										}
-										args[1] = elem[:idx]
-										elem = elem[idx:]
-
-										if len(elem) == 0 {
-											switch r.Method {
-											case "DELETE":
-												s.handleDomainDeleteExternalRootEncryptionKeyRequest([2]string{
-													args[0],
-													args[1],
-												}, elemIsEscaped, w, r)
-											default:
-												s.notAllowed(w, r, "DELETE")
-											}
-
-											return
-										}
-										switch elem[0] {
-										case '/': // Prefix: "/test"
-											if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "POST":
-													s.handleDomainExternalRootEncryptionKeyTestRequest([2]string{
-														args[0],
-														args[1],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "POST")
-												}
-
-												return
-											}
-										}
 									}
 								case 'l': // Prefix: "log"
 									if l := len("log"); len(elem) >= l && elem[0:l] == "log" {
@@ -1318,12 +1345,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												s.handleDomainGetSettingsRequest([1]string{
 													args[0],
 												}, elemIsEscaped, w, r)
-											case "PATCH":
-												s.handleDomainPatchSettingsRequest([1]string{
+											case "PUT":
+												s.handleDomainPutSettingsRequest([1]string{
 													args[0],
 												}, elemIsEscaped, w, r)
 											default:
-												s.notAllowed(w, r, "GET,PATCH")
+												s.notAllowed(w, r, "GET,PUT")
 											}
 
 											return
@@ -1589,26 +1616,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										}
 									}
 								}
-							}
-						case 'e': // Prefix: "encryption/flush"
-							if l := len("encryption/flush"); len(elem) >= l && elem[0:l] == "encryption/flush" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "POST":
-									s.handleDomainFlushEncryptionKeysRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
 							}
 						case 'h': // Prefix: "hooks"
 							if l := len("hooks"); len(elem) >= l && elem[0:l] == "hooks" {
@@ -2429,6 +2436,200 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											}
 										}
 									}
+								case 'e': // Prefix: "encryption/"
+									if l := len("encryption/"); len(elem) >= l && elem[0:l] == "encryption/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "active-key"
+										if l := len("active-key"); len(elem) >= l && elem[0:l] == "active-key" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												// Leaf: DomainGetActiveExternalRootEncryptionKey
+												r.name = "DomainGetActiveExternalRootEncryptionKey"
+												r.summary = "Get the active root encryption key's information."
+												r.operationID = "domainGetActiveExternalRootEncryptionKey"
+												r.pathPattern = "/domains/{domainID}/control/encryption/active-key"
+												r.args = args
+												r.count = 1
+												return r, true
+											case "POST":
+												// Leaf: DomainSetActiveExternalRootEncryptionKey
+												r.name = "DomainSetActiveExternalRootEncryptionKey"
+												r.summary = "Set the active root encryption key"
+												r.operationID = "domainSetActiveExternalRootEncryptionKey"
+												r.pathPattern = "/domains/{domainID}/control/encryption/active-key"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+									case 'f': // Prefix: "flush"
+										if l := len("flush"); len(elem) >= l && elem[0:l] == "flush" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "POST":
+												// Leaf: DomainFlushEncryptionKeys
+												r.name = "DomainFlushEncryptionKeys"
+												r.summary = "Flush all encryption keys"
+												r.operationID = "domainFlushEncryptionKeys"
+												r.pathPattern = "/domains/{domainID}/control/encryption/flush"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+									case 'k': // Prefix: "keys"
+										if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												r.name = "DomainListExternalRootEncryptionKey"
+												r.summary = "List all external root encryption keys."
+												r.operationID = "domainListExternalRootEncryptionKey"
+												r.pathPattern = "/domains/{domainID}/control/encryption/keys"
+												r.args = args
+												r.count = 1
+												return r, true
+											case "POST":
+												r.name = "DomainAddExternalRootEncryptionKey"
+												r.summary = "Add a new external root encryption key."
+												r.operationID = "domainAddExternalRootEncryptionKey"
+												r.pathPattern = "/domains/{domainID}/control/encryption/keys"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "rootEncryptionKeyID"
+											// Match until "/"
+											idx := strings.IndexByte(elem, '/')
+											if idx < 0 {
+												idx = len(elem)
+											}
+											args[1] = elem[:idx]
+											elem = elem[idx:]
+
+											if len(elem) == 0 {
+												switch method {
+												case "DELETE":
+													r.name = "DomainDeleteExternalRootEncryptionKey"
+													r.summary = "Delete an external root encryption key by ID."
+													r.operationID = "domainDeleteExternalRootEncryptionKey"
+													r.pathPattern = "/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/test"
+												if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													switch method {
+													case "POST":
+														// Leaf: DomainExternalRootEncryptionKeyTest
+														r.name = "DomainExternalRootEncryptionKeyTest"
+														r.summary = "Test the health of a root encryption key"
+														r.operationID = "domainExternalRootEncryptionKeyTest"
+														r.pathPattern = "/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+											}
+										}
+									case 'p': // Prefix: "providers"
+										if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												// Leaf: DomainGetExternalRootEncryptionKeyProviders
+												r.name = "DomainGetExternalRootEncryptionKeyProviders"
+												r.summary = "Returns a list of available root encryption key providers."
+												r.operationID = "domainGetExternalRootEncryptionKeyProviders"
+												r.pathPattern = "/domains/{domainID}/control/encryption/providers"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+									case 'r': // Prefix: "rotate"
+										if l := len("rotate"); len(elem) >= l && elem[0:l] == "rotate" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "POST":
+												// Leaf: DomainRotateRootEncryptionKeys
+												r.name = "DomainRotateRootEncryptionKeys"
+												r.summary = "Re-encrypt key encryption keys."
+												r.operationID = "domainRotateRootEncryptionKeys"
+												r.pathPattern = "/domains/{domainID}/control/encryption/rotate"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+									}
 								case 'f': // Prefix: "facts"
 									if l := len("facts"); len(elem) >= l && elem[0:l] == "facts" {
 										elem = elem[l:]
@@ -2732,8 +2933,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											}
 										}
 									}
-								case 'k': // Prefix: "keys"
-									if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+								case 'k': // Prefix: "keys/disaster-recovery"
+									if l := len("keys/disaster-recovery"); len(elem) >= l && elem[0:l] == "keys/disaster-recovery" {
 										elem = elem[l:]
 									} else {
 										break
@@ -2742,190 +2943,25 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									if len(elem) == 0 {
 										switch method {
 										case "GET":
-											r.name = "DomainListExternalRootEncryptionKey"
-											r.summary = "List all external root encryption keys."
-											r.operationID = "domainListExternalRootEncryptionKey"
-											r.pathPattern = "/domains/{domainID}/control/keys"
+											// Leaf: DomainGetDisasterRecoverySettings
+											r.name = "DomainGetDisasterRecoverySettings"
+											r.summary = "Get a domain's disaster recovery settings."
+											r.operationID = "domainGetDisasterRecoverySettings"
+											r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
 											r.args = args
 											r.count = 1
 											return r, true
-										case "POST":
-											r.name = "DomainAddExternalRootEncryptionKey"
-											r.summary = "Add a new external root encryption key."
-											r.operationID = "domainAddExternalRootEncryptionKey"
-											r.pathPattern = "/domains/{domainID}/control/keys"
+										case "PUT":
+											// Leaf: DomainPutDisasterRecoverySettings
+											r.name = "DomainPutDisasterRecoverySettings"
+											r.summary = "Create or update a domain's disaster recovery settings."
+											r.operationID = "domainPutDisasterRecoverySettings"
+											r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
 											r.args = args
 											r.count = 1
 											return r, true
 										default:
 											return
-										}
-									}
-									switch elem[0] {
-									case '/': // Prefix: "/"
-										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											break
-										}
-										switch elem[0] {
-										case 'a': // Prefix: "active"
-											if l := len("active"); len(elem) >= l && elem[0:l] == "active" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												switch method {
-												case "GET":
-													// Leaf: DomainGetActiveExternalRootEncryptionKey
-													r.name = "DomainGetActiveExternalRootEncryptionKey"
-													r.summary = "Get the active root encryption key's information."
-													r.operationID = "domainGetActiveExternalRootEncryptionKey"
-													r.pathPattern = "/domains/{domainID}/control/keys/active"
-													r.args = args
-													r.count = 1
-													return r, true
-												case "POST":
-													// Leaf: DomainSetActiveExternalRootEncryptionKey
-													r.name = "DomainSetActiveExternalRootEncryptionKey"
-													r.summary = "Set the active root encryption key"
-													r.operationID = "domainSetActiveExternalRootEncryptionKey"
-													r.pathPattern = "/domains/{domainID}/control/keys/active"
-													r.args = args
-													r.count = 1
-													return r, true
-												default:
-													return
-												}
-											}
-										case 'd': // Prefix: "disaster-recovery"
-											if l := len("disaster-recovery"); len(elem) >= l && elem[0:l] == "disaster-recovery" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												switch method {
-												case "GET":
-													// Leaf: DomainGetDisasterRecoverySettings
-													r.name = "DomainGetDisasterRecoverySettings"
-													r.summary = "Get a domain's disaster recovery settings."
-													r.operationID = "domainGetDisasterRecoverySettings"
-													r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
-													r.args = args
-													r.count = 1
-													return r, true
-												case "PUT":
-													// Leaf: DomainPutDisasterRecoverySettings
-													r.name = "DomainPutDisasterRecoverySettings"
-													r.summary = "Create or update a domain's disaster recovery settings."
-													r.operationID = "domainPutDisasterRecoverySettings"
-													r.pathPattern = "/domains/{domainID}/control/keys/disaster-recovery"
-													r.args = args
-													r.count = 1
-													return r, true
-												default:
-													return
-												}
-											}
-										case 'p': // Prefix: "providers"
-											if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												switch method {
-												case "GET":
-													// Leaf: DomainGetExternalRootEncryptionKeyProviders
-													r.name = "DomainGetExternalRootEncryptionKeyProviders"
-													r.summary = "Returns a list of available root encryption key providers."
-													r.operationID = "domainGetExternalRootEncryptionKeyProviders"
-													r.pathPattern = "/domains/{domainID}/control/keys/providers"
-													r.args = args
-													r.count = 1
-													return r, true
-												default:
-													return
-												}
-											}
-										case 'r': // Prefix: "rotate"
-											if l := len("rotate"); len(elem) >= l && elem[0:l] == "rotate" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												switch method {
-												case "POST":
-													// Leaf: DomainRotateRootEncryptionKeys
-													r.name = "DomainRotateRootEncryptionKeys"
-													r.summary = "Re-encrypt key encryption keys."
-													r.operationID = "domainRotateRootEncryptionKeys"
-													r.pathPattern = "/domains/{domainID}/control/keys/rotate"
-													r.args = args
-													r.count = 1
-													return r, true
-												default:
-													return
-												}
-											}
-										}
-										// Param: "rootEncryptionKeyID"
-										// Match until "/"
-										idx := strings.IndexByte(elem, '/')
-										if idx < 0 {
-											idx = len(elem)
-										}
-										args[1] = elem[:idx]
-										elem = elem[idx:]
-
-										if len(elem) == 0 {
-											switch method {
-											case "DELETE":
-												r.name = "DomainDeleteExternalRootEncryptionKey"
-												r.summary = "Delete an external root encryption key by ID."
-												r.operationID = "domainDeleteExternalRootEncryptionKey"
-												r.pathPattern = "/domains/{domainID}/control/keys/{rootEncryptionKeyID}"
-												r.args = args
-												r.count = 2
-												return r, true
-											default:
-												return
-											}
-										}
-										switch elem[0] {
-										case '/': // Prefix: "/test"
-											if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												switch method {
-												case "POST":
-													// Leaf: DomainExternalRootEncryptionKeyTest
-													r.name = "DomainExternalRootEncryptionKeyTest"
-													r.summary = "Test the health of a root encryption key"
-													r.operationID = "domainExternalRootEncryptionKeyTest"
-													r.pathPattern = "/domains/{domainID}/control/keys/{rootEncryptionKeyID}/test"
-													r.args = args
-													r.count = 2
-													return r, true
-												default:
-													return
-												}
-											}
 										}
 									}
 								case 'l': // Prefix: "log"
@@ -3373,11 +3409,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 												r.args = args
 												r.count = 1
 												return r, true
-											case "PATCH":
-												// Leaf: DomainPatchSettings
-												r.name = "DomainPatchSettings"
+											case "PUT":
+												// Leaf: DomainPutSettings
+												r.name = "DomainPutSettings"
 												r.summary = "Update the domain settings"
-												r.operationID = "domainPatchSettings"
+												r.operationID = "domainPutSettings"
 												r.pathPattern = "/domains/{domainID}/control/settings"
 												r.args = args
 												r.count = 1
@@ -3673,28 +3709,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											}
 										}
 									}
-								}
-							}
-						case 'e': // Prefix: "encryption/flush"
-							if l := len("encryption/flush"); len(elem) >= l && elem[0:l] == "encryption/flush" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "POST":
-									// Leaf: DomainFlushEncryptionKeys
-									r.name = "DomainFlushEncryptionKeys"
-									r.summary = "Flush all encryption keys"
-									r.operationID = "domainFlushEncryptionKeys"
-									r.pathPattern = "/domains/{domainID}/encryption/flush"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
 								}
 							}
 						case 'h': // Prefix: "hooks"
