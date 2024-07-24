@@ -18,7 +18,7 @@ type SecurityHandler interface {
 	// A JWT auth scheme using a token obtained from the domain /authenticate endpoint.
 	HandleDomainIdentity(ctx context.Context, operationName string, t DomainIdentity) (context.Context, error)
 	// HandleOAuthToken handles oauth_token security.
-	// A JWT token obtained from the browser based OAuth flow.
+	// A JWT token obtained from the browser based Google OAuth flow.
 	HandleOAuthToken(ctx context.Context, operationName string, t OAuthToken) (context.Context, error)
 }
 
@@ -74,7 +74,7 @@ type SecuritySource interface {
 	// A JWT auth scheme using a token obtained from the domain /authenticate endpoint.
 	DomainIdentity(ctx context.Context, operationName string) (DomainIdentity, error)
 	// OAuthToken provides oauth_token security value.
-	// A JWT token obtained from the browser based OAuth flow.
+	// A JWT token obtained from the browser based Google OAuth flow.
 	OAuthToken(ctx context.Context, operationName string) (OAuthToken, error)
 }
 

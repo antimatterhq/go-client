@@ -44,7 +44,7 @@ type Invoker interface {
 	//
 	// Add a new external root encryption key with its supporting access configuration.
 	//
-	// POST /domains/{domainID}/control/encryption/keys
+	// POST /domains/{domainID}/control/keys
 	DomainAddExternalRootEncryptionKey(ctx context.Context, request *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error)
 	// DomainAddNew invokes domainAddNew operation.
 	//
@@ -128,8 +128,8 @@ type Invoker interface {
 	DomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability invokes domainDeleteCapability operation.
 	//
-	// Delete a capability. All rules that reference the capability must have already been deleted, or
-	// you will get an error.
+	// Delete a capability. All domain policy rules that reference the capability must have already been
+	// deleted, or you will receive a 409 error.
 	//
 	// DELETE /domains/{domainID}/control/capabilities/{capability}
 	DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error)
@@ -142,10 +142,10 @@ type Invoker interface {
 	// DomainDeleteExternalRootEncryptionKey invokes domainDeleteExternalRootEncryptionKey operation.
 	//
 	// Delete an external root encryption key using its ID. This operation is only successful if the
-	// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
-	// ensure that all KEKs have been migrated to the active REK.
+	// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
+	// endpoint to ensure that all KEKs have been migrated to the active REK.
 	//
-	// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
+	// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
 	DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error)
 	// DomainDeleteFactByID invokes domainDeleteFactByID operation.
 	//
@@ -227,20 +227,20 @@ type Invoker interface {
 	//
 	// Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 	//
-	// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
+	// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
 	DomainExternalRootEncryptionKeyTest(ctx context.Context, request *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error)
 	// DomainFlushEncryptionKeys invokes domainFlushEncryptionKeys operation.
 	//
 	// Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-	// check that the domain's root key is still available.
+	// check that the domain's root encryption key is still available.
 	//
-	// POST /domains/{domainID}/control/encryption/flush
+	// POST /domains/{domainID}/encryption/flush
 	DomainFlushEncryptionKeys(ctx context.Context, request *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error)
 	// DomainGetActiveExternalRootEncryptionKey invokes domainGetActiveExternalRootEncryptionKey operation.
 	//
 	// Return the details about the current active root encryption key used by the domain.
 	//
-	// GET /domains/{domainID}/control/encryption/active-key
+	// GET /domains/{domainID}/control/keys/active
 	DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error)
 	// DomainGetCapabilities invokes domainGetCapabilities operation.
 	//
@@ -252,8 +252,8 @@ type Invoker interface {
 	DomainGetCapabilities(ctx context.Context, params DomainGetCapabilitiesParams) (DomainGetCapabilitiesRes, error)
 	// DomainGetCapability invokes domainGetCapability operation.
 	//
-	// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
-	// an identity provider. The capabilities can be referenced by the domain policy rules.
+	// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
+	// identity provider. The capabilities can be referenced by the domain policy rules.
 	//
 	// GET /domains/{domainID}/control/capabilities/{capability}
 	DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error)
@@ -275,7 +275,7 @@ type Invoker interface {
 	// relevant, any additional information required to use them (e.g. for the delegated key provider
 	// `aws_am` the AWS account number to delegate to is returned).
 	//
-	// GET /domains/{domainID}/control/encryption/providers
+	// GET /domains/{domainID}/control/keys/providers
 	DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error)
 	// DomainGetFactByID invokes domainGetFactByID operation.
 	//
@@ -409,7 +409,7 @@ type Invoker interface {
 	//
 	// List all external root encryption keys for the domain.
 	//
-	// GET /domains/{domainID}/control/encryption/keys
+	// GET /domains/{domainID}/control/keys
 	DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error)
 	// DomainListFactTypes invokes domainListFactTypes operation.
 	//
@@ -420,7 +420,7 @@ type Invoker interface {
 	DomainListFactTypes(ctx context.Context, params DomainListFactTypesParams) (DomainListFactTypesRes, error)
 	// DomainListFacts invokes domainListFacts operation.
 	//
-	// Get the facts corresponding to a fact type.
+	// Get the facts within a fact type.
 	//
 	// GET /domains/{domainID}/control/facts/{factType}/list
 	DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error)
@@ -435,7 +435,7 @@ type Invoker interface {
 	//
 	// Retrieve the domain's identity providers and a brief overview of their configuration. This
 	// endpoint requires authentication, but you can obtain an abridged list of the domain identity
-	// providers prior to authentication using the `/public-info` endpoint.
+	// providers prior to authentication by using the `/public-info` endpoint.
 	//
 	// GET /domains/{domainID}/control/identities
 	DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error)
@@ -484,6 +484,12 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/open
 	DomainOpenCapsule(ctx context.Context, request *CapsuleOpenRequest, params DomainOpenCapsuleParams) (DomainOpenCapsuleRes, error)
+	// DomainPatchSettings invokes domainPatchSettings operation.
+	//
+	// Applies the given patch to the domain settings.
+	//
+	// PATCH /domains/{domainID}/control/settings
+	DomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error)
 	// DomainPolicyFlush invokes domainPolicyFlush operation.
 	//
 	// Flush the policy cache so that changes to permissions take effect.
@@ -493,7 +499,7 @@ type Invoker interface {
 	// DomainPutCapability invokes domainPutCapability operation.
 	//
 	// Create or update a capability. If you want to return an error if the capability already existed,
-	// set createonly=true.
+	// set `createonly` to true.
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
@@ -507,16 +513,10 @@ type Invoker interface {
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
 	// context configuration rules. This endpoint allows you to register a new fact type. To create a
-	// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
+	// fact within an existing type, use `/control/facts/{factType}/new`.
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
-	// DomainPutSettings invokes domainPutSettings operation.
-	//
-	// Replace the current settings with the new settings supplied.
-	//
-	// PUT /domains/{domainID}/control/settings
-	DomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error)
 	// DomainPutVendorSettings invokes domainPutVendorSettings operation.
 	//
 	// Create or update the vendor settings for a given domain.
@@ -563,7 +563,7 @@ type Invoker interface {
 	// In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 	// caller will call this endpoint in a loop until has_more is false.
 	//
-	// POST /domains/{domainID}/control/encryption/rotate
+	// POST /domains/{domainID}/control/keys/rotate
 	DomainRotateRootEncryptionKeys(ctx context.Context, request *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error)
 	// DomainSealCapsule invokes domainSealCapsule operation.
 	//
@@ -574,9 +574,9 @@ type Invoker interface {
 	// DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 	//
 	// This will set which root encryption is active: i.e. is used for new capsules, or is used to
-	// encrypt KEKs when `rotate` is called.
+	// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 	//
-	// POST /domains/{domainID}/control/encryption/active-key
+	// POST /domains/{domainID}/control/keys/active
 	DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error)
 	// DomainUpdateIdentityProviderPrincipal invokes domainUpdateIdentityProviderPrincipal operation.
 	//
@@ -610,12 +610,12 @@ type Invoker interface {
 	// Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-	DomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
+	DomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
 	// DomainUpsertFact invokes domainUpsertFact operation.
 	//
 	// Create a new fact. The fact type must have been previously registered using
-	// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
-	// for all fields), this call is a no-op and returns the same ID.
+	// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
+	// this call is a no-op and returns the same ID.
 	//
 	// POST /domains/{domainID}/control/facts/{factType}/new
 	DomainUpsertFact(ctx context.Context, request *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error)
@@ -624,7 +624,7 @@ type Invoker interface {
 	// Create or configure an identity provider.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}
-	DomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
+	DomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
 	// DomainUpsertReadContext invokes domainUpsertReadContext operation.
 	//
 	// Update or create a read context.
@@ -841,15 +841,6 @@ func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCa
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/log"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -928,27 +919,6 @@ func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCa
 	pathParts[4] = "/log"
 	uri.AddPathParts(u, pathParts[:]...)
 
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "openToken" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "openToken",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if unwrapped := string(params.OpenToken); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -1011,7 +981,7 @@ func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCa
 //
 // Add a new external root encryption key with its supporting access configuration.
 //
-// POST /domains/{domainID}/control/encryption/keys
+// POST /domains/{domainID}/control/keys
 func (c *Client) DomainAddExternalRootEncryptionKey(ctx context.Context, request *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainAddExternalRootEncryptionKey(ctx, request, params)
 	return res, err
@@ -1021,7 +991,7 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
 	}
 
 	// Run stopwatch.
@@ -1076,7 +1046,7 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/keys"
+	pathParts[2] = "/control/keys"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1154,15 +1124,6 @@ func (c *Client) sendDomainAddNew(ctx context.Context, request *NewDomain) (res 
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1238,15 +1199,6 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 		otelogen.OperationID("domainAddReadContextRule"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -1557,15 +1509,6 @@ func (c *Client) sendDomainContactIssueVerify(ctx context.Context, request *Doma
 		otelogen.OperationID("domainContactIssueVerify"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/account/verify"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -1974,15 +1917,6 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2113,15 +2047,6 @@ func (c *Client) sendDomainCreatePolicyRule(ctx context.Context, request *NewDom
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2251,15 +2176,6 @@ func (c *Client) sendDomainDataTaggingHookInvoke(ctx context.Context, request *D
 		otelogen.OperationID("domainDataTaggingHookInvoke"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/invoke"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -2439,15 +2355,6 @@ func (c *Client) sendDomainDataTaggingHookTest(ctx context.Context, request *Dom
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/test"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2586,8 +2493,8 @@ func (c *Client) sendDomainDataTaggingHookTest(ctx context.Context, request *Dom
 
 // DomainDeleteCapability invokes domainDeleteCapability operation.
 //
-// Delete a capability. All rules that reference the capability must have already been deleted, or
-// you will get an error.
+// Delete a capability. All domain policy rules that reference the capability must have already been
+// deleted, or you will receive a 409 error.
 //
 // DELETE /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error) {
@@ -2888,10 +2795,10 @@ func (c *Client) sendDomainDeleteCapsuleTags(ctx context.Context, request *Delet
 // DomainDeleteExternalRootEncryptionKey invokes domainDeleteExternalRootEncryptionKey operation.
 //
 // Delete an external root encryption key using its ID. This operation is only successful if the
-// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
-// ensure that all KEKs have been migrated to the active REK.
+// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
+// endpoint to ensure that all KEKs have been migrated to the active REK.
 //
-// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
+// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
 func (c *Client) DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainDeleteExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -2901,7 +2808,7 @@ func (c *Client) sendDomainDeleteExternalRootEncryptionKey(ctx context.Context, 
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}"),
 	}
 
 	// Run stopwatch.
@@ -2956,7 +2863,7 @@ func (c *Client) sendDomainDeleteExternalRootEncryptionKey(ctx context.Context, 
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/keys/"
+	pathParts[2] = "/control/keys/"
 	{
 		// Encode "rootEncryptionKeyID" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -4950,7 +4857,7 @@ func (c *Client) sendDomainDescribeWriteContext(ctx context.Context, params Doma
 //
 // Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 //
-// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
+// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
 func (c *Client) DomainExternalRootEncryptionKeyTest(ctx context.Context, request *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error) {
 	res, err := c.sendDomainExternalRootEncryptionKeyTest(ctx, request, params)
 	return res, err
@@ -4960,7 +4867,7 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainExternalRootEncryptionKeyTest"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}/test"),
 	}
 
 	// Run stopwatch.
@@ -5015,7 +4922,7 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/keys/"
+	pathParts[2] = "/control/keys/"
 	{
 		// Encode "rootEncryptionKeyID" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -5101,9 +5008,9 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 // DomainFlushEncryptionKeys invokes domainFlushEncryptionKeys operation.
 //
 // Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-// check that the domain's root key is still available.
+// check that the domain's root encryption key is still available.
 //
-// POST /domains/{domainID}/control/encryption/flush
+// POST /domains/{domainID}/encryption/flush
 func (c *Client) DomainFlushEncryptionKeys(ctx context.Context, request *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error) {
 	res, err := c.sendDomainFlushEncryptionKeys(ctx, request, params)
 	return res, err
@@ -5113,7 +5020,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainFlushEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/flush"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/encryption/flush"),
 	}
 
 	// Run stopwatch.
@@ -5168,7 +5075,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/flush"
+	pathParts[2] = "/encryption/flush"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5233,7 +5140,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 //
 // Return the details about the current active root encryption key used by the domain.
 //
-// GET /domains/{domainID}/control/encryption/active-key
+// GET /domains/{domainID}/control/keys/active
 func (c *Client) DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainGetActiveExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -5243,7 +5150,7 @@ func (c *Client) sendDomainGetActiveExternalRootEncryptionKey(ctx context.Contex
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
 	}
 
 	// Run stopwatch.
@@ -5298,7 +5205,7 @@ func (c *Client) sendDomainGetActiveExternalRootEncryptionKey(ctx context.Contex
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/active-key"
+	pathParts[2] = "/control/keys/active"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5487,8 +5394,8 @@ func (c *Client) sendDomainGetCapabilities(ctx context.Context, params DomainGet
 
 // DomainGetCapability invokes domainGetCapability operation.
 //
-// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
-// an identity provider. The capabilities can be referenced by the domain policy rules.
+// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
+// identity provider. The capabilities can be referenced by the domain policy rules.
 //
 // GET /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error) {
@@ -5915,7 +5822,7 @@ func (c *Client) sendDomainGetDisasterRecoverySettings(ctx context.Context, para
 // relevant, any additional information required to use them (e.g. for the delegated key provider
 // `aws_am` the AWS account number to delegate to is returned).
 //
-// GET /domains/{domainID}/control/encryption/providers
+// GET /domains/{domainID}/control/keys/providers
 func (c *Client) DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error) {
 	res, err := c.sendDomainGetExternalRootEncryptionKeyProviders(ctx, params)
 	return res, err
@@ -5925,7 +5832,7 @@ func (c *Client) sendDomainGetExternalRootEncryptionKeyProviders(ctx context.Con
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetExternalRootEncryptionKeyProviders"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/providers"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/providers"),
 	}
 
 	// Run stopwatch.
@@ -5980,7 +5887,7 @@ func (c *Client) sendDomainGetExternalRootEncryptionKeyProviders(ctx context.Con
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/providers"
+	pathParts[2] = "/control/keys/providers"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -8359,15 +8266,6 @@ func (c *Client) sendDomainInsertIdentityProviderPrincipal(ctx context.Context, 
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -8520,15 +8418,6 @@ func (c *Client) sendDomainInsertWriteContextClassifierRule(ctx context.Context,
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -8680,15 +8569,6 @@ func (c *Client) sendDomainInsertWriteContextRegexRule(ctx context.Context, requ
 		otelogen.OperationID("domainInsertWriteContextRegexRule"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/regex-rule"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -9080,7 +8960,7 @@ func (c *Client) sendDomainListCapsules(ctx context.Context, params DomainListCa
 //
 // List all external root encryption keys for the domain.
 //
-// GET /domains/{domainID}/control/encryption/keys
+// GET /domains/{domainID}/control/keys
 func (c *Client) DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainListExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -9090,7 +8970,7 @@ func (c *Client) sendDomainListExternalRootEncryptionKey(ctx context.Context, pa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
 	}
 
 	// Run stopwatch.
@@ -9145,7 +9025,7 @@ func (c *Client) sendDomainListExternalRootEncryptionKey(ctx context.Context, pa
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/keys"
+	pathParts[2] = "/control/keys"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -9333,7 +9213,7 @@ func (c *Client) sendDomainListFactTypes(ctx context.Context, params DomainListF
 
 // DomainListFacts invokes domainListFacts operation.
 //
-// Get the facts corresponding to a fact type.
+// Get the facts within a fact type.
 //
 // GET /domains/{domainID}/control/facts/{factType}/list
 func (c *Client) DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error) {
@@ -9612,7 +9492,7 @@ func (c *Client) sendDomainListHooks(ctx context.Context, params DomainListHooks
 //
 // Retrieve the domain's identity providers and a brief overview of their configuration. This
 // endpoint requires authentication, but you can obtain an abridged list of the domain identity
-// providers prior to authentication using the `/public-info` endpoint.
+// providers prior to authentication by using the `/public-info` endpoint.
 //
 // GET /domains/{domainID}/control/identities
 func (c *Client) DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error) {
@@ -10554,6 +10434,136 @@ func (c *Client) sendDomainOpenCapsule(ctx context.Context, request *CapsuleOpen
 	return result, nil
 }
 
+// DomainPatchSettings invokes domainPatchSettings operation.
+//
+// Applies the given patch to the domain settings.
+//
+// PATCH /domains/{domainID}/control/settings
+func (c *Client) DomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error) {
+	res, err := c.sendDomainPatchSettings(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (res DomainPatchSettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPatchSettings"),
+		semconv.HTTPMethodKey.String("PATCH"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPatchSettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/settings"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainPatchSettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainPatchSettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainPatchSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainPolicyFlush invokes domainPolicyFlush operation.
 //
 // Flush the policy cache so that changes to permissions take effect.
@@ -10684,7 +10694,7 @@ func (c *Client) sendDomainPolicyFlush(ctx context.Context, params DomainPolicyF
 // DomainPutCapability invokes domainPutCapability operation.
 //
 // Create or update a capability. If you want to return an error if the capability already existed,
-// set createonly=true.
+// set `createonly` to true.
 //
 // PUT /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error) {
@@ -10697,15 +10707,6 @@ func (c *Client) sendDomainPutCapability(ctx context.Context, request *NewCapabi
 		otelogen.OperationID("domainPutCapability"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/capabilities/{capability}"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -10997,7 +10998,7 @@ func (c *Client) sendDomainPutDisasterRecoverySettings(ctx context.Context, requ
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
 // context configuration rules. This endpoint allows you to register a new fact type. To create a
-// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
+// fact within an existing type, use `/control/facts/{factType}/new`.
 //
 // PUT /domains/{domainID}/control/facts/{factType}
 func (c *Client) DomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error) {
@@ -11010,15 +11011,6 @@ func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactType
 		otelogen.OperationID("domainPutFactType"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -11155,145 +11147,6 @@ func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactType
 	return result, nil
 }
 
-// DomainPutSettings invokes domainPutSettings operation.
-//
-// Replace the current settings with the new settings supplied.
-//
-// PUT /domains/{domainID}/control/settings
-func (c *Client) DomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error) {
-	res, err := c.sendDomainPutSettings(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendDomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (res DomainPutSettingsRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainPutSettings"),
-		semconv.HTTPMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPutSettings",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/domains/"
-	{
-		// Encode "domainID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "domainID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.DomainID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/control/settings"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeDomainPutSettingsRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainPutSettings", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"DomainIdentity\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDomainPutSettingsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // DomainPutVendorSettings invokes domainPutVendorSettings operation.
 //
 // Create or update the vendor settings for a given domain.
@@ -11309,15 +11162,6 @@ func (c *Client) sendDomainPutVendorSettings(ctx context.Context, request *NewVe
 		otelogen.OperationID("domainPutVendorSettings"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/vendor/settings"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -12617,7 +12461,7 @@ func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, request *Dom
 // In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 // caller will call this endpoint in a loop until has_more is false.
 //
-// POST /domains/{domainID}/control/encryption/rotate
+// POST /domains/{domainID}/control/keys/rotate
 func (c *Client) DomainRotateRootEncryptionKeys(ctx context.Context, request *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error) {
 	res, err := c.sendDomainRotateRootEncryptionKeys(ctx, request, params)
 	return res, err
@@ -12627,7 +12471,7 @@ func (c *Client) sendDomainRotateRootEncryptionKeys(ctx context.Context, request
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRotateRootEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/rotate"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/rotate"),
 	}
 
 	// Run stopwatch.
@@ -12682,7 +12526,7 @@ func (c *Client) sendDomainRotateRootEncryptionKeys(ctx context.Context, request
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/rotate"
+	pathParts[2] = "/control/keys/rotate"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -12758,15 +12602,6 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 		otelogen.OperationID("domainSealCapsule"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/seal"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -12846,27 +12681,6 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 	pathParts[4] = "/seal"
 	uri.AddPathParts(u, pathParts[:]...)
 
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "createToken" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "createToken",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if unwrapped := string(params.CreateToken); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -12928,9 +12742,9 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 // DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `rotate` is called.
+// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 //
-// POST /domains/{domainID}/control/encryption/active-key
+// POST /domains/{domainID}/control/keys/active
 func (c *Client) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainSetActiveExternalRootEncryptionKey(ctx, request, params)
 	return res, err
@@ -12940,16 +12754,7 @@ func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Contex
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
 	}
 
 	// Run stopwatch.
@@ -13004,7 +12809,7 @@ func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Contex
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/encryption/active-key"
+	pathParts[2] = "/control/keys/active"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -13081,15 +12886,6 @@ func (c *Client) sendDomainUpdateIdentityProviderPrincipal(ctx context.Context, 
 		otelogen.OperationID("domainUpdateIdentityProviderPrincipal"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -13268,15 +13064,6 @@ func (c *Client) sendDomainUpdatePeer(ctx context.Context, request *DomainPeerCo
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/peers/{peerDomainID}"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -13428,15 +13215,6 @@ func (c *Client) sendDomainUpdatePolicyRule(ctx context.Context, request *NewDom
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy/{ruleID}"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -13587,15 +13365,6 @@ func (c *Client) sendDomainUpdateReadContextRule(ctx context.Context, request *N
 		otelogen.OperationID("domainUpdateReadContextRule"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config/{ruleID}"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -13759,25 +13528,16 @@ func (c *Client) sendDomainUpdateReadContextRule(ctx context.Context, request *N
 // Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 //
 // POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-func (c *Client) DomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error) {
+func (c *Client) DomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error) {
 	res, err := c.sendDomainUpsertCapsuleTags(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (res DomainUpsertCapsuleTagsRes, err error) {
+func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (res DomainUpsertCapsuleTagsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertCapsuleTags"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/capsule-tags"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -13918,8 +13678,8 @@ func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request *Domai
 // DomainUpsertFact invokes domainUpsertFact operation.
 //
 // Create a new fact. The fact type must have been previously registered using
-// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
-// for all fields), this call is a no-op and returns the same ID.
+// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
+// this call is a no-op and returns the same ID.
 //
 // POST /domains/{domainID}/control/facts/{factType}/new
 func (c *Client) DomainUpsertFact(ctx context.Context, request *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error) {
@@ -13932,15 +13692,6 @@ func (c *Client) sendDomainUpsertFact(ctx context.Context, request *NewFact, par
 		otelogen.OperationID("domainUpsertFact"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/new"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -14083,12 +13834,12 @@ func (c *Client) sendDomainUpsertFact(ctx context.Context, request *NewFact, par
 // Create or configure an identity provider.
 //
 // PUT /domains/{domainID}/control/identities/{identityProviderName}
-func (c *Client) DomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error) {
+func (c *Client) DomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error) {
 	res, err := c.sendDomainUpsertIdentityProvider(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (res DomainUpsertIdentityProviderRes, err error) {
+func (c *Client) sendDomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (res DomainUpsertIdentityProviderRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertIdentityProvider"),
 		semconv.HTTPMethodKey.String("PUT"),
@@ -14245,15 +13996,6 @@ func (c *Client) sendDomainUpsertReadContext(ctx context.Context, request *AddRe
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -14408,15 +14150,6 @@ func (c *Client) sendDomainUpsertSpanTags(ctx context.Context, request *UpsertSp
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/span-tags"),
 	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
-	}
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -14495,27 +14228,6 @@ func (c *Client) sendDomainUpsertSpanTags(ctx context.Context, request *UpsertSp
 	pathParts[4] = "/span-tags"
 	uri.AddPathParts(u, pathParts[:]...)
 
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "createToken" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "createToken",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if unwrapped := string(params.CreateToken); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "PUT", u)
 	if err != nil {
@@ -14590,15 +14302,6 @@ func (c *Client) sendDomainUpsertWriteContext(ctx context.Context, request *AddW
 		otelogen.OperationID("domainUpsertWriteContext"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.
@@ -14750,15 +14453,6 @@ func (c *Client) sendDomainUpsertWriteContextConfiguration(ctx context.Context, 
 		otelogen.OperationID("domainUpsertWriteContextConfiguration"),
 		semconv.HTTPMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/config"),
-	}
-	// Validate request before sending.
-	if err := func() error {
-		if err := request.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return res, errors.Wrap(err, "validate")
 	}
 
 	// Run stopwatch.

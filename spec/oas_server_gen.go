@@ -28,7 +28,7 @@ type Handler interface {
 	//
 	// Add a new external root encryption key with its supporting access configuration.
 	//
-	// POST /domains/{domainID}/control/encryption/keys
+	// POST /domains/{domainID}/control/keys
 	DomainAddExternalRootEncryptionKey(ctx context.Context, req *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error)
 	// DomainAddNew implements domainAddNew operation.
 	//
@@ -112,8 +112,8 @@ type Handler interface {
 	DomainDataTaggingHookTest(ctx context.Context, req *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability implements domainDeleteCapability operation.
 	//
-	// Delete a capability. All rules that reference the capability must have already been deleted, or
-	// you will get an error.
+	// Delete a capability. All domain policy rules that reference the capability must have already been
+	// deleted, or you will receive a 409 error.
 	//
 	// DELETE /domains/{domainID}/control/capabilities/{capability}
 	DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error)
@@ -126,10 +126,10 @@ type Handler interface {
 	// DomainDeleteExternalRootEncryptionKey implements domainDeleteExternalRootEncryptionKey operation.
 	//
 	// Delete an external root encryption key using its ID. This operation is only successful if the
-	// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
-	// ensure that all KEKs have been migrated to the active REK.
+	// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
+	// endpoint to ensure that all KEKs have been migrated to the active REK.
 	//
-	// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
+	// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
 	DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error)
 	// DomainDeleteFactByID implements domainDeleteFactByID operation.
 	//
@@ -211,20 +211,20 @@ type Handler interface {
 	//
 	// Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 	//
-	// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
+	// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
 	DomainExternalRootEncryptionKeyTest(ctx context.Context, req *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error)
 	// DomainFlushEncryptionKeys implements domainFlushEncryptionKeys operation.
 	//
 	// Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-	// check that the domain's root key is still available.
+	// check that the domain's root encryption key is still available.
 	//
-	// POST /domains/{domainID}/control/encryption/flush
+	// POST /domains/{domainID}/encryption/flush
 	DomainFlushEncryptionKeys(ctx context.Context, req *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error)
 	// DomainGetActiveExternalRootEncryptionKey implements domainGetActiveExternalRootEncryptionKey operation.
 	//
 	// Return the details about the current active root encryption key used by the domain.
 	//
-	// GET /domains/{domainID}/control/encryption/active-key
+	// GET /domains/{domainID}/control/keys/active
 	DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error)
 	// DomainGetCapabilities implements domainGetCapabilities operation.
 	//
@@ -236,8 +236,8 @@ type Handler interface {
 	DomainGetCapabilities(ctx context.Context, params DomainGetCapabilitiesParams) (DomainGetCapabilitiesRes, error)
 	// DomainGetCapability implements domainGetCapability operation.
 	//
-	// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
-	// an identity provider. The capabilities can be referenced by the domain policy rules.
+	// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
+	// identity provider. The capabilities can be referenced by the domain policy rules.
 	//
 	// GET /domains/{domainID}/control/capabilities/{capability}
 	DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error)
@@ -259,7 +259,7 @@ type Handler interface {
 	// relevant, any additional information required to use them (e.g. for the delegated key provider
 	// `aws_am` the AWS account number to delegate to is returned).
 	//
-	// GET /domains/{domainID}/control/encryption/providers
+	// GET /domains/{domainID}/control/keys/providers
 	DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error)
 	// DomainGetFactByID implements domainGetFactByID operation.
 	//
@@ -393,7 +393,7 @@ type Handler interface {
 	//
 	// List all external root encryption keys for the domain.
 	//
-	// GET /domains/{domainID}/control/encryption/keys
+	// GET /domains/{domainID}/control/keys
 	DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error)
 	// DomainListFactTypes implements domainListFactTypes operation.
 	//
@@ -404,7 +404,7 @@ type Handler interface {
 	DomainListFactTypes(ctx context.Context, params DomainListFactTypesParams) (DomainListFactTypesRes, error)
 	// DomainListFacts implements domainListFacts operation.
 	//
-	// Get the facts corresponding to a fact type.
+	// Get the facts within a fact type.
 	//
 	// GET /domains/{domainID}/control/facts/{factType}/list
 	DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error)
@@ -419,7 +419,7 @@ type Handler interface {
 	//
 	// Retrieve the domain's identity providers and a brief overview of their configuration. This
 	// endpoint requires authentication, but you can obtain an abridged list of the domain identity
-	// providers prior to authentication using the `/public-info` endpoint.
+	// providers prior to authentication by using the `/public-info` endpoint.
 	//
 	// GET /domains/{domainID}/control/identities
 	DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error)
@@ -468,6 +468,12 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/open
 	DomainOpenCapsule(ctx context.Context, req *CapsuleOpenRequest, params DomainOpenCapsuleParams) (DomainOpenCapsuleRes, error)
+	// DomainPatchSettings implements domainPatchSettings operation.
+	//
+	// Applies the given patch to the domain settings.
+	//
+	// PATCH /domains/{domainID}/control/settings
+	DomainPatchSettings(ctx context.Context, req *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error)
 	// DomainPolicyFlush implements domainPolicyFlush operation.
 	//
 	// Flush the policy cache so that changes to permissions take effect.
@@ -477,7 +483,7 @@ type Handler interface {
 	// DomainPutCapability implements domainPutCapability operation.
 	//
 	// Create or update a capability. If you want to return an error if the capability already existed,
-	// set createonly=true.
+	// set `createonly` to true.
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, req *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
@@ -491,16 +497,10 @@ type Handler interface {
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
 	// context configuration rules. This endpoint allows you to register a new fact type. To create a
-	// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
+	// fact within an existing type, use `/control/facts/{factType}/new`.
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, req *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
-	// DomainPutSettings implements domainPutSettings operation.
-	//
-	// Replace the current settings with the new settings supplied.
-	//
-	// PUT /domains/{domainID}/control/settings
-	DomainPutSettings(ctx context.Context, req *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error)
 	// DomainPutVendorSettings implements domainPutVendorSettings operation.
 	//
 	// Create or update the vendor settings for a given domain.
@@ -547,7 +547,7 @@ type Handler interface {
 	// In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 	// caller will call this endpoint in a loop until has_more is false.
 	//
-	// POST /domains/{domainID}/control/encryption/rotate
+	// POST /domains/{domainID}/control/keys/rotate
 	DomainRotateRootEncryptionKeys(ctx context.Context, req *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error)
 	// DomainSealCapsule implements domainSealCapsule operation.
 	//
@@ -558,9 +558,9 @@ type Handler interface {
 	// DomainSetActiveExternalRootEncryptionKey implements domainSetActiveExternalRootEncryptionKey operation.
 	//
 	// This will set which root encryption is active: i.e. is used for new capsules, or is used to
-	// encrypt KEKs when `rotate` is called.
+	// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
 	//
-	// POST /domains/{domainID}/control/encryption/active-key
+	// POST /domains/{domainID}/control/keys/active
 	DomainSetActiveExternalRootEncryptionKey(ctx context.Context, req *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error)
 	// DomainUpdateIdentityProviderPrincipal implements domainUpdateIdentityProviderPrincipal operation.
 	//
@@ -594,12 +594,12 @@ type Handler interface {
 	// Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-	DomainUpsertCapsuleTags(ctx context.Context, req *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
+	DomainUpsertCapsuleTags(ctx context.Context, req []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
 	// DomainUpsertFact implements domainUpsertFact operation.
 	//
 	// Create a new fact. The fact type must have been previously registered using
-	// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
-	// for all fields), this call is a no-op and returns the same ID.
+	// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
+	// this call is a no-op and returns the same ID.
 	//
 	// POST /domains/{domainID}/control/facts/{factType}/new
 	DomainUpsertFact(ctx context.Context, req *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error)
@@ -608,7 +608,7 @@ type Handler interface {
 	// Create or configure an identity provider.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}
-	DomainUpsertIdentityProvider(ctx context.Context, req *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
+	DomainUpsertIdentityProvider(ctx context.Context, req DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
 	// DomainUpsertReadContext implements domainUpsertReadContext operation.
 	//
 	// Update or create a read context.

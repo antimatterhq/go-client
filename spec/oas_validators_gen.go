@@ -10,6 +10,75 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s *APIKeyDomainIdentityProviderDetails) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s APIKeyDomainIdentityProviderDetailsType) Validate() error {
+	switch s {
+	case "APIKey":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *AWSServiceAccountKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AWSServiceAccountKeyInfoProviderName) Validate() error {
 	switch s {
 	case "aws_sa":
@@ -20,6 +89,10 @@ func (s AWSServiceAccountKeyInfoProviderName) Validate() error {
 }
 
 func (s *AccessLogEntry) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -176,6 +249,10 @@ func (s *AccessLogEntry) Validate() error {
 }
 
 func (s *AccessLogEntryCreateInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.WriteContext.Validate(); err != nil {
@@ -195,6 +272,10 @@ func (s *AccessLogEntryCreateInfo) Validate() error {
 }
 
 func (s *AccessLogEntryOpenInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ReadContext.Validate(); err != nil {
@@ -227,6 +308,10 @@ func (s AccessLogEntryOperation) Validate() error {
 }
 
 func (s *AccessLogEntryReadInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ReadContext.Validate(); err != nil {
@@ -279,6 +364,10 @@ func (s *AccessLogEntryReadInfo) Validate() error {
 }
 
 func (s *AccessLogResults) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Results == nil {
@@ -315,6 +404,10 @@ func (s *AccessLogResults) Validate() error {
 }
 
 func (s *ActiveRootEncryptionKeyID) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.KeyID.Validate(); err != nil {
@@ -334,7 +427,22 @@ func (s *ActiveRootEncryptionKeyID) Validate() error {
 }
 
 func (s *AddCapsuleLogEntryRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.OpenToken.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "openToken",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := s.Entry.Validate(); err != nil {
 			return err
@@ -353,6 +461,10 @@ func (s *AddCapsuleLogEntryRequest) Validate() error {
 }
 
 func (s *AddReadContext) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -451,6 +563,10 @@ func (s *AddReadContext) Validate() error {
 }
 
 func (s *AddWriteContext) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -507,6 +623,36 @@ func (s *AddWriteContext) Validate() error {
 	return nil
 }
 
+func (s *AntimatterDelegatedAWSKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AntimatterDelegatedAWSKeyInfoProviderName) Validate() error {
 	switch s {
 	case "aws_am":
@@ -514,6 +660,36 @@ func (s AntimatterDelegatedAWSKeyInfoProviderName) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *AntimatterDelegatedAzureKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s AntimatterDelegatedAzureKeyInfoProviderName) Validate() error {
@@ -525,6 +701,36 @@ func (s AntimatterDelegatedAzureKeyInfoProviderName) Validate() error {
 	}
 }
 
+func (s *AntimatterDelegatedGCPKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AntimatterDelegatedGCPKeyInfoProviderName) Validate() error {
 	switch s {
 	case "gcp_am":
@@ -532,6 +738,36 @@ func (s AntimatterDelegatedGCPKeyInfoProviderName) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *AvailableDelegatedRootEncryptionKeyProvider) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s AvailableDelegatedRootEncryptionKeyProviderType) Validate() error {
@@ -543,6 +779,90 @@ func (s AvailableDelegatedRootEncryptionKeyProviderType) Validate() error {
 	}
 }
 
+func (s *AvailableRootEncryptionKeyProviders) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Providers {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providers",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s AvailableRootEncryptionKeyProvidersProvidersItem) Validate() error {
+	switch s.Type {
+	case AvailableDelegatedRootEncryptionKeyProviderAvailableRootEncryptionKeyProvidersProvidersItem:
+		if err := s.AvailableDelegatedRootEncryptionKeyProvider.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AvailableServiceAccountRootEncryptionKeyProviderAvailableRootEncryptionKeyProvidersProvidersItem:
+		if err := s.AvailableServiceAccountRootEncryptionKeyProvider.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *AvailableServiceAccountRootEncryptionKeyProvider) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AvailableServiceAccountRootEncryptionKeyProviderType) Validate() error {
 	switch s {
 	case "ServiceAccountRootEncryptionKeyProvider":
@@ -552,6 +872,36 @@ func (s AvailableServiceAccountRootEncryptionKeyProviderType) Validate() error {
 	}
 }
 
+func (s *AzureServiceAccountKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AzureServiceAccountKeyInfoProviderName) Validate() error {
 	switch s {
 	case "azure_sa":
@@ -559,6 +909,36 @@ func (s AzureServiceAccountKeyInfoProviderName) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *BYOKKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s BYOKKeyInfoProviderName) Validate() error {
@@ -571,6 +951,10 @@ func (s BYOKKeyInfoProviderName) Validate() error {
 }
 
 func (s *Capability) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -616,6 +1000,10 @@ func (s *Capability) Validate() error {
 }
 
 func (s *CapabilityDefinition) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -691,6 +1079,10 @@ func (s *CapabilityDefinition) Validate() error {
 }
 
 func (s *CapabilityDefinitionList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Capabilities == nil {
@@ -727,6 +1119,10 @@ func (s *CapabilityDefinitionList) Validate() error {
 }
 
 func (s *CapabilityList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Capabilities == nil {
@@ -771,7 +1167,7 @@ func (s CapabilityName) Validate() error {
 		MaxLengthSet: false,
 		Email:        false,
 		Hostname:     false,
-		Regex:        regexMap["^[a-z][a-z0-9-]{2,16}$"],
+		Regex:        regexMap["^[a-z][a-z0-9-_]{2,16}$"],
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
 	}
@@ -787,7 +1183,7 @@ func (s CapabilityReference) Validate() error {
 		MaxLengthSet: false,
 		Email:        false,
 		Hostname:     false,
-		Regex:        regexMap["^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-]{2,16}$"],
+		Regex:        regexMap["^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-_]{2,16}$"],
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
 	}
@@ -795,6 +1191,10 @@ func (s CapabilityReference) Validate() error {
 }
 
 func (s *CapabilityRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -828,6 +1228,10 @@ func (s *CapabilityRule) Validate() error {
 }
 
 func (s *CapabilityRuleMatchExpressionsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -884,6 +1288,10 @@ func (s CapabilityRuleMatchExpressionsItemOperator) Validate() error {
 }
 
 func (s *CapsuleCreateResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -961,6 +1369,10 @@ func (s CapsuleID) Validate() error {
 }
 
 func (s *CapsuleInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -1030,6 +1442,10 @@ func (s *CapsuleInfo) Validate() error {
 }
 
 func (s *CapsuleList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Results == nil {
@@ -1066,6 +1482,10 @@ func (s *CapsuleList) Validate() error {
 }
 
 func (s *CapsuleOpenResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ReadContextConfiguration.Validate(); err != nil {
@@ -1124,19 +1544,30 @@ func (s *CapsuleOpenResponse) Validate() error {
 }
 
 func (s *CapsuleOpenResponseReadContextConfiguration) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := (validate.Int{
-			MinSet:        true,
-			Min:           0,
-			MaxSet:        false,
-			Max:           0,
-			MinExclusive:  false,
-			MaxExclusive:  false,
-			MultipleOfSet: false,
-			MultipleOf:    0,
-		}).Validate(int64(s.KeyCacheTTL)); err != nil {
-			return errors.Wrap(err, "int")
+		if value, ok := s.KeyCacheTTL.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -1168,6 +1599,10 @@ func (s CapsuleOperationToken) Validate() error {
 }
 
 func (s *CapsuleSealRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.CapsuleTags == nil {
@@ -1208,6 +1643,17 @@ func (s *CapsuleSealRequest) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.CreateToken.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "createToken",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -1215,6 +1661,10 @@ func (s *CapsuleSealRequest) Validate() error {
 }
 
 func (s *ClassifierRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.ID.Get(); ok {
@@ -1297,6 +1747,10 @@ func (s *ClassifierRule) Validate() error {
 }
 
 func (s *CreatePeerDomain) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -1412,6 +1866,10 @@ func (s *CreatePeerDomain) Validate() error {
 }
 
 func (s *DataTaggingHookInput) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Records == nil {
@@ -1448,6 +1906,10 @@ func (s *DataTaggingHookInput) Validate() error {
 }
 
 func (s *DataTaggingHookInputRecordsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Elements == nil {
@@ -1467,6 +1929,10 @@ func (s *DataTaggingHookInputRecordsItem) Validate() error {
 }
 
 func (s *DataTaggingHookResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -1522,6 +1988,10 @@ func (s *DataTaggingHookResponse) Validate() error {
 }
 
 func (s *DataTaggingHookResponseRecordsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Elements == nil {
@@ -1558,6 +2028,10 @@ func (s *DataTaggingHookResponseRecordsItem) Validate() error {
 }
 
 func (s *Domain) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -1577,6 +2051,10 @@ func (s *Domain) Validate() error {
 }
 
 func (s *DomainAddReadContextRuleOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.ID.Get(); ok {
@@ -1603,6 +2081,10 @@ func (s *DomainAddReadContextRuleOK) Validate() error {
 }
 
 func (s *DomainContactIssueVerifyReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -1630,6 +2112,10 @@ func (s *DomainContactIssueVerifyReq) Validate() error {
 }
 
 func (s *DomainControlLogEntry) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Domain.Validate(); err != nil {
@@ -1690,6 +2176,10 @@ func (s *DomainControlLogEntry) Validate() error {
 }
 
 func (s *DomainControlLogResults) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Results == nil {
@@ -1726,6 +2216,10 @@ func (s *DomainControlLogResults) Validate() error {
 }
 
 func (s *DomainDataTaggingHookTestReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Rule.Validate(); err != nil {
@@ -1756,6 +2250,10 @@ func (s *DomainDataTaggingHookTestReq) Validate() error {
 }
 
 func (s *DomainFactList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.FactTypes == nil {
@@ -1792,6 +2290,10 @@ func (s *DomainFactList) Validate() error {
 }
 
 func (s *DomainGetWriteContextClassifierRulesOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -1824,32 +2326,24 @@ func (s *DomainGetWriteContextClassifierRulesOK) Validate() error {
 	return nil
 }
 
-func (s *DomainGetWriteContextRegexRulesOK) Validate() error {
+func (s DomainGetWriteContextRegexRulesOKApplicationJSON) Validate() error {
+	alias := ([]WriteContextRegexRule)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
 	var failures []validate.FieldError
-	if err := func() error {
-		var failures []validate.FieldError
-		for i, elem := range s.Rules {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
 			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
 		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "rules",
-			Error: err,
-		})
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
@@ -1858,6 +2352,10 @@ func (s *DomainGetWriteContextRegexRulesOK) Validate() error {
 }
 
 func (s *DomainHooksList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -1891,6 +2389,10 @@ func (s *DomainHooksList) Validate() error {
 }
 
 func (s *DomainHooksListHooksItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -1947,6 +2449,36 @@ func (s DomainID) Validate() error {
 	return nil
 }
 
+func (s *DomainIdentityAPIKeyPrincipalParams) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s DomainIdentityAPIKeyPrincipalParamsType) Validate() error {
 	switch s {
 	case "APIKey":
@@ -1957,7 +2489,29 @@ func (s DomainIdentityAPIKeyPrincipalParamsType) Validate() error {
 }
 
 func (s *DomainIdentityEmailPrincipalParams) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := (validate.String{
 			MinLength:    0,
@@ -1992,6 +2546,36 @@ func (s DomainIdentityEmailPrincipalParamsType) Validate() error {
 	}
 }
 
+func (s *DomainIdentityHostedDomainPrincipalParams) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s DomainIdentityHostedDomainPrincipalParamsType) Validate() error {
 	switch s {
 	case "HostedDomain":
@@ -2004,22 +2588,47 @@ func (s DomainIdentityHostedDomainPrincipalParamsType) Validate() error {
 func (s DomainIdentityPrincipalDetails) Validate() error {
 	switch s.Type {
 	case DomainIdentityAPIKeyPrincipalParamsDomainIdentityPrincipalDetails:
-		return nil // no validation needed
+		if err := s.DomainIdentityAPIKeyPrincipalParams.Validate(); err != nil {
+			return err
+		}
+		return nil
 	case DomainIdentityEmailPrincipalParamsDomainIdentityPrincipalDetails:
 		if err := s.DomainIdentityEmailPrincipalParams.Validate(); err != nil {
 			return err
 		}
 		return nil
 	case DomainIdentityHostedDomainPrincipalParamsDomainIdentityPrincipalDetails:
-		return nil // no validation needed
-	case DomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails:
-		return nil // no validation needed
+		if err := s.DomainIdentityHostedDomainPrincipalParams.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s DomainIdentityProviderDetails) Validate() error {
+	switch s.Type {
+	case GoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails:
+		if err := s.GoogleOAuthDomainIdentityProviderDetails.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case APIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails:
+		if err := s.APIKeyDomainIdentityProviderDetails.Validate(); err != nil {
+			return err
+		}
+		return nil
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
 	}
 }
 
 func (s *DomainIdentityProviderInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -2029,6 +2638,17 @@ func (s *DomainIdentityProviderInfo) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
 			Error: err,
 		})
 	}
@@ -2078,6 +2698,24 @@ func (s *DomainIdentityProviderInfo) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if value, ok := s.Details.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "details",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -2085,6 +2723,10 @@ func (s *DomainIdentityProviderInfo) Validate() error {
 }
 
 func (s *DomainIdentityProviderList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -2118,6 +2760,10 @@ func (s *DomainIdentityProviderList) Validate() error {
 }
 
 func (s *DomainIdentityProviderPrincipalList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Principals == nil {
@@ -2154,6 +2800,10 @@ func (s *DomainIdentityProviderPrincipalList) Validate() error {
 }
 
 func (s *DomainIdentityProviderPrincipalParams) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Capabilities == nil {
@@ -2208,16 +2858,18 @@ func (s DomainIdentityProviderPrincipalType) Validate() error {
 		return nil
 	case "HostedDomain":
 		return nil
-	case "TenantID":
-		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
 }
 
-func (s DomainIdentityTenantIDPrincipalParamsType) Validate() error {
+func (s DomainIdentityProviderType) Validate() error {
 	switch s {
-	case "TenantID":
+	case "GoogleOAuth":
+		return nil
+	case "GCPServiceAccount":
+		return nil
+	case "APIKey":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -2225,6 +2877,10 @@ func (s DomainIdentityTenantIDPrincipalParamsType) Validate() error {
 }
 
 func (s *DomainInsertIdentityProviderPrincipalOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.PrincipalID.Validate(); err != nil {
@@ -2244,6 +2900,10 @@ func (s *DomainInsertIdentityProviderPrincipalOK) Validate() error {
 }
 
 func (s *DomainInsertWriteContextClassifierRuleOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.RuleID.Validate(); err != nil {
@@ -2263,6 +2923,10 @@ func (s *DomainInsertWriteContextClassifierRuleOK) Validate() error {
 }
 
 func (s *DomainInsertWriteContextRegexRuleOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.RuleID.Validate(); err != nil {
@@ -2281,20 +2945,11 @@ func (s *DomainInsertWriteContextRegexRuleOK) Validate() error {
 	return nil
 }
 
-func (s DomainListCapsulesSortOn) Validate() error {
-	switch s {
-	case "created":
-		return nil
-	case "id":
-		return nil
-	case "size":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *DomainPeerConfig) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -2623,6 +3278,10 @@ func (s *DomainPeerConfig) Validate() error {
 }
 
 func (s *DomainPeerList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Peers == nil {
@@ -2659,6 +3318,10 @@ func (s *DomainPeerList) Validate() error {
 }
 
 func (s *DomainPeerListPeersItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -2689,6 +3352,10 @@ func (s *DomainPeerListPeersItem) Validate() error {
 }
 
 func (s *DomainPolicy) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Rules == nil {
@@ -2725,6 +3392,10 @@ func (s *DomainPolicy) Validate() error {
 }
 
 func (s *DomainPolicyRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -2833,6 +3504,10 @@ func (s *DomainPolicyRule) Validate() error {
 }
 
 func (s *DomainPrivateInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -2899,6 +3574,10 @@ func (s *DomainPrivateInfo) Validate() error {
 }
 
 func (s *DomainPublicInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -2964,37 +3643,11 @@ func (s *DomainPublicInfo) Validate() error {
 	return nil
 }
 
-func (s DomainQueryAccessLogOperationType) Validate() error {
-	switch s {
-	case "create":
-		return nil
-	case "open":
-		return nil
-	case "read":
-		return nil
-	case "write":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
-func (s DomainQueryAccessLogSingleCapsuleOperationType) Validate() error {
-	switch s {
-	case "create":
-		return nil
-	case "open":
-		return nil
-	case "read":
-		return nil
-	case "write":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *DomainResourceSummary) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Schema == nil {
@@ -3031,6 +3684,10 @@ func (s *DomainResourceSummary) Validate() error {
 }
 
 func (s *DomainResourceSummarySchemaItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Operations == nil {
@@ -3113,7 +3770,47 @@ func (s DomainResourceSummarySchemaItemPlaceholderValues) Validate() error {
 }
 
 func (s *DomainSettings) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
+	if err := func() error {
+		if s.AdminContacts == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.AdminContacts {
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    0,
+					MaxLengthSet: false,
+					Email:        true,
+					Hostname:     false,
+					Regex:        nil,
+				}).Validate(string(elem)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "adminContacts",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		var failures []validate.FieldError
 		for i, elem := range s.ActiveAdminContacts {
@@ -3205,7 +3902,34 @@ func (s *DomainSettings) Validate() error {
 	return nil
 }
 
+func (s *DomainSettingsPatch) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Patch.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "patch",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *DomainStatus) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		var failures []validate.FieldError
@@ -3239,6 +3963,10 @@ func (s *DomainStatus) Validate() error {
 }
 
 func (s *DomainStatusNotificationsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Type.Validate(); err != nil {
@@ -3269,6 +3997,10 @@ func (s DomainStatusNotificationsItemType) Validate() error {
 }
 
 func (s *DomainTagInfoResults) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Tags == nil {
@@ -3304,40 +4036,11 @@ func (s *DomainTagInfoResults) Validate() error {
 	return nil
 }
 
-func (s *DomainUpsertCapsuleTagsReq) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		var failures []validate.FieldError
-		for i, elem := range s.Tags {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "tags",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *Fact) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -3428,6 +4131,10 @@ func (s FactID) Validate() error {
 }
 
 func (s *FactList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Facts == nil {
@@ -3465,9 +4172,6 @@ func (s *FactList) Validate() error {
 
 func (s FactPolicyRules) Validate() error {
 	alias := ([]FactPolicyRulesItem)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
 	var failures []validate.FieldError
 	for i, elem := range alias {
 		if err := func() error {
@@ -3489,6 +4193,10 @@ func (s FactPolicyRules) Validate() error {
 }
 
 func (s *FactPolicyRulesItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Operator.Validate(); err != nil {
@@ -3555,10 +4263,21 @@ func (s *FactPolicyRulesItem) Validate() error {
 }
 
 func (s *FactPolicyRulesItemArgumentsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Source.Validate(); err != nil {
-			return err
+		if value, ok := s.Source.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -3597,8 +4316,6 @@ func (s FactPolicyRulesItemArgumentsItemSource) Validate() error {
 		return nil
 	case "literal":
 		return nil
-	case "any":
-		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -3616,6 +4333,10 @@ func (s FactPolicyRulesItemOperator) Validate() error {
 }
 
 func (s *FactTypeDefinition) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -3708,6 +4429,10 @@ func (s *FactTypeDefinition) Validate() error {
 }
 
 func (s *FactTypeDefinitionArgumentsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -3785,9 +4510,78 @@ func (s FactTypeReference) Validate() error {
 	return nil
 }
 
+func (s *GCPServiceAccountKeyInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ProviderName.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providerName",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s GCPServiceAccountKeyInfoProviderName) Validate() error {
 	switch s {
 	case "gcp_sa":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *GoogleOAuthDomainIdentityProviderDetails) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s GoogleOAuthDomainIdentityProviderDetailsType) Validate() error {
+	switch s {
+	case "GoogleOAuth":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3858,6 +4652,344 @@ func (s ImportAlias) Validate() error {
 	return nil
 }
 
+func (s *JSONPatchRequestAdd) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Value.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestAddOp) Validate() error {
+	switch s {
+	case "add":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s JSONPatchRequestAddValue) Validate() error {
+	switch s.Type {
+	case StringJSONPatchRequestAddValue:
+		return nil // no validation needed
+	case Float64JSONPatchRequestAddValue:
+		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	case BoolJSONPatchRequestAddValue:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *JSONPatchRequestCopy) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestCopyOp) Validate() error {
+	switch s {
+	case "copy":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *JSONPatchRequestMove) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestMoveOp) Validate() error {
+	switch s {
+	case "move":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *JSONPatchRequestRemove) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestRemoveOp) Validate() error {
+	switch s {
+	case "remove":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *JSONPatchRequestReplace) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Value.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestReplaceOp) Validate() error {
+	switch s {
+	case "replace":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s JSONPatchRequestReplaceValue) Validate() error {
+	switch s.Type {
+	case StringJSONPatchRequestReplaceValue:
+		return nil // no validation needed
+	case Float64JSONPatchRequestReplaceValue:
+		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	case BoolJSONPatchRequestReplaceValue:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *JSONPatchRequestTst) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Value.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Op.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "op",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JSONPatchRequestTstOp) Validate() error {
+	switch s {
+	case "test":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s JSONPatchRequestTstValue) Validate() error {
+	switch s.Type {
+	case StringJSONPatchRequestTstValue:
+		return nil // no validation needed
+	case Float64JSONPatchRequestTstValue:
+		if err := (validate.Float{}).Validate(float64(s.Float64)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	case BoolJSONPatchRequestTstValue:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *KeyInfos) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.KeyInformation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "keyInformation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s KeyInfosKeyInformation) Validate() error {
+	switch s.Type {
+	case GCPServiceAccountKeyInfoKeyInfosKeyInformation:
+		if err := s.GCPServiceAccountKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AntimatterDelegatedGCPKeyInfoKeyInfosKeyInformation:
+		if err := s.AntimatterDelegatedGCPKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AWSServiceAccountKeyInfoKeyInfosKeyInformation:
+		if err := s.AWSServiceAccountKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AntimatterDelegatedAWSKeyInfoKeyInfosKeyInformation:
+		if err := s.AntimatterDelegatedAWSKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AzureServiceAccountKeyInfoKeyInfosKeyInformation:
+		if err := s.AzureServiceAccountKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case AntimatterDelegatedAzureKeyInfoKeyInfosKeyInformation:
+		if err := s.AntimatterDelegatedAzureKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case BYOKKeyInfoKeyInfosKeyInformation:
+		if err := s.BYOKKeyInfo.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
 func (s LogEntryID) Validate() error {
 	alias := (string)(s)
 	if err := (validate.String{
@@ -3875,6 +5007,10 @@ func (s LogEntryID) Validate() error {
 }
 
 func (s *NewAccessLogEntry) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Operation.Validate(); err != nil {
@@ -3914,6 +5050,10 @@ func (s NewAccessLogEntryOperation) Validate() error {
 }
 
 func (s *NewAccessLogEntryReadInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.AllowedTags.Validate(); err != nil {
@@ -3955,6 +5095,10 @@ func (s *NewAccessLogEntryReadInfo) Validate() error {
 }
 
 func (s *NewCapabilityDefinition) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -4001,6 +5145,10 @@ func (s *NewCapabilityDefinition) Validate() error {
 }
 
 func (s *NewDomain) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -4054,6 +5202,10 @@ func (s *NewDomain) Validate() error {
 }
 
 func (s *NewDomainPolicyRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.DomainIdentity.Get(); ok {
@@ -4133,6 +5285,10 @@ func (s *NewDomainPolicyRule) Validate() error {
 }
 
 func (s *NewDomainResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -4151,107 +5307,11 @@ func (s *NewDomainResponse) Validate() error {
 	return nil
 }
 
-func (s *NewDomainSettings) Validate() error {
-	var failures []validate.FieldError
-	if err := func() error {
-		var failures []validate.FieldError
-		for i, elem := range s.ActiveAdminContacts {
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:    0,
-					MinLengthSet: false,
-					MaxLength:    0,
-					MaxLengthSet: false,
-					Email:        true,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(elem)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "activeAdminContacts",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		var failures []validate.FieldError
-		for i, elem := range s.PendingAdminContacts {
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:    0,
-					MinLengthSet: false,
-					MaxLength:    0,
-					MaxLengthSet: false,
-					Email:        true,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(elem)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "pendingAdminContacts",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.DefaultDisplayName.Get(); ok {
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:    0,
-					MinLengthSet: false,
-					MaxLength:    40,
-					MaxLengthSet: true,
-					Email:        false,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(value)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "defaultDisplayName",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *NewFact) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Arguments == nil {
@@ -4304,6 +5364,10 @@ func (s *NewFact) Validate() error {
 }
 
 func (s *NewFactTypeDefinition) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -4367,6 +5431,10 @@ func (s *NewFactTypeDefinition) Validate() error {
 }
 
 func (s *NewFactTypeDefinitionArgumentsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -4413,6 +5481,10 @@ func (s *NewFactTypeDefinitionArgumentsItem) Validate() error {
 }
 
 func (s *NewReadContextConfigRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.MatchExpressions.Validate(); err != nil {
@@ -4551,6 +5623,10 @@ func (s NewReadContextConfigRuleTokenScope) Validate() error {
 }
 
 func (s *NewVendorSettings) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.ManagedKeyId.Get(); ok {
@@ -4574,6 +5650,68 @@ func (s *NewVendorSettings) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s PatchRequest) Validate() error {
+	alias := ([]PatchRequestItem)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PatchRequestItem) Validate() error {
+	switch s.Type {
+	case JSONPatchRequestAddPatchRequestItem:
+		if err := s.JSONPatchRequestAdd.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case JSONPatchRequestReplacePatchRequestItem:
+		if err := s.JSONPatchRequestReplace.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case JSONPatchRequestTstPatchRequestItem:
+		if err := s.JSONPatchRequestTst.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case JSONPatchRequestRemovePatchRequestItem:
+		if err := s.JSONPatchRequestRemove.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case JSONPatchRequestMovePatchRequestItem:
+		if err := s.JSONPatchRequestMove.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case JSONPatchRequestCopyPatchRequestItem:
+		if err := s.JSONPatchRequestCopy.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
 }
 
 func (s PolicyRuleOperation) Validate() error {
@@ -4617,6 +5755,10 @@ func (s PrincipalID) Validate() error {
 }
 
 func (s *PrincipalInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.PrincipalID.Validate(); err != nil {
@@ -4675,6 +5817,10 @@ func (s *PrincipalInfo) Validate() error {
 }
 
 func (s *PrincipalSummary) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.PrincipalID.Validate(); err != nil {
@@ -4704,7 +5850,39 @@ func (s *PrincipalSummary) Validate() error {
 	return nil
 }
 
+func (s QueryCapsulesSortOn) Validate() error {
+	switch s {
+	case "created":
+		return nil
+	case "id":
+		return nil
+	case "size":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s QueryOperationType) Validate() error {
+	switch s {
+	case "create":
+		return nil
+	case "open":
+		return nil
+	case "read":
+		return nil
+	case "write":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *ReadContextConfigRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -4872,6 +6050,10 @@ func (s ReadContextConfigRuleTokenScope) Validate() error {
 }
 
 func (s *ReadContextDetails) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -4923,17 +6105,24 @@ func (s *ReadContextDetails) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := (validate.Int{
-			MinSet:        true,
-			Min:           0,
-			MaxSet:        false,
-			Max:           0,
-			MinExclusive:  false,
-			MaxExclusive:  false,
-			MultipleOfSet: false,
-			MultipleOf:    0,
-		}).Validate(int64(s.KeyCacheTTL)); err != nil {
-			return errors.Wrap(err, "int")
+		if value, ok := s.KeyCacheTTL.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -5031,6 +6220,10 @@ func (s *ReadContextDetails) Validate() error {
 }
 
 func (s *ReadContextList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.ReadContexts == nil {
@@ -5099,10 +6292,21 @@ func (s ReadContextReference) Validate() error {
 }
 
 func (s *ReadContextRequiredHook) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Hook.Validate(); err != nil {
-			return err
+		if value, ok := s.Hook.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -5112,8 +6316,15 @@ func (s *ReadContextRequiredHook) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Constraint.Validate(); err != nil {
-			return err
+		if value, ok := s.Constraint.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -5148,9 +6359,6 @@ func (s *ReadContextRequiredHook) Validate() error {
 
 func (s ReadContextRuleFacts) Validate() error {
 	alias := ([]ReadContextRuleFactsItem)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
 	var failures []validate.FieldError
 	for i, elem := range alias {
 		if err := func() error {
@@ -5172,6 +6380,10 @@ func (s ReadContextRuleFacts) Validate() error {
 }
 
 func (s *ReadContextRuleFactsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.Operator.Get(); ok {
@@ -5223,6 +6435,10 @@ func (s *ReadContextRuleFactsItem) Validate() error {
 }
 
 func (s *ReadContextRuleFactsItemArgumentsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.Source.Get(); ok {
@@ -5276,9 +6492,6 @@ func (s ReadContextRuleFactsItemOperator) Validate() error {
 
 func (s ReadContextRuleMatchExpressions) Validate() error {
 	alias := ([]ReadContextRuleMatchExpressionsItem)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
 	var failures []validate.FieldError
 	for i, elem := range alias {
 		if err := func() error {
@@ -5300,6 +6513,10 @@ func (s ReadContextRuleMatchExpressions) Validate() error {
 }
 
 func (s *ReadContextRuleMatchExpressionsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Source.Validate(); err != nil {
@@ -5362,6 +6579,10 @@ func (s ReadContextRuleMatchExpressionsItemSource) Validate() error {
 }
 
 func (s *ReadContextShortDetails) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -5413,17 +6634,24 @@ func (s *ReadContextShortDetails) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := (validate.Int{
-			MinSet:        true,
-			Min:           0,
-			MaxSet:        false,
-			Max:           0,
-			MinExclusive:  false,
-			MaxExclusive:  false,
-			MultipleOfSet: false,
-			MultipleOf:    0,
-		}).Validate(int64(s.KeyCacheTTL)); err != nil {
-			return errors.Wrap(err, "int")
+		if value, ok := s.KeyCacheTTL.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -5484,6 +6712,10 @@ func (s RootEncryptionKeyID) Validate() error {
 }
 
 func (s *RootEncryptionKeyItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.RekID.Validate(); err != nil {
@@ -5520,32 +6752,24 @@ func (s *RootEncryptionKeyItem) Validate() error {
 	return nil
 }
 
-func (s *RootEncryptionKeyListResponse) Validate() error {
+func (s RootEncryptionKeyListResponse) Validate() error {
+	alias := ([]RootEncryptionKeyItem)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
 	var failures []validate.FieldError
-	if err := func() error {
-		var failures []validate.FieldError
-		for i, elem := range s.Keys {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
 			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
 		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "keys",
-			Error: err,
-		})
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
@@ -5570,6 +6794,10 @@ func (s RootEncryptionKeyReference) Validate() error {
 }
 
 func (s *RootEncryptionKeyTestResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ID.Validate(); err != nil {
@@ -5672,6 +6900,10 @@ func (s SessionID) Validate() error {
 }
 
 func (s *StarredDomainList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Domains == nil {
@@ -5708,6 +6940,10 @@ func (s *StarredDomainList) Validate() error {
 }
 
 func (s *Tag) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -5775,6 +7011,10 @@ func (s *Tag) Validate() error {
 }
 
 func (s *TagMeta) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
@@ -5810,7 +7050,7 @@ func (s TagName) Validate() error {
 		MaxLengthSet: false,
 		Email:        false,
 		Hostname:     false,
-		Regex:        regexMap["^[a-z0-9]*$"],
+		Regex:        regexMap["^[a-z0-9./-]{2,64}$"],
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
 	}
@@ -5834,6 +7074,10 @@ func (s TagNameField) Validate() error {
 }
 
 func (s *TagSet) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.CapsuleTags == nil {
@@ -5898,6 +7142,10 @@ func (s *TagSet) Validate() error {
 }
 
 func (s *TagSetSpanTagsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Tags == nil {
@@ -5934,6 +7182,10 @@ func (s *TagSetSpanTagsItem) Validate() error {
 }
 
 func (s *TagSummary) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.UniqueTags == nil {
@@ -5981,6 +7233,10 @@ func (s *TagSummary) Validate() error {
 }
 
 func (s *TagSummaryUniqueTagsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Tag.Validate(); err != nil {
@@ -6033,6 +7289,10 @@ func (s TagValueField) Validate() error {
 }
 
 func (s *UpsertSpanTagsRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Summary.Validate(); err != nil {
@@ -6045,6 +7305,17 @@ func (s *UpsertSpanTagsRequest) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.CreateToken.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "createToken",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -6052,6 +7323,10 @@ func (s *UpsertSpanTagsRequest) Validate() error {
 }
 
 func (s *VendorSettings) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.ManagedKeyId.Validate(); err != nil {
@@ -6071,6 +7346,10 @@ func (s *VendorSettings) Validate() error {
 }
 
 func (s *VerifyContactResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Domain.Validate(); err != nil {
@@ -6106,6 +7385,10 @@ func (s VersionConstraint) Validate() error {
 }
 
 func (s *WriteContextClassifierTag) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -6154,6 +7437,10 @@ func (s *WriteContextClassifierTag) Validate() error {
 }
 
 func (s *WriteContextConfigInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.KeyReuseTTL.Get(); ok {
@@ -6242,6 +7529,10 @@ func (s *WriteContextConfigInfo) Validate() error {
 }
 
 func (s *WriteContextConfigInfoRequiredHooksItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Hook.Validate(); err != nil {
@@ -6294,6 +7585,10 @@ func (s WriteContextConfigInfoRequiredHooksItemMode) Validate() error {
 }
 
 func (s *WriteContextDetails) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Name.Validate(); err != nil {
@@ -6380,6 +7675,10 @@ func (s *WriteContextDetails) Validate() error {
 }
 
 func (s *WriteContextList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.WriteContexts == nil {
@@ -6448,6 +7747,10 @@ func (s WriteContextReference) Validate() error {
 }
 
 func (s *WriteContextRegexRule) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.ID.Get(); ok {

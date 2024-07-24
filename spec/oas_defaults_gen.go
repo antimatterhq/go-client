@@ -26,11 +26,11 @@ func (s *CapabilityDefinition) setDefaults() {
 func (s *CapsuleOpenResponseReadContextConfiguration) setDefaults() {
 	{
 		val := bool(false)
-		s.DisableReadLogging = val
+		s.DisableReadLogging.SetTo(val)
 	}
 	{
 		val := int32(0)
-		s.KeyCacheTTL = val
+		s.KeyCacheTTL.SetTo(val)
 	}
 }
 
@@ -66,6 +66,10 @@ func (s *CreatePeerDomain) setDefaults() {
 	}
 	{
 		val := bool(false)
+		s.LinkDataPolicy.SetTo(val)
+	}
+	{
+		val := bool(false)
 		s.LinkRootEncryptionKeys.SetTo(val)
 	}
 	{
@@ -83,6 +87,14 @@ func (s *CreatePeerDomain) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *FactPolicyRulesItemArgumentsItem) setDefaults() {
+	{
+		val := bool(false)
+		s.Any.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *NewCapabilityDefinition) setDefaults() {
 	{
 		val := bool(false)
@@ -94,11 +106,11 @@ func (s *NewCapabilityDefinition) setDefaults() {
 func (s *ReadContextDetails) setDefaults() {
 	{
 		val := bool(false)
-		s.DisableReadLogging = val
+		s.DisableReadLogging.SetTo(val)
 	}
 	{
 		val := int32(0)
-		s.KeyCacheTTL = val
+		s.KeyCacheTTL.SetTo(val)
 	}
 }
 
@@ -106,11 +118,11 @@ func (s *ReadContextDetails) setDefaults() {
 func (s *ReadContextShortDetails) setDefaults() {
 	{
 		val := bool(false)
-		s.DisableReadLogging = val
+		s.DisableReadLogging.SetTo(val)
 	}
 	{
 		val := int32(0)
-		s.KeyCacheTTL = val
+		s.KeyCacheTTL.SetTo(val)
 	}
 }
 

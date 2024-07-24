@@ -269,6 +269,10 @@ type DomainOpenCapsuleRes interface {
 	domainOpenCapsuleRes()
 }
 
+type DomainPatchSettingsRes interface {
+	domainPatchSettingsRes()
+}
+
 type DomainPolicyFlushRes interface {
 	domainPolicyFlushRes()
 }
@@ -283,10 +287,6 @@ type DomainPutDisasterRecoverySettingsRes interface {
 
 type DomainPutFactTypeRes interface {
 	domainPutFactTypeRes()
-}
-
-type DomainPutSettingsRes interface {
-	domainPutSettingsRes()
 }
 
 type DomainPutVendorSettingsRes interface {

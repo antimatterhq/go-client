@@ -18,15 +18,15 @@ import (
 
 var regexMap = map[string]ogenregex.Regexp{
 	"^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|default|active)$": ogenregex.MustCompile("^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|default|active)$"),
-	"^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-]{2,16}$":                                                                         ogenregex.MustCompile("^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-]{2,16}$"),
+	"^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-_]{2,16}$":                                                                        ogenregex.MustCompile("^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9-_]{2,16}$"),
 	"^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9_]{2,31}$":                                                                         ogenregex.MustCompile("^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?[a-z][a-z0-9_]{2,31}$"),
 	"^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?rl-[a-z0-9]{16}$$":                                                                             ogenregex.MustCompile("^((dm-[1-9A-HJ-NP-Za-km-z]{11}|[a-z][a-z0-9_]{2,31})::)?rl-[a-z0-9]{16}$$"),
 	"^(?:\\^|>)?\\d+\\.\\d+\\.\\d+$": ogenregex.MustCompile("^(?:\\^|>)?\\d+\\.\\d+\\.\\d+$"),
 	"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|default$": ogenregex.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|default$"),
 	"^[0-9a-f]{32}":             ogenregex.MustCompile("^[0-9a-f]{32}"),
-	"^[a-z0-9]*$":               ogenregex.MustCompile("^[a-z0-9]*$"),
-	"^[a-z][a-z0-9-]{2,16}$":    ogenregex.MustCompile("^[a-z][a-z0-9-]{2,16}$"),
+	"^[a-z0-9./-]{2,64}$":       ogenregex.MustCompile("^[a-z0-9./-]{2,64}$"),
 	"^[a-z][a-z0-9-]{2,32}$":    ogenregex.MustCompile("^[a-z][a-z0-9-]{2,32}$"),
+	"^[a-z][a-z0-9-_]{2,16}$":   ogenregex.MustCompile("^[a-z][a-z0-9-_]{2,16}$"),
 	"^[a-z][a-z0-9_]{2,31}$":    ogenregex.MustCompile("^[a-z][a-z0-9_]{2,31}$"),
 	"^[a-z][a-zA-Z0-9_]{2,31}$": ogenregex.MustCompile("^[a-z][a-zA-Z0-9_]{2,31}$"),
 	"^\\d+\\.\\d+\\.\\d+$":      ogenregex.MustCompile("^\\d+\\.\\d+\\.\\d+$"),
@@ -66,7 +66,9 @@ func (cfg *otelConfig) initOTEL() {
 	cfg.Tracer = cfg.TracerProvider.Tracer(otelogen.Name,
 		trace.WithInstrumentationVersion(otelogen.SemVersion()),
 	)
-	cfg.Meter = cfg.MeterProvider.Meter(otelogen.Name)
+	cfg.Meter = cfg.MeterProvider.Meter(otelogen.Name,
+		metric.WithInstrumentationVersion(otelogen.SemVersion()),
+	)
 }
 
 // ErrorHandler is error handler.
@@ -87,14 +89,13 @@ type ServerOption interface {
 	applyServer(*serverConfig)
 }
 
-var _ = []ServerOption{
-	(optionFunc[serverConfig])(nil),
-	(otelOptionFunc)(nil),
-}
+var _ ServerOption = (optionFunc[serverConfig])(nil)
 
 func (o optionFunc[C]) applyServer(c *C) {
 	o(c)
 }
+
+var _ ServerOption = (otelOptionFunc)(nil)
 
 func (o otelOptionFunc) applyServer(c *serverConfig) {
 	o(&c.otelConfig)
@@ -104,8 +105,15 @@ func newServerConfig(opts ...ServerOption) serverConfig {
 	cfg := serverConfig{
 		NotFound: http.NotFound,
 		MethodNotAllowed: func(w http.ResponseWriter, r *http.Request, allowed string) {
-			w.Header().Set("Allow", allowed)
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			status := http.StatusMethodNotAllowed
+			if r.Method == "OPTIONS" {
+				w.Header().Set("Access-Control-Allow-Methods", allowed)
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				status = http.StatusNoContent
+			} else {
+				w.Header().Set("Allow", allowed)
+			}
+			w.WriteHeader(status)
 		},
 		ErrorHandler:       ogenerrors.DefaultErrorHandler,
 		Middleware:         nil,
@@ -135,13 +143,13 @@ func (s baseServer) notAllowed(w http.ResponseWriter, r *http.Request, allowed s
 
 func (cfg serverConfig) baseServer() (s baseServer, err error) {
 	s = baseServer{cfg: cfg}
-	if s.requests, err = s.cfg.Meter.Int64Counter(otelogen.ServerRequestCount); err != nil {
+	if s.requests, err = otelogen.ServerRequestCountCounter(s.cfg.Meter); err != nil {
 		return s, err
 	}
-	if s.errors, err = s.cfg.Meter.Int64Counter(otelogen.ServerErrorsCount); err != nil {
+	if s.errors, err = otelogen.ServerErrorsCountCounter(s.cfg.Meter); err != nil {
 		return s, err
 	}
-	if s.duration, err = s.cfg.Meter.Float64Histogram(otelogen.ServerDuration); err != nil {
+	if s.duration, err = otelogen.ServerDurationHistogram(s.cfg.Meter); err != nil {
 		return s, err
 	}
 	return s, nil
@@ -157,14 +165,13 @@ type ClientOption interface {
 	applyClient(*clientConfig)
 }
 
-var _ = []ClientOption{
-	(optionFunc[clientConfig])(nil),
-	(otelOptionFunc)(nil),
-}
+var _ ClientOption = (optionFunc[clientConfig])(nil)
 
 func (o optionFunc[C]) applyClient(c *C) {
 	o(c)
 }
+
+var _ ClientOption = (otelOptionFunc)(nil)
 
 func (o otelOptionFunc) applyClient(c *clientConfig) {
 	o(&c.otelConfig)
@@ -190,13 +197,13 @@ type baseClient struct {
 
 func (cfg clientConfig) baseClient() (c baseClient, err error) {
 	c = baseClient{cfg: cfg}
-	if c.requests, err = c.cfg.Meter.Int64Counter(otelogen.ClientRequestCount); err != nil {
+	if c.requests, err = otelogen.ClientRequestCountCounter(c.cfg.Meter); err != nil {
 		return c, err
 	}
-	if c.errors, err = c.cfg.Meter.Int64Counter(otelogen.ClientErrorsCount); err != nil {
+	if c.errors, err = otelogen.ClientErrorsCountCounter(c.cfg.Meter); err != nil {
 		return c, err
 	}
-	if c.duration, err = c.cfg.Meter.Float64Histogram(otelogen.ClientDuration); err != nil {
+	if c.duration, err = otelogen.ClientDurationHistogram(c.cfg.Meter); err != nil {
 		return c, err
 	}
 	return c, nil

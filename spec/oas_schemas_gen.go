@@ -16,17 +16,51 @@ func (s *ErrorStatusCode) Error() string {
 // Detailed information about an API key identity provider.
 // Ref: #/components/schemas/APIKeyDomainIdentityProviderDetails
 type APIKeyDomainIdentityProviderDetails struct {
-	Version OptString `json:"version"`
+	Type OptAPIKeyDomainIdentityProviderDetailsType `json:"type"`
 }
 
-// GetVersion returns the value of Version.
-func (s *APIKeyDomainIdentityProviderDetails) GetVersion() OptString {
-	return s.Version
+// GetType returns the value of Type.
+func (s *APIKeyDomainIdentityProviderDetails) GetType() OptAPIKeyDomainIdentityProviderDetailsType {
+	return s.Type
 }
 
-// SetVersion sets the value of Version.
-func (s *APIKeyDomainIdentityProviderDetails) SetVersion(val OptString) {
-	s.Version = val
+// SetType sets the value of Type.
+func (s *APIKeyDomainIdentityProviderDetails) SetType(val OptAPIKeyDomainIdentityProviderDetailsType) {
+	s.Type = val
+}
+
+type APIKeyDomainIdentityProviderDetailsType string
+
+const (
+	APIKeyDomainIdentityProviderDetailsTypeAPIKey APIKeyDomainIdentityProviderDetailsType = "APIKey"
+)
+
+// AllValues returns all APIKeyDomainIdentityProviderDetailsType values.
+func (APIKeyDomainIdentityProviderDetailsType) AllValues() []APIKeyDomainIdentityProviderDetailsType {
+	return []APIKeyDomainIdentityProviderDetailsType{
+		APIKeyDomainIdentityProviderDetailsTypeAPIKey,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s APIKeyDomainIdentityProviderDetailsType) MarshalText() ([]byte, error) {
+	switch s {
+	case APIKeyDomainIdentityProviderDetailsTypeAPIKey:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *APIKeyDomainIdentityProviderDetailsType) UnmarshalText(data []byte) error {
+	switch APIKeyDomainIdentityProviderDetailsType(data) {
+	case APIKeyDomainIdentityProviderDetailsTypeAPIKey:
+		*s = APIKeyDomainIdentityProviderDetailsTypeAPIKey
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // The AWS service account information and details required to use the provided AWS hosted encryption
@@ -38,7 +72,8 @@ type AWSServiceAccountKeyInfo struct {
 	// The access key ID's secret access key.
 	SecretAccessKey string `json:"secretAccessKey"`
 	// The key ARN to be used.
-	KeyARN string `json:"keyARN"`
+	KeyARN       string                                  `json:"keyARN"`
+	ProviderName OptAWSServiceAccountKeyInfoProviderName `json:"providerName"`
 }
 
 // GetAccessKeyID returns the value of AccessKeyID.
@@ -56,6 +91,11 @@ func (s *AWSServiceAccountKeyInfo) GetKeyARN() string {
 	return s.KeyARN
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *AWSServiceAccountKeyInfo) GetProviderName() OptAWSServiceAccountKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetAccessKeyID sets the value of AccessKeyID.
 func (s *AWSServiceAccountKeyInfo) SetAccessKeyID(val string) {
 	s.AccessKeyID = val
@@ -69,6 +109,11 @@ func (s *AWSServiceAccountKeyInfo) SetSecretAccessKey(val string) {
 // SetKeyARN sets the value of KeyARN.
 func (s *AWSServiceAccountKeyInfo) SetKeyARN(val string) {
 	s.KeyARN = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *AWSServiceAccountKeyInfo) SetProviderName(val OptAWSServiceAccountKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type AWSServiceAccountKeyInfoProviderName string
@@ -132,7 +177,7 @@ type AccessLogEntry struct {
 	CapsuleSize int64 `json:"capsuleSize"`
 	// When this capsule was created.
 	CapsuleCreated time.Time `json:"capsuleCreated"`
-	// The principal's issuer.
+	// The principals issuer.
 	Issuer string `json:"issuer"`
 	// The principal for this operation.
 	Principal string `json:"principal"`
@@ -561,12 +606,23 @@ func (*ActiveRootEncryptionKeyResponse) domainSetActiveExternalRootEncryptionKey
 // A request to add a capsule log entry.
 // Ref: #/components/schemas/AddCapsuleLogEntryRequest
 type AddCapsuleLogEntryRequest struct {
-	Entry NewAccessLogEntry `json:"entry"`
+	OpenToken CapsuleOperationToken `json:"openToken"`
+	Entry     NewAccessLogEntry     `json:"entry"`
+}
+
+// GetOpenToken returns the value of OpenToken.
+func (s *AddCapsuleLogEntryRequest) GetOpenToken() CapsuleOperationToken {
+	return s.OpenToken
 }
 
 // GetEntry returns the value of Entry.
 func (s *AddCapsuleLogEntryRequest) GetEntry() NewAccessLogEntry {
 	return s.Entry
+}
+
+// SetOpenToken sets the value of OpenToken.
+func (s *AddCapsuleLogEntryRequest) SetOpenToken(val CapsuleOperationToken) {
+	s.OpenToken = val
 }
 
 // SetEntry sets the value of Entry.
@@ -696,7 +752,8 @@ func (s *AddWriteContext) SetConfig(val WriteContextConfigInfo) {
 // Ref: #/components/schemas/AntimatterDelegatedAWSKeyInfo
 type AntimatterDelegatedAWSKeyInfo struct {
 	// The key ARN to be used.
-	KeyARN string `json:"keyARN"`
+	KeyARN       string                                       `json:"keyARN"`
+	ProviderName OptAntimatterDelegatedAWSKeyInfoProviderName `json:"providerName"`
 }
 
 // GetKeyARN returns the value of KeyARN.
@@ -704,9 +761,19 @@ func (s *AntimatterDelegatedAWSKeyInfo) GetKeyARN() string {
 	return s.KeyARN
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *AntimatterDelegatedAWSKeyInfo) GetProviderName() OptAntimatterDelegatedAWSKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetKeyARN sets the value of KeyARN.
 func (s *AntimatterDelegatedAWSKeyInfo) SetKeyARN(val string) {
 	s.KeyARN = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *AntimatterDelegatedAWSKeyInfo) SetProviderName(val OptAntimatterDelegatedAWSKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type AntimatterDelegatedAWSKeyInfoProviderName string
@@ -751,7 +818,8 @@ type AntimatterDelegatedAzureKeyInfo struct {
 	// The directory ID in containing the managed HSM.
 	TenantID string `json:"tenantID"`
 	// The full URL for the key.
-	KeyURL string `json:"keyURL"`
+	KeyURL       string                                         `json:"keyURL"`
+	ProviderName OptAntimatterDelegatedAzureKeyInfoProviderName `json:"providerName"`
 }
 
 // GetTenantID returns the value of TenantID.
@@ -764,6 +832,11 @@ func (s *AntimatterDelegatedAzureKeyInfo) GetKeyURL() string {
 	return s.KeyURL
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *AntimatterDelegatedAzureKeyInfo) GetProviderName() OptAntimatterDelegatedAzureKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetTenantID sets the value of TenantID.
 func (s *AntimatterDelegatedAzureKeyInfo) SetTenantID(val string) {
 	s.TenantID = val
@@ -772,6 +845,11 @@ func (s *AntimatterDelegatedAzureKeyInfo) SetTenantID(val string) {
 // SetKeyURL sets the value of KeyURL.
 func (s *AntimatterDelegatedAzureKeyInfo) SetKeyURL(val string) {
 	s.KeyURL = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *AntimatterDelegatedAzureKeyInfo) SetProviderName(val OptAntimatterDelegatedAzureKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type AntimatterDelegatedAzureKeyInfoProviderName string
@@ -820,7 +898,8 @@ type AntimatterDelegatedGCPKeyInfo struct {
 	// The Google keyring's ID at location.
 	KeyringID string `json:"keyringID"`
 	// The key ID that should be used in the Google keyring.
-	KeyID string `json:"keyID"`
+	KeyID        string                                       `json:"keyID"`
+	ProviderName OptAntimatterDelegatedGCPKeyInfoProviderName `json:"providerName"`
 }
 
 // GetProjectID returns the value of ProjectID.
@@ -843,6 +922,11 @@ func (s *AntimatterDelegatedGCPKeyInfo) GetKeyID() string {
 	return s.KeyID
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *AntimatterDelegatedGCPKeyInfo) GetProviderName() OptAntimatterDelegatedGCPKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetProjectID sets the value of ProjectID.
 func (s *AntimatterDelegatedGCPKeyInfo) SetProjectID(val string) {
 	s.ProjectID = val
@@ -861,6 +945,11 @@ func (s *AntimatterDelegatedGCPKeyInfo) SetKeyringID(val string) {
 // SetKeyID sets the value of KeyID.
 func (s *AntimatterDelegatedGCPKeyInfo) SetKeyID(val string) {
 	s.KeyID = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *AntimatterDelegatedGCPKeyInfo) SetProviderName(val OptAntimatterDelegatedGCPKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type AntimatterDelegatedGCPKeyInfoProviderName string
@@ -899,10 +988,16 @@ func (s *AntimatterDelegatedGCPKeyInfoProviderName) UnmarshalText(data []byte) e
 
 // Ref: #/components/schemas/AvailableDelegatedRootEncryptionKeyProvider
 type AvailableDelegatedRootEncryptionKeyProvider struct {
-	Name           string `json:"name"`
-	ShortName      string `json:"shortName"`
-	Description    string `json:"description"`
-	AccountDetails string `json:"accountDetails"`
+	Type           OptAvailableDelegatedRootEncryptionKeyProviderType `json:"type"`
+	Name           string                                             `json:"name"`
+	ShortName      string                                             `json:"shortName"`
+	Description    string                                             `json:"description"`
+	AccountDetails string                                             `json:"accountDetails"`
+}
+
+// GetType returns the value of Type.
+func (s *AvailableDelegatedRootEncryptionKeyProvider) GetType() OptAvailableDelegatedRootEncryptionKeyProviderType {
+	return s.Type
 }
 
 // GetName returns the value of Name.
@@ -923,6 +1018,11 @@ func (s *AvailableDelegatedRootEncryptionKeyProvider) GetDescription() string {
 // GetAccountDetails returns the value of AccountDetails.
 func (s *AvailableDelegatedRootEncryptionKeyProvider) GetAccountDetails() string {
 	return s.AccountDetails
+}
+
+// SetType sets the value of Type.
+func (s *AvailableDelegatedRootEncryptionKeyProvider) SetType(val OptAvailableDelegatedRootEncryptionKeyProviderType) {
+	s.Type = val
 }
 
 // SetName sets the value of Name.
@@ -1066,9 +1166,15 @@ func NewAvailableServiceAccountRootEncryptionKeyProviderAvailableRootEncryptionK
 
 // Ref: #/components/schemas/AvailableServiceAccountRootEncryptionKeyProvider
 type AvailableServiceAccountRootEncryptionKeyProvider struct {
-	Name        string `json:"name"`
-	ShortName   string `json:"shortName"`
-	Description string `json:"description"`
+	Type        OptAvailableServiceAccountRootEncryptionKeyProviderType `json:"type"`
+	Name        string                                                  `json:"name"`
+	ShortName   string                                                  `json:"shortName"`
+	Description string                                                  `json:"description"`
+}
+
+// GetType returns the value of Type.
+func (s *AvailableServiceAccountRootEncryptionKeyProvider) GetType() OptAvailableServiceAccountRootEncryptionKeyProviderType {
+	return s.Type
 }
 
 // GetName returns the value of Name.
@@ -1084,6 +1190,11 @@ func (s *AvailableServiceAccountRootEncryptionKeyProvider) GetShortName() string
 // GetDescription returns the value of Description.
 func (s *AvailableServiceAccountRootEncryptionKeyProvider) GetDescription() string {
 	return s.Description
+}
+
+// SetType sets the value of Type.
+func (s *AvailableServiceAccountRootEncryptionKeyProvider) SetType(val OptAvailableServiceAccountRootEncryptionKeyProviderType) {
+	s.Type = val
 }
 
 // SetName sets the value of Name.
@@ -1141,12 +1252,13 @@ func (s *AvailableServiceAccountRootEncryptionKeyProviderType) UnmarshalText(dat
 type AzureServiceAccountKeyInfo struct {
 	// The Azure service account directory ID.
 	TenantID string `json:"tenantID"`
-	// The name of the key in Azure Key Vault.
+	// The name of the key in the Azure HSM.
 	KeyURL string `json:"keyURL"`
 	// The access key ID's secret access key.
 	ClientID string `json:"clientID"`
 	// The access key ID's secret access key.
-	ClientSecret string `json:"clientSecret"`
+	ClientSecret string                                    `json:"clientSecret"`
+	ProviderName OptAzureServiceAccountKeyInfoProviderName `json:"providerName"`
 }
 
 // GetTenantID returns the value of TenantID.
@@ -1169,6 +1281,11 @@ func (s *AzureServiceAccountKeyInfo) GetClientSecret() string {
 	return s.ClientSecret
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *AzureServiceAccountKeyInfo) GetProviderName() OptAzureServiceAccountKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetTenantID sets the value of TenantID.
 func (s *AzureServiceAccountKeyInfo) SetTenantID(val string) {
 	s.TenantID = val
@@ -1187,6 +1304,11 @@ func (s *AzureServiceAccountKeyInfo) SetClientID(val string) {
 // SetClientSecret sets the value of ClientSecret.
 func (s *AzureServiceAccountKeyInfo) SetClientSecret(val string) {
 	s.ClientSecret = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *AzureServiceAccountKeyInfo) SetProviderName(val OptAzureServiceAccountKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type AzureServiceAccountKeyInfoProviderName string
@@ -1227,7 +1349,8 @@ func (s *AzureServiceAccountKeyInfoProviderName) UnmarshalText(data []byte) erro
 type BYOKKeyInfo struct {
 	// The base64-encoded key material to use as the basis for an
 	// encryption key. It must be 256 bytes or longer.
-	Key []byte `json:"key"`
+	Key          []byte                     `json:"key"`
+	ProviderName OptBYOKKeyInfoProviderName `json:"providerName"`
 }
 
 // GetKey returns the value of Key.
@@ -1235,9 +1358,19 @@ func (s *BYOKKeyInfo) GetKey() []byte {
 	return s.Key
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *BYOKKeyInfo) GetProviderName() OptBYOKKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetKey sets the value of Key.
 func (s *BYOKKeyInfo) SetKey(val []byte) {
 	s.Key = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *BYOKKeyInfo) SetProviderName(val OptBYOKKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type BYOKKeyInfoProviderName string
@@ -1552,9 +1685,6 @@ type CapsuleCreateResponse struct {
 	KeyEncryptionKeyID        int64                  `json:"keyEncryptionKeyID"`
 	CreateToken               CapsuleOperationToken  `json:"createToken"`
 	WriteContextConfiguration WriteContextConfigInfo `json:"writeContextConfiguration"`
-	// Contains a CBOR encoded encryption key for the capsule that has been encrypted using the Disaster
-	// Recovery key. This field is ony set if disaster recovery has been enabled.
-	DisasterRecoveryToken OptString `json:"disasterRecoveryToken"`
 }
 
 // GetID returns the value of ID.
@@ -1587,11 +1717,6 @@ func (s *CapsuleCreateResponse) GetWriteContextConfiguration() WriteContextConfi
 	return s.WriteContextConfiguration
 }
 
-// GetDisasterRecoveryToken returns the value of DisasterRecoveryToken.
-func (s *CapsuleCreateResponse) GetDisasterRecoveryToken() OptString {
-	return s.DisasterRecoveryToken
-}
-
 // SetID sets the value of ID.
 func (s *CapsuleCreateResponse) SetID(val CapsuleID) {
 	s.ID = val
@@ -1620,11 +1745,6 @@ func (s *CapsuleCreateResponse) SetCreateToken(val CapsuleOperationToken) {
 // SetWriteContextConfiguration sets the value of WriteContextConfiguration.
 func (s *CapsuleCreateResponse) SetWriteContextConfiguration(val WriteContextConfigInfo) {
 	s.WriteContextConfiguration = val
-}
-
-// SetDisasterRecoveryToken sets the value of DisasterRecoveryToken.
-func (s *CapsuleCreateResponse) SetDisasterRecoveryToken(val OptString) {
-	s.DisasterRecoveryToken = val
 }
 
 func (*CapsuleCreateResponse) domainCreateCapsuleRes() {}
@@ -1851,21 +1971,21 @@ func (*CapsuleOpenResponse) domainOpenCapsuleRes() {}
 // The material required for enacting read context configuration (e.g. wasm stuff).
 type CapsuleOpenResponseReadContextConfiguration struct {
 	// If true, skip creation of audit log events on read.
-	DisableReadLogging bool `json:"disableReadLogging"`
+	DisableReadLogging OptBool `json:"disableReadLogging"`
 	// Number of seconds for which cached encryption keys will be
 	// considered valid by the client.
-	KeyCacheTTL int32 `json:"keyCacheTTL"`
+	KeyCacheTTL OptInt32 `json:"keyCacheTTL"`
 	// A bundled version of the Rego policy associated with this open event.
 	PolicyAssembly []byte `json:"policyAssembly"`
 }
 
 // GetDisableReadLogging returns the value of DisableReadLogging.
-func (s *CapsuleOpenResponseReadContextConfiguration) GetDisableReadLogging() bool {
+func (s *CapsuleOpenResponseReadContextConfiguration) GetDisableReadLogging() OptBool {
 	return s.DisableReadLogging
 }
 
 // GetKeyCacheTTL returns the value of KeyCacheTTL.
-func (s *CapsuleOpenResponseReadContextConfiguration) GetKeyCacheTTL() int32 {
+func (s *CapsuleOpenResponseReadContextConfiguration) GetKeyCacheTTL() OptInt32 {
 	return s.KeyCacheTTL
 }
 
@@ -1875,12 +1995,12 @@ func (s *CapsuleOpenResponseReadContextConfiguration) GetPolicyAssembly() []byte
 }
 
 // SetDisableReadLogging sets the value of DisableReadLogging.
-func (s *CapsuleOpenResponseReadContextConfiguration) SetDisableReadLogging(val bool) {
+func (s *CapsuleOpenResponseReadContextConfiguration) SetDisableReadLogging(val OptBool) {
 	s.DisableReadLogging = val
 }
 
 // SetKeyCacheTTL sets the value of KeyCacheTTL.
-func (s *CapsuleOpenResponseReadContextConfiguration) SetKeyCacheTTL(val int32) {
+func (s *CapsuleOpenResponseReadContextConfiguration) SetKeyCacheTTL(val OptInt32) {
 	s.KeyCacheTTL = val
 }
 
@@ -1897,7 +2017,8 @@ type CapsuleSealRequest struct {
 	CapsuleTags []Tag      `json:"capsuleTags"`
 	SpanTags    TagSummary `json:"spanTags"`
 	// How big this capsule is.
-	Size int64 `json:"size"`
+	Size        int64                 `json:"size"`
+	CreateToken CapsuleOperationToken `json:"createToken"`
 }
 
 // GetCapsuleTags returns the value of CapsuleTags.
@@ -1915,6 +2036,11 @@ func (s *CapsuleSealRequest) GetSize() int64 {
 	return s.Size
 }
 
+// GetCreateToken returns the value of CreateToken.
+func (s *CapsuleSealRequest) GetCreateToken() CapsuleOperationToken {
+	return s.CreateToken
+}
+
 // SetCapsuleTags sets the value of CapsuleTags.
 func (s *CapsuleSealRequest) SetCapsuleTags(val []Tag) {
 	s.CapsuleTags = val
@@ -1928,6 +2054,11 @@ func (s *CapsuleSealRequest) SetSpanTags(val TagSummary) {
 // SetSize sets the value of Size.
 func (s *CapsuleSealRequest) SetSize(val int64) {
 	s.Size = val
+}
+
+// SetCreateToken sets the value of CreateToken.
+func (s *CapsuleSealRequest) SetCreateToken(val CapsuleOperationToken) {
+	s.CreateToken = val
 }
 
 // Configuration for a classification hook.
@@ -2043,101 +2174,16 @@ func (s *ConflictError) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*ConflictError) capsuleGetByIdRes()                              {}
-func (*ConflictError) domainAddAccessLogEntryRes()                     {}
-func (*ConflictError) domainAddExternalRootEncryptionKeyRes()          {}
-func (*ConflictError) domainAddNewRes()                                {}
-func (*ConflictError) domainAddReadContextRuleRes()                    {}
-func (*ConflictError) domainAuthenticateRes()                          {}
-func (*ConflictError) domainContactIssueVerifyRes()                    {}
-func (*ConflictError) domainContactVerifyRes()                         {}
-func (*ConflictError) domainCreateCapsuleRes()                         {}
-func (*ConflictError) domainCreatePeerDomainRes()                      {}
-func (*ConflictError) domainCreatePolicyRuleRes()                      {}
-func (*ConflictError) domainDataTaggingHookInvokeRes()                 {}
-func (*ConflictError) domainDataTaggingHookTestRes()                   {}
-func (*ConflictError) domainDeleteCapabilityRes()                      {}
-func (*ConflictError) domainDeleteCapsuleTagsRes()                     {}
-func (*ConflictError) domainDeleteExternalRootEncryptionKeyRes()       {}
-func (*ConflictError) domainDeleteFactByIDRes()                        {}
-func (*ConflictError) domainDeleteFactTypeRes()                        {}
-func (*ConflictError) domainDeleteIdentityProviderPrincipalRes()       {}
-func (*ConflictError) domainDeleteIdentityProviderRes()                {}
-func (*ConflictError) domainDeletePeerRes()                            {}
-func (*ConflictError) domainDeletePolicyRuleRes()                      {}
-func (*ConflictError) domainDeleteReadContextRes()                     {}
-func (*ConflictError) domainDeleteReadContextRuleRes()                 {}
-func (*ConflictError) domainDeleteWriteContextClassifierRuleRes()      {}
-func (*ConflictError) domainDeleteWriteContextRegexRuleRes()           {}
-func (*ConflictError) domainDeleteWriteContextRes()                    {}
-func (*ConflictError) domainDescribeWriteContextRes()                  {}
-func (*ConflictError) domainExternalRootEncryptionKeyTestRes()         {}
-func (*ConflictError) domainFlushEncryptionKeysRes()                   {}
-func (*ConflictError) domainGetActiveExternalRootEncryptionKeyRes()    {}
-func (*ConflictError) domainGetCapabilitiesRes()                       {}
-func (*ConflictError) domainGetCapabilityRes()                         {}
-func (*ConflictError) domainGetCapsuleInfoRes()                        {}
-func (*ConflictError) domainGetDisasterRecoverySettingsRes()           {}
-func (*ConflictError) domainGetExternalRootEncryptionKeyProvidersRes() {}
-func (*ConflictError) domainGetFactByIDRes()                           {}
-func (*ConflictError) domainGetFactTypeRes()                           {}
-func (*ConflictError) domainGetIdentityProviderPrincipalRes()          {}
-func (*ConflictError) domainGetIdentityProviderPrincipalsRes()         {}
-func (*ConflictError) domainGetIdentityProviderRes()                   {}
-func (*ConflictError) domainGetPeerConfigRes()                         {}
-func (*ConflictError) domainGetPeerRes()                               {}
-func (*ConflictError) domainGetPrivateInfoRes()                        {}
-func (*ConflictError) domainGetPublicInfoRes()                         {}
-func (*ConflictError) domainGetReadContextRes()                        {}
-func (*ConflictError) domainGetSettingsRes()                           {}
-func (*ConflictError) domainGetStatusRes()                             {}
-func (*ConflictError) domainGetTagInfoRes()                            {}
-func (*ConflictError) domainGetVendorSettingsRes()                     {}
-func (*ConflictError) domainGetWriteContextClassifierRulesRes()        {}
-func (*ConflictError) domainGetWriteContextRegexRulesRes()             {}
-func (*ConflictError) domainInsertIdentityProviderPrincipalRes()       {}
-func (*ConflictError) domainInsertWriteContextClassifierRuleRes()      {}
-func (*ConflictError) domainInsertWriteContextRegexRuleRes()           {}
-func (*ConflictError) domainListCapsulesRes()                          {}
-func (*ConflictError) domainListExternalRootEncryptionKeyRes()         {}
-func (*ConflictError) domainListFactTypesRes()                         {}
-func (*ConflictError) domainListFactsRes()                             {}
-func (*ConflictError) domainListHooksRes()                             {}
-func (*ConflictError) domainListIdentityProvidersRes()                 {}
-func (*ConflictError) domainListPeersRes()                             {}
-func (*ConflictError) domainListPolicyRulesRes()                       {}
-func (*ConflictError) domainListReadContextsRes()                      {}
-func (*ConflictError) domainListResourcesRes()                         {}
-func (*ConflictError) domainListWriteContextsRes()                     {}
-func (*ConflictError) domainOpenCapsuleRes()                           {}
-func (*ConflictError) domainPolicyFlushRes()                           {}
-func (*ConflictError) domainPutCapabilityRes()                         {}
-func (*ConflictError) domainPutDisasterRecoverySettingsRes()           {}
-func (*ConflictError) domainPutFactTypeRes()                           {}
-func (*ConflictError) domainPutSettingsRes()                           {}
-func (*ConflictError) domainPutVendorSettingsRes()                     {}
-func (*ConflictError) domainQueryAccessLogRes()                        {}
-func (*ConflictError) domainQueryAccessLogSingleCapsuleRes()           {}
-func (*ConflictError) domainQueryControlLogRes()                       {}
-func (*ConflictError) domainReadContextFlushRes()                      {}
-func (*ConflictError) domainRenumberPolicyRulesRes()                   {}
-func (*ConflictError) domainRotateRootEncryptionKeysRes()              {}
-func (*ConflictError) domainSealCapsuleRes()                           {}
-func (*ConflictError) domainSetActiveExternalRootEncryptionKeyRes()    {}
-func (*ConflictError) domainUpdateIdentityProviderPrincipalRes()       {}
-func (*ConflictError) domainUpdatePeerRes()                            {}
-func (*ConflictError) domainUpdatePolicyRuleRes()                      {}
-func (*ConflictError) domainUpdateReadContextRuleRes()                 {}
-func (*ConflictError) domainUpsertCapsuleTagsRes()                     {}
-func (*ConflictError) domainUpsertFactRes()                            {}
-func (*ConflictError) domainUpsertIdentityProviderRes()                {}
-func (*ConflictError) domainUpsertReadContextRes()                     {}
-func (*ConflictError) domainUpsertSpanTagsRes()                        {}
-func (*ConflictError) domainUpsertWriteContextConfigurationRes()       {}
-func (*ConflictError) domainUpsertWriteContextRes()                    {}
-func (*ConflictError) starredDomainAddRes()                            {}
-func (*ConflictError) starredDomainListRes()                           {}
-func (*ConflictError) starredDomainRemoveRes()                         {}
+func (*ConflictError) domainCreatePeerDomainRes()              {}
+func (*ConflictError) domainDeleteCapabilityRes()              {}
+func (*ConflictError) domainExternalRootEncryptionKeyTestRes() {}
+func (*ConflictError) domainGetDisasterRecoverySettingsRes()   {}
+func (*ConflictError) domainGetVendorSettingsRes()             {}
+func (*ConflictError) domainPutCapabilityRes()                 {}
+func (*ConflictError) domainPutDisasterRecoverySettingsRes()   {}
+func (*ConflictError) domainPutVendorSettingsRes()             {}
+func (*ConflictError) domainReadContextFlushRes()              {}
+func (*ConflictError) domainUpsertSpanTagsRes()                {}
 
 // Configuration options for creating a new subdomain.
 // Ref: #/components/schemas/CreatePeerDomain
@@ -2160,6 +2206,7 @@ type CreatePeerDomain struct {
 	LinkWriteContexts      OptBool `json:"linkWriteContexts"`
 	LinkCapabilities       OptBool `json:"linkCapabilities"`
 	LinkDomainPolicy       OptBool `json:"linkDomainPolicy"`
+	LinkDataPolicy         OptBool `json:"linkDataPolicy"`
 	LinkRootEncryptionKeys OptBool `json:"linkRootEncryptionKeys"`
 	LinkCapsuleAccessLog   OptBool `json:"linkCapsuleAccessLog"`
 	LinkControlLog         OptBool `json:"linkControlLog"`
@@ -2224,6 +2271,11 @@ func (s *CreatePeerDomain) GetLinkCapabilities() OptBool {
 // GetLinkDomainPolicy returns the value of LinkDomainPolicy.
 func (s *CreatePeerDomain) GetLinkDomainPolicy() OptBool {
 	return s.LinkDomainPolicy
+}
+
+// GetLinkDataPolicy returns the value of LinkDataPolicy.
+func (s *CreatePeerDomain) GetLinkDataPolicy() OptBool {
+	return s.LinkDataPolicy
 }
 
 // GetLinkRootEncryptionKeys returns the value of LinkRootEncryptionKeys.
@@ -2304,6 +2356,11 @@ func (s *CreatePeerDomain) SetLinkCapabilities(val OptBool) {
 // SetLinkDomainPolicy sets the value of LinkDomainPolicy.
 func (s *CreatePeerDomain) SetLinkDomainPolicy(val OptBool) {
 	s.LinkDomainPolicy = val
+}
+
+// SetLinkDataPolicy sets the value of LinkDataPolicy.
+func (s *CreatePeerDomain) SetLinkDataPolicy(val OptBool) {
+	s.LinkDataPolicy = val
 }
 
 // SetLinkRootEncryptionKeys sets the value of LinkRootEncryptionKeys.
@@ -2544,7 +2601,7 @@ func (s *DomainAuthenticate) SetToken(val string) {
 type DomainAuthenticateResponse struct {
 	Token string `json:"token"`
 	// The token expiration, in UTC.
-	Expiry time.Time `json:"expiry"`
+	Expiry OptDateTime `json:"expiry"`
 	// Optional advisory message for the caller. This can be used to indicate that the authenticating
 	// client is out of date.
 	Advisory []string `json:"advisory"`
@@ -2556,7 +2613,7 @@ func (s *DomainAuthenticateResponse) GetToken() string {
 }
 
 // GetExpiry returns the value of Expiry.
-func (s *DomainAuthenticateResponse) GetExpiry() time.Time {
+func (s *DomainAuthenticateResponse) GetExpiry() OptDateTime {
 	return s.Expiry
 }
 
@@ -2571,7 +2628,7 @@ func (s *DomainAuthenticateResponse) SetToken(val string) {
 }
 
 // SetExpiry sets the value of Expiry.
-func (s *DomainAuthenticateResponse) SetExpiry(val time.Time) {
+func (s *DomainAuthenticateResponse) SetExpiry(val OptDateTime) {
 	s.Expiry = val
 }
 
@@ -2896,21 +2953,9 @@ func (s *DomainGetWriteContextClassifierRulesOK) SetRules(val []ClassifierRule) 
 
 func (*DomainGetWriteContextClassifierRulesOK) domainGetWriteContextClassifierRulesRes() {}
 
-type DomainGetWriteContextRegexRulesOK struct {
-	Rules []WriteContextRegexRule `json:"rules"`
-}
+type DomainGetWriteContextRegexRulesOKApplicationJSON []WriteContextRegexRule
 
-// GetRules returns the value of Rules.
-func (s *DomainGetWriteContextRegexRulesOK) GetRules() []WriteContextRegexRule {
-	return s.Rules
-}
-
-// SetRules sets the value of Rules.
-func (s *DomainGetWriteContextRegexRulesOK) SetRules(val []WriteContextRegexRule) {
-	s.Rules = val
-}
-
-func (*DomainGetWriteContextRegexRulesOK) domainGetWriteContextRegexRulesRes() {}
+func (*DomainGetWriteContextRegexRulesOKApplicationJSON) domainGetWriteContextRegexRulesRes() {}
 
 // A list of available hooks in this domain.
 // Ref: #/components/schemas/DomainHooksList
@@ -2932,6 +2977,7 @@ func (*DomainHooksList) domainListHooksRes() {}
 
 type DomainHooksListHooksItem struct {
 	Name        HookName `json:"name"`
+	URL         string   `json:"url"`
 	Version     string   `json:"version"`
 	Summary     string   `json:"summary"`
 	Description string   `json:"description"`
@@ -2944,6 +2990,11 @@ type DomainHooksListHooksItem struct {
 // GetName returns the value of Name.
 func (s *DomainHooksListHooksItem) GetName() HookName {
 	return s.Name
+}
+
+// GetURL returns the value of URL.
+func (s *DomainHooksListHooksItem) GetURL() string {
+	return s.URL
 }
 
 // GetVersion returns the value of Version.
@@ -2974,6 +3025,11 @@ func (s *DomainHooksListHooksItem) GetOutputCapsuleTags() []string {
 // SetName sets the value of Name.
 func (s *DomainHooksListHooksItem) SetName(val HookName) {
 	s.Name = val
+}
+
+// SetURL sets the value of URL.
+func (s *DomainHooksListHooksItem) SetURL(val string) {
+	s.URL = val
 }
 
 // SetVersion sets the value of Version.
@@ -3020,9 +3076,15 @@ func (s *DomainIdentity) SetToken(val string) {
 // Details for an API key principal.
 // Ref: #/components/schemas/DomainIdentityAPIKeyPrincipalParams
 type DomainIdentityAPIKeyPrincipalParams struct {
-	ApiKeyID OptString `json:"apiKeyID"`
+	Type     OptDomainIdentityAPIKeyPrincipalParamsType `json:"type"`
+	ApiKeyID OptString                                  `json:"apiKeyID"`
 	// An optional comment for the API key principal.
 	Comment OptString `json:"comment"`
+}
+
+// GetType returns the value of Type.
+func (s *DomainIdentityAPIKeyPrincipalParams) GetType() OptDomainIdentityAPIKeyPrincipalParamsType {
+	return s.Type
 }
 
 // GetApiKeyID returns the value of ApiKeyID.
@@ -3033,6 +3095,11 @@ func (s *DomainIdentityAPIKeyPrincipalParams) GetApiKeyID() OptString {
 // GetComment returns the value of Comment.
 func (s *DomainIdentityAPIKeyPrincipalParams) GetComment() OptString {
 	return s.Comment
+}
+
+// SetType sets the value of Type.
+func (s *DomainIdentityAPIKeyPrincipalParams) SetType(val OptDomainIdentityAPIKeyPrincipalParamsType) {
+	s.Type = val
 }
 
 // SetApiKeyID sets the value of ApiKeyID.
@@ -3082,9 +3149,15 @@ func (s *DomainIdentityAPIKeyPrincipalParamsType) UnmarshalText(data []byte) err
 // Details for an email principal.
 // Ref: #/components/schemas/DomainIdentityEmailPrincipalParams
 type DomainIdentityEmailPrincipalParams struct {
-	Email string `json:"email"`
+	Type  OptDomainIdentityEmailPrincipalParamsType `json:"type"`
+	Email string                                    `json:"email"`
 	// An optional comment for the email principal.
 	Comment OptString `json:"comment"`
+}
+
+// GetType returns the value of Type.
+func (s *DomainIdentityEmailPrincipalParams) GetType() OptDomainIdentityEmailPrincipalParamsType {
+	return s.Type
 }
 
 // GetEmail returns the value of Email.
@@ -3095,6 +3168,11 @@ func (s *DomainIdentityEmailPrincipalParams) GetEmail() string {
 // GetComment returns the value of Comment.
 func (s *DomainIdentityEmailPrincipalParams) GetComment() OptString {
 	return s.Comment
+}
+
+// SetType sets the value of Type.
+func (s *DomainIdentityEmailPrincipalParams) SetType(val OptDomainIdentityEmailPrincipalParamsType) {
+	s.Type = val
 }
 
 // SetEmail sets the value of Email.
@@ -3144,9 +3222,15 @@ func (s *DomainIdentityEmailPrincipalParamsType) UnmarshalText(data []byte) erro
 // Additional details for a hosted domain principal.
 // Ref: #/components/schemas/DomainIdentityHostedDomainPrincipalParams
 type DomainIdentityHostedDomainPrincipalParams struct {
-	HostedDomain string `json:"hostedDomain"`
+	Type         OptDomainIdentityHostedDomainPrincipalParamsType `json:"type"`
+	HostedDomain string                                           `json:"hostedDomain"`
 	// An optional comment for the hosted domain principal.
 	Comment OptString `json:"comment"`
+}
+
+// GetType returns the value of Type.
+func (s *DomainIdentityHostedDomainPrincipalParams) GetType() OptDomainIdentityHostedDomainPrincipalParamsType {
+	return s.Type
 }
 
 // GetHostedDomain returns the value of HostedDomain.
@@ -3157,6 +3241,11 @@ func (s *DomainIdentityHostedDomainPrincipalParams) GetHostedDomain() string {
 // GetComment returns the value of Comment.
 func (s *DomainIdentityHostedDomainPrincipalParams) GetComment() OptString {
 	return s.Comment
+}
+
+// SetType sets the value of Type.
+func (s *DomainIdentityHostedDomainPrincipalParams) SetType(val OptDomainIdentityHostedDomainPrincipalParamsType) {
+	s.Type = val
 }
 
 // SetHostedDomain sets the value of HostedDomain.
@@ -3210,7 +3299,6 @@ type DomainIdentityPrincipalDetails struct {
 	DomainIdentityAPIKeyPrincipalParams       DomainIdentityAPIKeyPrincipalParams
 	DomainIdentityEmailPrincipalParams        DomainIdentityEmailPrincipalParams
 	DomainIdentityHostedDomainPrincipalParams DomainIdentityHostedDomainPrincipalParams
-	DomainIdentityTenantIDPrincipalParams     DomainIdentityTenantIDPrincipalParams
 }
 
 // DomainIdentityPrincipalDetailsType is oneOf type of DomainIdentityPrincipalDetails.
@@ -3221,7 +3309,6 @@ const (
 	DomainIdentityAPIKeyPrincipalParamsDomainIdentityPrincipalDetails       DomainIdentityPrincipalDetailsType = "APIKey"
 	DomainIdentityEmailPrincipalParamsDomainIdentityPrincipalDetails        DomainIdentityPrincipalDetailsType = "Email"
 	DomainIdentityHostedDomainPrincipalParamsDomainIdentityPrincipalDetails DomainIdentityPrincipalDetailsType = "HostedDomain"
-	DomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails     DomainIdentityPrincipalDetailsType = "TenantID"
 )
 
 // IsDomainIdentityAPIKeyPrincipalParams reports whether DomainIdentityPrincipalDetails is DomainIdentityAPIKeyPrincipalParams.
@@ -3237,11 +3324,6 @@ func (s DomainIdentityPrincipalDetails) IsDomainIdentityEmailPrincipalParams() b
 // IsDomainIdentityHostedDomainPrincipalParams reports whether DomainIdentityPrincipalDetails is DomainIdentityHostedDomainPrincipalParams.
 func (s DomainIdentityPrincipalDetails) IsDomainIdentityHostedDomainPrincipalParams() bool {
 	return s.Type == DomainIdentityHostedDomainPrincipalParamsDomainIdentityPrincipalDetails
-}
-
-// IsDomainIdentityTenantIDPrincipalParams reports whether DomainIdentityPrincipalDetails is DomainIdentityTenantIDPrincipalParams.
-func (s DomainIdentityPrincipalDetails) IsDomainIdentityTenantIDPrincipalParams() bool {
-	return s.Type == DomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails
 }
 
 // SetDomainIdentityAPIKeyPrincipalParams sets DomainIdentityPrincipalDetails to DomainIdentityAPIKeyPrincipalParams.
@@ -3307,62 +3389,73 @@ func NewDomainIdentityHostedDomainPrincipalParamsDomainIdentityPrincipalDetails(
 	return s
 }
 
-// SetDomainIdentityTenantIDPrincipalParams sets DomainIdentityPrincipalDetails to DomainIdentityTenantIDPrincipalParams.
-func (s *DomainIdentityPrincipalDetails) SetDomainIdentityTenantIDPrincipalParams(v DomainIdentityTenantIDPrincipalParams) {
-	s.Type = DomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails
-	s.DomainIdentityTenantIDPrincipalParams = v
+// Ref: #/components/schemas/DomainIdentityProviderDetails
+// DomainIdentityProviderDetails represents sum type.
+type DomainIdentityProviderDetails struct {
+	Type                                     DomainIdentityProviderDetailsType // switch on this field
+	GoogleOAuthDomainIdentityProviderDetails GoogleOAuthDomainIdentityProviderDetails
+	APIKeyDomainIdentityProviderDetails      APIKeyDomainIdentityProviderDetails
 }
 
-// GetDomainIdentityTenantIDPrincipalParams returns DomainIdentityTenantIDPrincipalParams and true boolean if DomainIdentityPrincipalDetails is DomainIdentityTenantIDPrincipalParams.
-func (s DomainIdentityPrincipalDetails) GetDomainIdentityTenantIDPrincipalParams() (v DomainIdentityTenantIDPrincipalParams, ok bool) {
-	if !s.IsDomainIdentityTenantIDPrincipalParams() {
+// DomainIdentityProviderDetailsType is oneOf type of DomainIdentityProviderDetails.
+type DomainIdentityProviderDetailsType string
+
+// Possible values for DomainIdentityProviderDetailsType.
+const (
+	GoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails DomainIdentityProviderDetailsType = "GoogleOAuth"
+	APIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails      DomainIdentityProviderDetailsType = "APIKey"
+)
+
+// IsGoogleOAuthDomainIdentityProviderDetails reports whether DomainIdentityProviderDetails is GoogleOAuthDomainIdentityProviderDetails.
+func (s DomainIdentityProviderDetails) IsGoogleOAuthDomainIdentityProviderDetails() bool {
+	return s.Type == GoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails
+}
+
+// IsAPIKeyDomainIdentityProviderDetails reports whether DomainIdentityProviderDetails is APIKeyDomainIdentityProviderDetails.
+func (s DomainIdentityProviderDetails) IsAPIKeyDomainIdentityProviderDetails() bool {
+	return s.Type == APIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails
+}
+
+// SetGoogleOAuthDomainIdentityProviderDetails sets DomainIdentityProviderDetails to GoogleOAuthDomainIdentityProviderDetails.
+func (s *DomainIdentityProviderDetails) SetGoogleOAuthDomainIdentityProviderDetails(v GoogleOAuthDomainIdentityProviderDetails) {
+	s.Type = GoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails
+	s.GoogleOAuthDomainIdentityProviderDetails = v
+}
+
+// GetGoogleOAuthDomainIdentityProviderDetails returns GoogleOAuthDomainIdentityProviderDetails and true boolean if DomainIdentityProviderDetails is GoogleOAuthDomainIdentityProviderDetails.
+func (s DomainIdentityProviderDetails) GetGoogleOAuthDomainIdentityProviderDetails() (v GoogleOAuthDomainIdentityProviderDetails, ok bool) {
+	if !s.IsGoogleOAuthDomainIdentityProviderDetails() {
 		return v, false
 	}
-	return s.DomainIdentityTenantIDPrincipalParams, true
+	return s.GoogleOAuthDomainIdentityProviderDetails, true
 }
 
-// NewDomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails returns new DomainIdentityPrincipalDetails from DomainIdentityTenantIDPrincipalParams.
-func NewDomainIdentityTenantIDPrincipalParamsDomainIdentityPrincipalDetails(v DomainIdentityTenantIDPrincipalParams) DomainIdentityPrincipalDetails {
-	var s DomainIdentityPrincipalDetails
-	s.SetDomainIdentityTenantIDPrincipalParams(v)
+// NewGoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails returns new DomainIdentityProviderDetails from GoogleOAuthDomainIdentityProviderDetails.
+func NewGoogleOAuthDomainIdentityProviderDetailsDomainIdentityProviderDetails(v GoogleOAuthDomainIdentityProviderDetails) DomainIdentityProviderDetails {
+	var s DomainIdentityProviderDetails
+	s.SetGoogleOAuthDomainIdentityProviderDetails(v)
 	return s
 }
 
-// Ref: #/components/schemas/DomainIdentityProviderDetails
-type DomainIdentityProviderDetails struct {
-	GoogleOAuth    OptGoogleOAuthDomainIdentityProviderDetails    `json:"GoogleOAuth"`
-	MicrosoftOAuth OptMicrosoftOAuthDomainIdentityProviderDetails `json:"MicrosoftOAuth"`
-	APIKey         OptAPIKeyDomainIdentityProviderDetails         `json:"APIKey"`
+// SetAPIKeyDomainIdentityProviderDetails sets DomainIdentityProviderDetails to APIKeyDomainIdentityProviderDetails.
+func (s *DomainIdentityProviderDetails) SetAPIKeyDomainIdentityProviderDetails(v APIKeyDomainIdentityProviderDetails) {
+	s.Type = APIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails
+	s.APIKeyDomainIdentityProviderDetails = v
 }
 
-// GetGoogleOAuth returns the value of GoogleOAuth.
-func (s *DomainIdentityProviderDetails) GetGoogleOAuth() OptGoogleOAuthDomainIdentityProviderDetails {
-	return s.GoogleOAuth
+// GetAPIKeyDomainIdentityProviderDetails returns APIKeyDomainIdentityProviderDetails and true boolean if DomainIdentityProviderDetails is APIKeyDomainIdentityProviderDetails.
+func (s DomainIdentityProviderDetails) GetAPIKeyDomainIdentityProviderDetails() (v APIKeyDomainIdentityProviderDetails, ok bool) {
+	if !s.IsAPIKeyDomainIdentityProviderDetails() {
+		return v, false
+	}
+	return s.APIKeyDomainIdentityProviderDetails, true
 }
 
-// GetMicrosoftOAuth returns the value of MicrosoftOAuth.
-func (s *DomainIdentityProviderDetails) GetMicrosoftOAuth() OptMicrosoftOAuthDomainIdentityProviderDetails {
-	return s.MicrosoftOAuth
-}
-
-// GetAPIKey returns the value of APIKey.
-func (s *DomainIdentityProviderDetails) GetAPIKey() OptAPIKeyDomainIdentityProviderDetails {
-	return s.APIKey
-}
-
-// SetGoogleOAuth sets the value of GoogleOAuth.
-func (s *DomainIdentityProviderDetails) SetGoogleOAuth(val OptGoogleOAuthDomainIdentityProviderDetails) {
-	s.GoogleOAuth = val
-}
-
-// SetMicrosoftOAuth sets the value of MicrosoftOAuth.
-func (s *DomainIdentityProviderDetails) SetMicrosoftOAuth(val OptMicrosoftOAuthDomainIdentityProviderDetails) {
-	s.MicrosoftOAuth = val
-}
-
-// SetAPIKey sets the value of APIKey.
-func (s *DomainIdentityProviderDetails) SetAPIKey(val OptAPIKeyDomainIdentityProviderDetails) {
-	s.APIKey = val
+// NewAPIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails returns new DomainIdentityProviderDetails from APIKeyDomainIdentityProviderDetails.
+func NewAPIKeyDomainIdentityProviderDetailsDomainIdentityProviderDetails(v APIKeyDomainIdentityProviderDetails) DomainIdentityProviderDetails {
+	var s DomainIdentityProviderDetails
+	s.SetAPIKeyDomainIdentityProviderDetails(v)
+	return s
 }
 
 // Information about an identity provider. This may be an imported provider or a provider in this
@@ -3524,7 +3617,6 @@ const (
 	DomainIdentityProviderPrincipalTypeAPIKey       DomainIdentityProviderPrincipalType = "APIKey"
 	DomainIdentityProviderPrincipalTypeEmail        DomainIdentityProviderPrincipalType = "Email"
 	DomainIdentityProviderPrincipalTypeHostedDomain DomainIdentityProviderPrincipalType = "HostedDomain"
-	DomainIdentityProviderPrincipalTypeTenantID     DomainIdentityProviderPrincipalType = "TenantID"
 )
 
 // AllValues returns all DomainIdentityProviderPrincipalType values.
@@ -3533,7 +3625,6 @@ func (DomainIdentityProviderPrincipalType) AllValues() []DomainIdentityProviderP
 		DomainIdentityProviderPrincipalTypeAPIKey,
 		DomainIdentityProviderPrincipalTypeEmail,
 		DomainIdentityProviderPrincipalTypeHostedDomain,
-		DomainIdentityProviderPrincipalTypeTenantID,
 	}
 }
 
@@ -3545,8 +3636,6 @@ func (s DomainIdentityProviderPrincipalType) MarshalText() ([]byte, error) {
 	case DomainIdentityProviderPrincipalTypeEmail:
 		return []byte(s), nil
 	case DomainIdentityProviderPrincipalTypeHostedDomain:
-		return []byte(s), nil
-	case DomainIdentityProviderPrincipalTypeTenantID:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -3565,61 +3654,38 @@ func (s *DomainIdentityProviderPrincipalType) UnmarshalText(data []byte) error {
 	case DomainIdentityProviderPrincipalTypeHostedDomain:
 		*s = DomainIdentityProviderPrincipalTypeHostedDomain
 		return nil
-	case DomainIdentityProviderPrincipalTypeTenantID:
-		*s = DomainIdentityProviderPrincipalTypeTenantID
-		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
 
+// Type of the identity provider.
+// Ref: #/components/schemas/DomainIdentityProviderType
 type DomainIdentityProviderType string
 
-// Additional details for a tenant ID principal.
-// Ref: #/components/schemas/DomainIdentityTenantIDPrincipalParams
-type DomainIdentityTenantIDPrincipalParams struct {
-	TenantID string `json:"tenantID"`
-	// An optional comment for the tenant ID principal.
-	Comment OptString `json:"comment"`
-}
-
-// GetTenantID returns the value of TenantID.
-func (s *DomainIdentityTenantIDPrincipalParams) GetTenantID() string {
-	return s.TenantID
-}
-
-// GetComment returns the value of Comment.
-func (s *DomainIdentityTenantIDPrincipalParams) GetComment() OptString {
-	return s.Comment
-}
-
-// SetTenantID sets the value of TenantID.
-func (s *DomainIdentityTenantIDPrincipalParams) SetTenantID(val string) {
-	s.TenantID = val
-}
-
-// SetComment sets the value of Comment.
-func (s *DomainIdentityTenantIDPrincipalParams) SetComment(val OptString) {
-	s.Comment = val
-}
-
-type DomainIdentityTenantIDPrincipalParamsType string
-
 const (
-	DomainIdentityTenantIDPrincipalParamsTypeTenantID DomainIdentityTenantIDPrincipalParamsType = "TenantID"
+	DomainIdentityProviderTypeGoogleOAuth       DomainIdentityProviderType = "GoogleOAuth"
+	DomainIdentityProviderTypeGCPServiceAccount DomainIdentityProviderType = "GCPServiceAccount"
+	DomainIdentityProviderTypeAPIKey            DomainIdentityProviderType = "APIKey"
 )
 
-// AllValues returns all DomainIdentityTenantIDPrincipalParamsType values.
-func (DomainIdentityTenantIDPrincipalParamsType) AllValues() []DomainIdentityTenantIDPrincipalParamsType {
-	return []DomainIdentityTenantIDPrincipalParamsType{
-		DomainIdentityTenantIDPrincipalParamsTypeTenantID,
+// AllValues returns all DomainIdentityProviderType values.
+func (DomainIdentityProviderType) AllValues() []DomainIdentityProviderType {
+	return []DomainIdentityProviderType{
+		DomainIdentityProviderTypeGoogleOAuth,
+		DomainIdentityProviderTypeGCPServiceAccount,
+		DomainIdentityProviderTypeAPIKey,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s DomainIdentityTenantIDPrincipalParamsType) MarshalText() ([]byte, error) {
+func (s DomainIdentityProviderType) MarshalText() ([]byte, error) {
 	switch s {
-	case DomainIdentityTenantIDPrincipalParamsTypeTenantID:
+	case DomainIdentityProviderTypeGoogleOAuth:
+		return []byte(s), nil
+	case DomainIdentityProviderTypeGCPServiceAccount:
+		return []byte(s), nil
+	case DomainIdentityProviderTypeAPIKey:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -3627,10 +3693,16 @@ func (s DomainIdentityTenantIDPrincipalParamsType) MarshalText() ([]byte, error)
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DomainIdentityTenantIDPrincipalParamsType) UnmarshalText(data []byte) error {
-	switch DomainIdentityTenantIDPrincipalParamsType(data) {
-	case DomainIdentityTenantIDPrincipalParamsTypeTenantID:
-		*s = DomainIdentityTenantIDPrincipalParamsTypeTenantID
+func (s *DomainIdentityProviderType) UnmarshalText(data []byte) error {
+	switch DomainIdentityProviderType(data) {
+	case DomainIdentityProviderTypeGoogleOAuth:
+		*s = DomainIdentityProviderTypeGoogleOAuth
+		return nil
+	case DomainIdentityProviderTypeGCPServiceAccount:
+		*s = DomainIdentityProviderTypeGCPServiceAccount
+		return nil
+	case DomainIdentityProviderTypeAPIKey:
+		*s = DomainIdentityProviderTypeAPIKey
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -3696,54 +3768,6 @@ func (s *DomainInsertWriteContextRegexRuleOK) SetRuleID(val RuleID) {
 
 func (*DomainInsertWriteContextRegexRuleOK) domainInsertWriteContextRegexRuleRes() {}
 
-type DomainListCapsulesSortOn string
-
-const (
-	DomainListCapsulesSortOnCreated DomainListCapsulesSortOn = "created"
-	DomainListCapsulesSortOnID      DomainListCapsulesSortOn = "id"
-	DomainListCapsulesSortOnSize    DomainListCapsulesSortOn = "size"
-)
-
-// AllValues returns all DomainListCapsulesSortOn values.
-func (DomainListCapsulesSortOn) AllValues() []DomainListCapsulesSortOn {
-	return []DomainListCapsulesSortOn{
-		DomainListCapsulesSortOnCreated,
-		DomainListCapsulesSortOnID,
-		DomainListCapsulesSortOnSize,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s DomainListCapsulesSortOn) MarshalText() ([]byte, error) {
-	switch s {
-	case DomainListCapsulesSortOnCreated:
-		return []byte(s), nil
-	case DomainListCapsulesSortOnID:
-		return []byte(s), nil
-	case DomainListCapsulesSortOnSize:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DomainListCapsulesSortOn) UnmarshalText(data []byte) error {
-	switch DomainListCapsulesSortOn(data) {
-	case DomainListCapsulesSortOnCreated:
-		*s = DomainListCapsulesSortOnCreated
-		return nil
-	case DomainListCapsulesSortOnID:
-		*s = DomainListCapsulesSortOnID
-		return nil
-	case DomainListCapsulesSortOnSize:
-		*s = DomainListCapsulesSortOnSize
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // Configuration of a domain peer. If the import alias is absent, the domain ID, without the initial
 // "dm-" prefix, will be used.
 // Ref: #/components/schemas/DomainPeerConfig
@@ -3760,6 +3784,8 @@ type DomainPeerConfig struct {
 	ExportReadContexts []ReadContextName `json:"exportReadContexts"`
 	// If present and true, this overrides exportReadContexts and exports all read contexts.
 	ExportAllReadContexts OptBool `json:"exportAllReadContexts"`
+	// If present and true, this overrides exportDataPolicies and exports all available data policies.
+	ExportAllDataPolicies OptBool `json:"exportAllDataPolicies"`
 	// A list of write contexts that this peer domain may import from us.
 	ExportWriteContexts []WriteContextName `json:"exportWriteContexts"`
 	// If present and true, this overrides exportWriteContexts and exports all write contexts.
@@ -3814,6 +3840,8 @@ type DomainPeerConfig struct {
 	ImportReadContexts []ReadContextName `json:"importReadContexts"`
 	// If present and true, this overrides importReadContexts and imports all available read contexts.
 	ImportAllReadContexts OptBool `json:"importAllReadContexts"`
+	// If present and true, this overrides importDataPolicies and imports all available data policies.
+	ImportAllDataPolicies OptBool `json:"importAllDataPolicies"`
 	// A list of write contexts to import from the peer domain.
 	ImportWriteContexts []WriteContextName `json:"importWriteContexts"`
 	// If present and true, this overrides importWriteContexts and imports all available write contexts.
@@ -3873,6 +3901,11 @@ func (s *DomainPeerConfig) GetExportReadContexts() []ReadContextName {
 // GetExportAllReadContexts returns the value of ExportAllReadContexts.
 func (s *DomainPeerConfig) GetExportAllReadContexts() OptBool {
 	return s.ExportAllReadContexts
+}
+
+// GetExportAllDataPolicies returns the value of ExportAllDataPolicies.
+func (s *DomainPeerConfig) GetExportAllDataPolicies() OptBool {
+	return s.ExportAllDataPolicies
 }
 
 // GetExportWriteContexts returns the value of ExportWriteContexts.
@@ -3980,6 +4013,11 @@ func (s *DomainPeerConfig) GetImportAllReadContexts() OptBool {
 	return s.ImportAllReadContexts
 }
 
+// GetImportAllDataPolicies returns the value of ImportAllDataPolicies.
+func (s *DomainPeerConfig) GetImportAllDataPolicies() OptBool {
+	return s.ImportAllDataPolicies
+}
+
 // GetImportWriteContexts returns the value of ImportWriteContexts.
 func (s *DomainPeerConfig) GetImportWriteContexts() []WriteContextName {
 	return s.ImportWriteContexts
@@ -4063,6 +4101,11 @@ func (s *DomainPeerConfig) SetExportReadContexts(val []ReadContextName) {
 // SetExportAllReadContexts sets the value of ExportAllReadContexts.
 func (s *DomainPeerConfig) SetExportAllReadContexts(val OptBool) {
 	s.ExportAllReadContexts = val
+}
+
+// SetExportAllDataPolicies sets the value of ExportAllDataPolicies.
+func (s *DomainPeerConfig) SetExportAllDataPolicies(val OptBool) {
+	s.ExportAllDataPolicies = val
 }
 
 // SetExportWriteContexts sets the value of ExportWriteContexts.
@@ -4168,6 +4211,11 @@ func (s *DomainPeerConfig) SetImportReadContexts(val []ReadContextName) {
 // SetImportAllReadContexts sets the value of ImportAllReadContexts.
 func (s *DomainPeerConfig) SetImportAllReadContexts(val OptBool) {
 	s.ImportAllReadContexts = val
+}
+
+// SetImportAllDataPolicies sets the value of ImportAllDataPolicies.
+func (s *DomainPeerConfig) SetImportAllDataPolicies(val OptBool) {
+	s.ImportAllDataPolicies = val
 }
 
 // SetImportWriteContexts sets the value of ImportWriteContexts.
@@ -4566,116 +4614,6 @@ type DomainPutVendorSettingsOK struct{}
 
 func (*DomainPutVendorSettingsOK) domainPutVendorSettingsRes() {}
 
-type DomainQueryAccessLogOperationType string
-
-const (
-	DomainQueryAccessLogOperationTypeCreate DomainQueryAccessLogOperationType = "create"
-	DomainQueryAccessLogOperationTypeOpen   DomainQueryAccessLogOperationType = "open"
-	DomainQueryAccessLogOperationTypeRead   DomainQueryAccessLogOperationType = "read"
-	DomainQueryAccessLogOperationTypeWrite  DomainQueryAccessLogOperationType = "write"
-)
-
-// AllValues returns all DomainQueryAccessLogOperationType values.
-func (DomainQueryAccessLogOperationType) AllValues() []DomainQueryAccessLogOperationType {
-	return []DomainQueryAccessLogOperationType{
-		DomainQueryAccessLogOperationTypeCreate,
-		DomainQueryAccessLogOperationTypeOpen,
-		DomainQueryAccessLogOperationTypeRead,
-		DomainQueryAccessLogOperationTypeWrite,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s DomainQueryAccessLogOperationType) MarshalText() ([]byte, error) {
-	switch s {
-	case DomainQueryAccessLogOperationTypeCreate:
-		return []byte(s), nil
-	case DomainQueryAccessLogOperationTypeOpen:
-		return []byte(s), nil
-	case DomainQueryAccessLogOperationTypeRead:
-		return []byte(s), nil
-	case DomainQueryAccessLogOperationTypeWrite:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DomainQueryAccessLogOperationType) UnmarshalText(data []byte) error {
-	switch DomainQueryAccessLogOperationType(data) {
-	case DomainQueryAccessLogOperationTypeCreate:
-		*s = DomainQueryAccessLogOperationTypeCreate
-		return nil
-	case DomainQueryAccessLogOperationTypeOpen:
-		*s = DomainQueryAccessLogOperationTypeOpen
-		return nil
-	case DomainQueryAccessLogOperationTypeRead:
-		*s = DomainQueryAccessLogOperationTypeRead
-		return nil
-	case DomainQueryAccessLogOperationTypeWrite:
-		*s = DomainQueryAccessLogOperationTypeWrite
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-type DomainQueryAccessLogSingleCapsuleOperationType string
-
-const (
-	DomainQueryAccessLogSingleCapsuleOperationTypeCreate DomainQueryAccessLogSingleCapsuleOperationType = "create"
-	DomainQueryAccessLogSingleCapsuleOperationTypeOpen   DomainQueryAccessLogSingleCapsuleOperationType = "open"
-	DomainQueryAccessLogSingleCapsuleOperationTypeRead   DomainQueryAccessLogSingleCapsuleOperationType = "read"
-	DomainQueryAccessLogSingleCapsuleOperationTypeWrite  DomainQueryAccessLogSingleCapsuleOperationType = "write"
-)
-
-// AllValues returns all DomainQueryAccessLogSingleCapsuleOperationType values.
-func (DomainQueryAccessLogSingleCapsuleOperationType) AllValues() []DomainQueryAccessLogSingleCapsuleOperationType {
-	return []DomainQueryAccessLogSingleCapsuleOperationType{
-		DomainQueryAccessLogSingleCapsuleOperationTypeCreate,
-		DomainQueryAccessLogSingleCapsuleOperationTypeOpen,
-		DomainQueryAccessLogSingleCapsuleOperationTypeRead,
-		DomainQueryAccessLogSingleCapsuleOperationTypeWrite,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s DomainQueryAccessLogSingleCapsuleOperationType) MarshalText() ([]byte, error) {
-	switch s {
-	case DomainQueryAccessLogSingleCapsuleOperationTypeCreate:
-		return []byte(s), nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeOpen:
-		return []byte(s), nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeRead:
-		return []byte(s), nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeWrite:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DomainQueryAccessLogSingleCapsuleOperationType) UnmarshalText(data []byte) error {
-	switch DomainQueryAccessLogSingleCapsuleOperationType(data) {
-	case DomainQueryAccessLogSingleCapsuleOperationTypeCreate:
-		*s = DomainQueryAccessLogSingleCapsuleOperationTypeCreate
-		return nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeOpen:
-		*s = DomainQueryAccessLogSingleCapsuleOperationTypeOpen
-		return nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeRead:
-		*s = DomainQueryAccessLogSingleCapsuleOperationTypeRead
-		return nil
-	case DomainQueryAccessLogSingleCapsuleOperationTypeWrite:
-		*s = DomainQueryAccessLogSingleCapsuleOperationTypeWrite
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // DomainReadContextFlushOK is response for DomainReadContextFlush operation.
 type DomainReadContextFlushOK struct{}
 
@@ -4822,6 +4760,8 @@ func (*DomainSealCapsuleOK) domainSealCapsuleRes() {}
 // Ref: #/components/schemas/DomainSettings
 type DomainSettings struct {
 	// A list of admin contact details that have been validated.
+	AdminContacts []string `json:"adminContacts"`
+	// A list of admin contact details that have been validated.
 	ActiveAdminContacts []string `json:"activeAdminContacts"`
 	// A list of admin contact details that are pending validation.
 	PendingAdminContacts []string `json:"pendingAdminContacts"`
@@ -4831,6 +4771,11 @@ type DomainSettings struct {
 	DefaultTokenLifetime OptInt `json:"defaultTokenLifetime"`
 	// The maximum lifetime in seconds that a domain authentication token can be generated for.
 	MaximumTokenLifetime OptInt `json:"maximumTokenLifetime"`
+}
+
+// GetAdminContacts returns the value of AdminContacts.
+func (s *DomainSettings) GetAdminContacts() []string {
+	return s.AdminContacts
 }
 
 // GetActiveAdminContacts returns the value of ActiveAdminContacts.
@@ -4858,6 +4803,11 @@ func (s *DomainSettings) GetMaximumTokenLifetime() OptInt {
 	return s.MaximumTokenLifetime
 }
 
+// SetAdminContacts sets the value of AdminContacts.
+func (s *DomainSettings) SetAdminContacts(val []string) {
+	s.AdminContacts = val
+}
+
 // SetActiveAdminContacts sets the value of ActiveAdminContacts.
 func (s *DomainSettings) SetActiveAdminContacts(val []string) {
 	s.ActiveAdminContacts = val
@@ -4883,8 +4833,24 @@ func (s *DomainSettings) SetMaximumTokenLifetime(val OptInt) {
 	s.MaximumTokenLifetime = val
 }
 
-func (*DomainSettings) domainGetSettingsRes() {}
-func (*DomainSettings) domainPutSettingsRes() {}
+func (*DomainSettings) domainGetSettingsRes()   {}
+func (*DomainSettings) domainPatchSettingsRes() {}
+
+// A JSON patch to apply to the domain settings.
+// Ref: #/components/schemas/DomainSettingsPatch
+type DomainSettingsPatch struct {
+	Patch PatchRequest `json:"patch"`
+}
+
+// GetPatch returns the value of Patch.
+func (s *DomainSettingsPatch) GetPatch() PatchRequest {
+	return s.Patch
+}
+
+// SetPatch sets the value of Patch.
+func (s *DomainSettingsPatch) SetPatch(val PatchRequest) {
+	s.Patch = val
+}
 
 // Information about the status of the domain.
 // Ref: #/components/schemas/DomainStatus
@@ -5035,20 +5001,6 @@ func (*DomainUpdateReadContextRuleOK) domainUpdateReadContextRuleRes() {}
 type DomainUpsertCapsuleTagsOK struct{}
 
 func (*DomainUpsertCapsuleTagsOK) domainUpsertCapsuleTagsRes() {}
-
-type DomainUpsertCapsuleTagsReq struct {
-	Tags []Tag `json:"tags"`
-}
-
-// GetTags returns the value of Tags.
-func (s *DomainUpsertCapsuleTagsReq) GetTags() []Tag {
-	return s.Tags
-}
-
-// SetTags sets the value of Tags.
-func (s *DomainUpsertCapsuleTagsReq) SetTags(val []Tag) {
-	s.Tags = val
-}
 
 // DomainUpsertReadContextOK is response for DomainUpsertReadContext operation.
 type DomainUpsertReadContextOK struct{}
@@ -5225,17 +5177,24 @@ func (s *FactPolicyRulesItem) SetArguments(val []FactPolicyRulesItemArgumentsIte
 }
 
 type FactPolicyRulesItemArgumentsItem struct {
+	// This argument can have any value (don't care).
+	Any OptBool `json:"any"`
 	// Which value to compare against. If literal, the 'value' field will be used. If 'domainIdentity'
 	// then the domain identity will be checked for a capability matching the reference in the
-	// 'capability' field. If 'any', this argument can have any value.
-	Source     FactPolicyRulesItemArgumentsItemSource `json:"source"`
-	Capability OptCapabilityReference                 `json:"capability"`
+	// 'capability' field.
+	Source     OptFactPolicyRulesItemArgumentsItemSource `json:"source"`
+	Capability OptCapabilityReference                    `json:"capability"`
 	// If source is literal, what is the value.
 	Value OptString `json:"value"`
 }
 
+// GetAny returns the value of Any.
+func (s *FactPolicyRulesItemArgumentsItem) GetAny() OptBool {
+	return s.Any
+}
+
 // GetSource returns the value of Source.
-func (s *FactPolicyRulesItemArgumentsItem) GetSource() FactPolicyRulesItemArgumentsItemSource {
+func (s *FactPolicyRulesItemArgumentsItem) GetSource() OptFactPolicyRulesItemArgumentsItemSource {
 	return s.Source
 }
 
@@ -5249,8 +5208,13 @@ func (s *FactPolicyRulesItemArgumentsItem) GetValue() OptString {
 	return s.Value
 }
 
+// SetAny sets the value of Any.
+func (s *FactPolicyRulesItemArgumentsItem) SetAny(val OptBool) {
+	s.Any = val
+}
+
 // SetSource sets the value of Source.
-func (s *FactPolicyRulesItemArgumentsItem) SetSource(val FactPolicyRulesItemArgumentsItemSource) {
+func (s *FactPolicyRulesItemArgumentsItem) SetSource(val OptFactPolicyRulesItemArgumentsItemSource) {
 	s.Source = val
 }
 
@@ -5266,13 +5230,12 @@ func (s *FactPolicyRulesItemArgumentsItem) SetValue(val OptString) {
 
 // Which value to compare against. If literal, the 'value' field will be used. If 'domainIdentity'
 // then the domain identity will be checked for a capability matching the reference in the
-// 'capability' field. If 'any', this argument can have any value.
+// 'capability' field.
 type FactPolicyRulesItemArgumentsItemSource string
 
 const (
 	FactPolicyRulesItemArgumentsItemSourceDomainIdentity FactPolicyRulesItemArgumentsItemSource = "domainIdentity"
 	FactPolicyRulesItemArgumentsItemSourceLiteral        FactPolicyRulesItemArgumentsItemSource = "literal"
-	FactPolicyRulesItemArgumentsItemSourceAny            FactPolicyRulesItemArgumentsItemSource = "any"
 )
 
 // AllValues returns all FactPolicyRulesItemArgumentsItemSource values.
@@ -5280,7 +5243,6 @@ func (FactPolicyRulesItemArgumentsItemSource) AllValues() []FactPolicyRulesItemA
 	return []FactPolicyRulesItemArgumentsItemSource{
 		FactPolicyRulesItemArgumentsItemSourceDomainIdentity,
 		FactPolicyRulesItemArgumentsItemSourceLiteral,
-		FactPolicyRulesItemArgumentsItemSourceAny,
 	}
 }
 
@@ -5290,8 +5252,6 @@ func (s FactPolicyRulesItemArgumentsItemSource) MarshalText() ([]byte, error) {
 	case FactPolicyRulesItemArgumentsItemSourceDomainIdentity:
 		return []byte(s), nil
 	case FactPolicyRulesItemArgumentsItemSourceLiteral:
-		return []byte(s), nil
-	case FactPolicyRulesItemArgumentsItemSourceAny:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -5306,9 +5266,6 @@ func (s *FactPolicyRulesItemArgumentsItemSource) UnmarshalText(data []byte) erro
 		return nil
 	case FactPolicyRulesItemArgumentsItemSourceLiteral:
 		*s = FactPolicyRulesItemArgumentsItemSourceLiteral
-		return nil
-	case FactPolicyRulesItemArgumentsItemSourceAny:
-		*s = FactPolicyRulesItemArgumentsItemSourceAny
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -5462,7 +5419,7 @@ type FactTypeName string
 
 type FactTypeReference string
 
-// Returned when the server is forbidden from performing some action on the user's behalf by a
+// Returned when the server is forbidden form performing some action on the user's behalf by a
 // third-party service (for example, AWS KMS).
 // Ref: #/components/schemas/ForbiddenError
 type ForbiddenError struct {
@@ -5496,7 +5453,8 @@ type GCPServiceAccountKeyInfo struct {
 	// The Google keyring's ID at location.
 	KeyringID string `json:"keyringID"`
 	// The key ID that should be used in the Google keyring.
-	KeyID string `json:"keyID"`
+	KeyID        string                                  `json:"keyID"`
+	ProviderName OptGCPServiceAccountKeyInfoProviderName `json:"providerName"`
 }
 
 // GetServiceAccountCredentials returns the value of ServiceAccountCredentials.
@@ -5524,6 +5482,11 @@ func (s *GCPServiceAccountKeyInfo) GetKeyID() string {
 	return s.KeyID
 }
 
+// GetProviderName returns the value of ProviderName.
+func (s *GCPServiceAccountKeyInfo) GetProviderName() OptGCPServiceAccountKeyInfoProviderName {
+	return s.ProviderName
+}
+
 // SetServiceAccountCredentials sets the value of ServiceAccountCredentials.
 func (s *GCPServiceAccountKeyInfo) SetServiceAccountCredentials(val []byte) {
 	s.ServiceAccountCredentials = val
@@ -5547,6 +5510,11 @@ func (s *GCPServiceAccountKeyInfo) SetKeyringID(val string) {
 // SetKeyID sets the value of KeyID.
 func (s *GCPServiceAccountKeyInfo) SetKeyID(val string) {
 	s.KeyID = val
+}
+
+// SetProviderName sets the value of ProviderName.
+func (s *GCPServiceAccountKeyInfo) SetProviderName(val OptGCPServiceAccountKeyInfoProviderName) {
+	s.ProviderName = val
 }
 
 type GCPServiceAccountKeyInfoProviderName string
@@ -5587,7 +5555,13 @@ func (s *GCPServiceAccountKeyInfoProviderName) UnmarshalText(data []byte) error 
 // Antimatter Client ID will be used.
 // Ref: #/components/schemas/GoogleOAuthDomainIdentityProviderDetails
 type GoogleOAuthDomainIdentityProviderDetails struct {
-	ClientID OptString `json:"clientID"`
+	Type     OptGoogleOAuthDomainIdentityProviderDetailsType `json:"type"`
+	ClientID OptString                                       `json:"clientID"`
+}
+
+// GetType returns the value of Type.
+func (s *GoogleOAuthDomainIdentityProviderDetails) GetType() OptGoogleOAuthDomainIdentityProviderDetailsType {
+	return s.Type
 }
 
 // GetClientID returns the value of ClientID.
@@ -5595,9 +5569,48 @@ func (s *GoogleOAuthDomainIdentityProviderDetails) GetClientID() OptString {
 	return s.ClientID
 }
 
+// SetType sets the value of Type.
+func (s *GoogleOAuthDomainIdentityProviderDetails) SetType(val OptGoogleOAuthDomainIdentityProviderDetailsType) {
+	s.Type = val
+}
+
 // SetClientID sets the value of ClientID.
 func (s *GoogleOAuthDomainIdentityProviderDetails) SetClientID(val OptString) {
 	s.ClientID = val
+}
+
+type GoogleOAuthDomainIdentityProviderDetailsType string
+
+const (
+	GoogleOAuthDomainIdentityProviderDetailsTypeGoogleOAuth GoogleOAuthDomainIdentityProviderDetailsType = "GoogleOAuth"
+)
+
+// AllValues returns all GoogleOAuthDomainIdentityProviderDetailsType values.
+func (GoogleOAuthDomainIdentityProviderDetailsType) AllValues() []GoogleOAuthDomainIdentityProviderDetailsType {
+	return []GoogleOAuthDomainIdentityProviderDetailsType{
+		GoogleOAuthDomainIdentityProviderDetailsTypeGoogleOAuth,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GoogleOAuthDomainIdentityProviderDetailsType) MarshalText() ([]byte, error) {
+	switch s {
+	case GoogleOAuthDomainIdentityProviderDetailsTypeGoogleOAuth:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GoogleOAuthDomainIdentityProviderDetailsType) UnmarshalText(data []byte) error {
+	switch GoogleOAuthDomainIdentityProviderDetailsType(data) {
+	case GoogleOAuthDomainIdentityProviderDetailsTypeGoogleOAuth:
+		*s = GoogleOAuthDomainIdentityProviderDetailsTypeGoogleOAuth
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type HookName string
@@ -5704,11 +5717,11 @@ func (*InvalidRequestError) domainListReadContextsRes()                      {}
 func (*InvalidRequestError) domainListResourcesRes()                         {}
 func (*InvalidRequestError) domainListWriteContextsRes()                     {}
 func (*InvalidRequestError) domainOpenCapsuleRes()                           {}
+func (*InvalidRequestError) domainPatchSettingsRes()                         {}
 func (*InvalidRequestError) domainPolicyFlushRes()                           {}
 func (*InvalidRequestError) domainPutCapabilityRes()                         {}
 func (*InvalidRequestError) domainPutDisasterRecoverySettingsRes()           {}
 func (*InvalidRequestError) domainPutFactTypeRes()                           {}
-func (*InvalidRequestError) domainPutSettingsRes()                           {}
 func (*InvalidRequestError) domainPutVendorSettingsRes()                     {}
 func (*InvalidRequestError) domainQueryAccessLogRes()                        {}
 func (*InvalidRequestError) domainQueryAccessLogSingleCapsuleRes()           {}
@@ -5731,6 +5744,699 @@ func (*InvalidRequestError) domainUpsertWriteContextConfigurationRes()       {}
 func (*InvalidRequestError) domainUpsertWriteContextRes()                    {}
 func (*InvalidRequestError) starredDomainAddRes()                            {}
 func (*InvalidRequestError) starredDomainRemoveRes()                         {}
+
+// Ref: #/components/schemas/JSONPatchRequestAdd
+type JSONPatchRequestAdd struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The value to add.
+	Value JSONPatchRequestAddValue `json:"value"`
+	// The operation to perform.
+	Op JSONPatchRequestAddOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestAdd) GetPath() string {
+	return s.Path
+}
+
+// GetValue returns the value of Value.
+func (s *JSONPatchRequestAdd) GetValue() JSONPatchRequestAddValue {
+	return s.Value
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestAdd) GetOp() JSONPatchRequestAddOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestAdd) SetPath(val string) {
+	s.Path = val
+}
+
+// SetValue sets the value of Value.
+func (s *JSONPatchRequestAdd) SetValue(val JSONPatchRequestAddValue) {
+	s.Value = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestAdd) SetOp(val JSONPatchRequestAddOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestAddOp string
+
+const (
+	JSONPatchRequestAddOpAdd JSONPatchRequestAddOp = "add"
+)
+
+// AllValues returns all JSONPatchRequestAddOp values.
+func (JSONPatchRequestAddOp) AllValues() []JSONPatchRequestAddOp {
+	return []JSONPatchRequestAddOp{
+		JSONPatchRequestAddOpAdd,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestAddOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestAddOpAdd:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestAddOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestAddOp(data) {
+	case JSONPatchRequestAddOpAdd:
+		*s = JSONPatchRequestAddOpAdd
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// The value to add.
+// JSONPatchRequestAddValue represents sum type.
+type JSONPatchRequestAddValue struct {
+	Type    JSONPatchRequestAddValueType // switch on this field
+	String  string
+	Float64 float64
+	Bool    bool
+}
+
+// JSONPatchRequestAddValueType is oneOf type of JSONPatchRequestAddValue.
+type JSONPatchRequestAddValueType string
+
+// Possible values for JSONPatchRequestAddValueType.
+const (
+	StringJSONPatchRequestAddValue  JSONPatchRequestAddValueType = "string"
+	Float64JSONPatchRequestAddValue JSONPatchRequestAddValueType = "float64"
+	BoolJSONPatchRequestAddValue    JSONPatchRequestAddValueType = "bool"
+)
+
+// IsString reports whether JSONPatchRequestAddValue is string.
+func (s JSONPatchRequestAddValue) IsString() bool { return s.Type == StringJSONPatchRequestAddValue }
+
+// IsFloat64 reports whether JSONPatchRequestAddValue is float64.
+func (s JSONPatchRequestAddValue) IsFloat64() bool { return s.Type == Float64JSONPatchRequestAddValue }
+
+// IsBool reports whether JSONPatchRequestAddValue is bool.
+func (s JSONPatchRequestAddValue) IsBool() bool { return s.Type == BoolJSONPatchRequestAddValue }
+
+// SetString sets JSONPatchRequestAddValue to string.
+func (s *JSONPatchRequestAddValue) SetString(v string) {
+	s.Type = StringJSONPatchRequestAddValue
+	s.String = v
+}
+
+// GetString returns string and true boolean if JSONPatchRequestAddValue is string.
+func (s JSONPatchRequestAddValue) GetString() (v string, ok bool) {
+	if !s.IsString() {
+		return v, false
+	}
+	return s.String, true
+}
+
+// NewStringJSONPatchRequestAddValue returns new JSONPatchRequestAddValue from string.
+func NewStringJSONPatchRequestAddValue(v string) JSONPatchRequestAddValue {
+	var s JSONPatchRequestAddValue
+	s.SetString(v)
+	return s
+}
+
+// SetFloat64 sets JSONPatchRequestAddValue to float64.
+func (s *JSONPatchRequestAddValue) SetFloat64(v float64) {
+	s.Type = Float64JSONPatchRequestAddValue
+	s.Float64 = v
+}
+
+// GetFloat64 returns float64 and true boolean if JSONPatchRequestAddValue is float64.
+func (s JSONPatchRequestAddValue) GetFloat64() (v float64, ok bool) {
+	if !s.IsFloat64() {
+		return v, false
+	}
+	return s.Float64, true
+}
+
+// NewFloat64JSONPatchRequestAddValue returns new JSONPatchRequestAddValue from float64.
+func NewFloat64JSONPatchRequestAddValue(v float64) JSONPatchRequestAddValue {
+	var s JSONPatchRequestAddValue
+	s.SetFloat64(v)
+	return s
+}
+
+// SetBool sets JSONPatchRequestAddValue to bool.
+func (s *JSONPatchRequestAddValue) SetBool(v bool) {
+	s.Type = BoolJSONPatchRequestAddValue
+	s.Bool = v
+}
+
+// GetBool returns bool and true boolean if JSONPatchRequestAddValue is bool.
+func (s JSONPatchRequestAddValue) GetBool() (v bool, ok bool) {
+	if !s.IsBool() {
+		return v, false
+	}
+	return s.Bool, true
+}
+
+// NewBoolJSONPatchRequestAddValue returns new JSONPatchRequestAddValue from bool.
+func NewBoolJSONPatchRequestAddValue(v bool) JSONPatchRequestAddValue {
+	var s JSONPatchRequestAddValue
+	s.SetBool(v)
+	return s
+}
+
+// Ref: #/components/schemas/JSONPatchRequestCopy
+type JSONPatchRequestCopy struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The operation to perform.
+	Op JSONPatchRequestCopyOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestCopy) GetPath() string {
+	return s.Path
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestCopy) GetOp() JSONPatchRequestCopyOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestCopy) SetPath(val string) {
+	s.Path = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestCopy) SetOp(val JSONPatchRequestCopyOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestCopyOp string
+
+const (
+	JSONPatchRequestCopyOpCopy JSONPatchRequestCopyOp = "copy"
+)
+
+// AllValues returns all JSONPatchRequestCopyOp values.
+func (JSONPatchRequestCopyOp) AllValues() []JSONPatchRequestCopyOp {
+	return []JSONPatchRequestCopyOp{
+		JSONPatchRequestCopyOpCopy,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestCopyOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestCopyOpCopy:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestCopyOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestCopyOp(data) {
+	case JSONPatchRequestCopyOpCopy:
+		*s = JSONPatchRequestCopyOpCopy
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/JSONPatchRequestMove
+type JSONPatchRequestMove struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The operation to perform.
+	Op JSONPatchRequestMoveOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestMove) GetPath() string {
+	return s.Path
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestMove) GetOp() JSONPatchRequestMoveOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestMove) SetPath(val string) {
+	s.Path = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestMove) SetOp(val JSONPatchRequestMoveOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestMoveOp string
+
+const (
+	JSONPatchRequestMoveOpMove JSONPatchRequestMoveOp = "move"
+)
+
+// AllValues returns all JSONPatchRequestMoveOp values.
+func (JSONPatchRequestMoveOp) AllValues() []JSONPatchRequestMoveOp {
+	return []JSONPatchRequestMoveOp{
+		JSONPatchRequestMoveOpMove,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestMoveOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestMoveOpMove:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestMoveOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestMoveOp(data) {
+	case JSONPatchRequestMoveOpMove:
+		*s = JSONPatchRequestMoveOpMove
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/JSONPatchRequestRemove
+type JSONPatchRequestRemove struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The operation to perform.
+	Op JSONPatchRequestRemoveOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestRemove) GetPath() string {
+	return s.Path
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestRemove) GetOp() JSONPatchRequestRemoveOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestRemove) SetPath(val string) {
+	s.Path = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestRemove) SetOp(val JSONPatchRequestRemoveOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestRemoveOp string
+
+const (
+	JSONPatchRequestRemoveOpRemove JSONPatchRequestRemoveOp = "remove"
+)
+
+// AllValues returns all JSONPatchRequestRemoveOp values.
+func (JSONPatchRequestRemoveOp) AllValues() []JSONPatchRequestRemoveOp {
+	return []JSONPatchRequestRemoveOp{
+		JSONPatchRequestRemoveOpRemove,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestRemoveOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestRemoveOpRemove:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestRemoveOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestRemoveOp(data) {
+	case JSONPatchRequestRemoveOpRemove:
+		*s = JSONPatchRequestRemoveOpRemove
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/JSONPatchRequestReplace
+type JSONPatchRequestReplace struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The value to replace.
+	Value JSONPatchRequestReplaceValue `json:"value"`
+	// The operation to perform.
+	Op JSONPatchRequestReplaceOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestReplace) GetPath() string {
+	return s.Path
+}
+
+// GetValue returns the value of Value.
+func (s *JSONPatchRequestReplace) GetValue() JSONPatchRequestReplaceValue {
+	return s.Value
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestReplace) GetOp() JSONPatchRequestReplaceOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestReplace) SetPath(val string) {
+	s.Path = val
+}
+
+// SetValue sets the value of Value.
+func (s *JSONPatchRequestReplace) SetValue(val JSONPatchRequestReplaceValue) {
+	s.Value = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestReplace) SetOp(val JSONPatchRequestReplaceOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestReplaceOp string
+
+const (
+	JSONPatchRequestReplaceOpReplace JSONPatchRequestReplaceOp = "replace"
+)
+
+// AllValues returns all JSONPatchRequestReplaceOp values.
+func (JSONPatchRequestReplaceOp) AllValues() []JSONPatchRequestReplaceOp {
+	return []JSONPatchRequestReplaceOp{
+		JSONPatchRequestReplaceOpReplace,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestReplaceOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestReplaceOpReplace:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestReplaceOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestReplaceOp(data) {
+	case JSONPatchRequestReplaceOpReplace:
+		*s = JSONPatchRequestReplaceOpReplace
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// The value to replace.
+// JSONPatchRequestReplaceValue represents sum type.
+type JSONPatchRequestReplaceValue struct {
+	Type    JSONPatchRequestReplaceValueType // switch on this field
+	String  string
+	Float64 float64
+	Bool    bool
+}
+
+// JSONPatchRequestReplaceValueType is oneOf type of JSONPatchRequestReplaceValue.
+type JSONPatchRequestReplaceValueType string
+
+// Possible values for JSONPatchRequestReplaceValueType.
+const (
+	StringJSONPatchRequestReplaceValue  JSONPatchRequestReplaceValueType = "string"
+	Float64JSONPatchRequestReplaceValue JSONPatchRequestReplaceValueType = "float64"
+	BoolJSONPatchRequestReplaceValue    JSONPatchRequestReplaceValueType = "bool"
+)
+
+// IsString reports whether JSONPatchRequestReplaceValue is string.
+func (s JSONPatchRequestReplaceValue) IsString() bool {
+	return s.Type == StringJSONPatchRequestReplaceValue
+}
+
+// IsFloat64 reports whether JSONPatchRequestReplaceValue is float64.
+func (s JSONPatchRequestReplaceValue) IsFloat64() bool {
+	return s.Type == Float64JSONPatchRequestReplaceValue
+}
+
+// IsBool reports whether JSONPatchRequestReplaceValue is bool.
+func (s JSONPatchRequestReplaceValue) IsBool() bool {
+	return s.Type == BoolJSONPatchRequestReplaceValue
+}
+
+// SetString sets JSONPatchRequestReplaceValue to string.
+func (s *JSONPatchRequestReplaceValue) SetString(v string) {
+	s.Type = StringJSONPatchRequestReplaceValue
+	s.String = v
+}
+
+// GetString returns string and true boolean if JSONPatchRequestReplaceValue is string.
+func (s JSONPatchRequestReplaceValue) GetString() (v string, ok bool) {
+	if !s.IsString() {
+		return v, false
+	}
+	return s.String, true
+}
+
+// NewStringJSONPatchRequestReplaceValue returns new JSONPatchRequestReplaceValue from string.
+func NewStringJSONPatchRequestReplaceValue(v string) JSONPatchRequestReplaceValue {
+	var s JSONPatchRequestReplaceValue
+	s.SetString(v)
+	return s
+}
+
+// SetFloat64 sets JSONPatchRequestReplaceValue to float64.
+func (s *JSONPatchRequestReplaceValue) SetFloat64(v float64) {
+	s.Type = Float64JSONPatchRequestReplaceValue
+	s.Float64 = v
+}
+
+// GetFloat64 returns float64 and true boolean if JSONPatchRequestReplaceValue is float64.
+func (s JSONPatchRequestReplaceValue) GetFloat64() (v float64, ok bool) {
+	if !s.IsFloat64() {
+		return v, false
+	}
+	return s.Float64, true
+}
+
+// NewFloat64JSONPatchRequestReplaceValue returns new JSONPatchRequestReplaceValue from float64.
+func NewFloat64JSONPatchRequestReplaceValue(v float64) JSONPatchRequestReplaceValue {
+	var s JSONPatchRequestReplaceValue
+	s.SetFloat64(v)
+	return s
+}
+
+// SetBool sets JSONPatchRequestReplaceValue to bool.
+func (s *JSONPatchRequestReplaceValue) SetBool(v bool) {
+	s.Type = BoolJSONPatchRequestReplaceValue
+	s.Bool = v
+}
+
+// GetBool returns bool and true boolean if JSONPatchRequestReplaceValue is bool.
+func (s JSONPatchRequestReplaceValue) GetBool() (v bool, ok bool) {
+	if !s.IsBool() {
+		return v, false
+	}
+	return s.Bool, true
+}
+
+// NewBoolJSONPatchRequestReplaceValue returns new JSONPatchRequestReplaceValue from bool.
+func NewBoolJSONPatchRequestReplaceValue(v bool) JSONPatchRequestReplaceValue {
+	var s JSONPatchRequestReplaceValue
+	s.SetBool(v)
+	return s
+}
+
+// Ref: #/components/schemas/JSONPatchRequestTst
+type JSONPatchRequestTst struct {
+	// A JSON Pointer path.
+	Path string `json:"path"`
+	// The value to test.
+	Value JSONPatchRequestTstValue `json:"value"`
+	// The operation to perform.
+	Op JSONPatchRequestTstOp `json:"op"`
+}
+
+// GetPath returns the value of Path.
+func (s *JSONPatchRequestTst) GetPath() string {
+	return s.Path
+}
+
+// GetValue returns the value of Value.
+func (s *JSONPatchRequestTst) GetValue() JSONPatchRequestTstValue {
+	return s.Value
+}
+
+// GetOp returns the value of Op.
+func (s *JSONPatchRequestTst) GetOp() JSONPatchRequestTstOp {
+	return s.Op
+}
+
+// SetPath sets the value of Path.
+func (s *JSONPatchRequestTst) SetPath(val string) {
+	s.Path = val
+}
+
+// SetValue sets the value of Value.
+func (s *JSONPatchRequestTst) SetValue(val JSONPatchRequestTstValue) {
+	s.Value = val
+}
+
+// SetOp sets the value of Op.
+func (s *JSONPatchRequestTst) SetOp(val JSONPatchRequestTstOp) {
+	s.Op = val
+}
+
+// The operation to perform.
+type JSONPatchRequestTstOp string
+
+const (
+	JSONPatchRequestTstOpTest JSONPatchRequestTstOp = "test"
+)
+
+// AllValues returns all JSONPatchRequestTstOp values.
+func (JSONPatchRequestTstOp) AllValues() []JSONPatchRequestTstOp {
+	return []JSONPatchRequestTstOp{
+		JSONPatchRequestTstOpTest,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JSONPatchRequestTstOp) MarshalText() ([]byte, error) {
+	switch s {
+	case JSONPatchRequestTstOpTest:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JSONPatchRequestTstOp) UnmarshalText(data []byte) error {
+	switch JSONPatchRequestTstOp(data) {
+	case JSONPatchRequestTstOpTest:
+		*s = JSONPatchRequestTstOpTest
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// The value to test.
+// JSONPatchRequestTstValue represents sum type.
+type JSONPatchRequestTstValue struct {
+	Type    JSONPatchRequestTstValueType // switch on this field
+	String  string
+	Float64 float64
+	Bool    bool
+}
+
+// JSONPatchRequestTstValueType is oneOf type of JSONPatchRequestTstValue.
+type JSONPatchRequestTstValueType string
+
+// Possible values for JSONPatchRequestTstValueType.
+const (
+	StringJSONPatchRequestTstValue  JSONPatchRequestTstValueType = "string"
+	Float64JSONPatchRequestTstValue JSONPatchRequestTstValueType = "float64"
+	BoolJSONPatchRequestTstValue    JSONPatchRequestTstValueType = "bool"
+)
+
+// IsString reports whether JSONPatchRequestTstValue is string.
+func (s JSONPatchRequestTstValue) IsString() bool { return s.Type == StringJSONPatchRequestTstValue }
+
+// IsFloat64 reports whether JSONPatchRequestTstValue is float64.
+func (s JSONPatchRequestTstValue) IsFloat64() bool { return s.Type == Float64JSONPatchRequestTstValue }
+
+// IsBool reports whether JSONPatchRequestTstValue is bool.
+func (s JSONPatchRequestTstValue) IsBool() bool { return s.Type == BoolJSONPatchRequestTstValue }
+
+// SetString sets JSONPatchRequestTstValue to string.
+func (s *JSONPatchRequestTstValue) SetString(v string) {
+	s.Type = StringJSONPatchRequestTstValue
+	s.String = v
+}
+
+// GetString returns string and true boolean if JSONPatchRequestTstValue is string.
+func (s JSONPatchRequestTstValue) GetString() (v string, ok bool) {
+	if !s.IsString() {
+		return v, false
+	}
+	return s.String, true
+}
+
+// NewStringJSONPatchRequestTstValue returns new JSONPatchRequestTstValue from string.
+func NewStringJSONPatchRequestTstValue(v string) JSONPatchRequestTstValue {
+	var s JSONPatchRequestTstValue
+	s.SetString(v)
+	return s
+}
+
+// SetFloat64 sets JSONPatchRequestTstValue to float64.
+func (s *JSONPatchRequestTstValue) SetFloat64(v float64) {
+	s.Type = Float64JSONPatchRequestTstValue
+	s.Float64 = v
+}
+
+// GetFloat64 returns float64 and true boolean if JSONPatchRequestTstValue is float64.
+func (s JSONPatchRequestTstValue) GetFloat64() (v float64, ok bool) {
+	if !s.IsFloat64() {
+		return v, false
+	}
+	return s.Float64, true
+}
+
+// NewFloat64JSONPatchRequestTstValue returns new JSONPatchRequestTstValue from float64.
+func NewFloat64JSONPatchRequestTstValue(v float64) JSONPatchRequestTstValue {
+	var s JSONPatchRequestTstValue
+	s.SetFloat64(v)
+	return s
+}
+
+// SetBool sets JSONPatchRequestTstValue to bool.
+func (s *JSONPatchRequestTstValue) SetBool(v bool) {
+	s.Type = BoolJSONPatchRequestTstValue
+	s.Bool = v
+}
+
+// GetBool returns bool and true boolean if JSONPatchRequestTstValue is bool.
+func (s JSONPatchRequestTstValue) GetBool() (v bool, ok bool) {
+	if !s.IsBool() {
+		return v, false
+	}
+	return s.Bool, true
+}
+
+// NewBoolJSONPatchRequestTstValue returns new JSONPatchRequestTstValue from bool.
+func NewBoolJSONPatchRequestTstValue(v bool) JSONPatchRequestTstValue {
+	var s JSONPatchRequestTstValue
+	s.SetBool(v)
+	return s
+}
 
 // Holds the required service account information for varying providers.
 // Ref: #/components/schemas/KeyInfos
@@ -5995,23 +6701,6 @@ func (s *LLMClassifierConfig) SetPrompt(val string) {
 }
 
 type LogEntryID string
-
-// Detailed information about a Microsoft OAuth identity provider. If the clientID is omitted, an
-// Antimatter Client ID will be used.
-// Ref: #/components/schemas/MicrosoftOAuthDomainIdentityProviderDetails
-type MicrosoftOAuthDomainIdentityProviderDetails struct {
-	ClientID OptString `json:"clientID"`
-}
-
-// GetClientID returns the value of ClientID.
-func (s *MicrosoftOAuthDomainIdentityProviderDetails) GetClientID() OptString {
-	return s.ClientID
-}
-
-// SetClientID sets the value of ClientID.
-func (s *MicrosoftOAuthDomainIdentityProviderDetails) SetClientID(val OptString) {
-	s.ClientID = val
-}
 
 // An individual capsule data-plane log entry, in the form required when inserting a  new record.
 // Ref: #/components/schemas/NewAccessLogEntry
@@ -6378,71 +7067,6 @@ func (s *NewDomainResponse) SetApiKey(val string) {
 
 func (*NewDomainResponse) domainAddNewRes()           {}
 func (*NewDomainResponse) domainCreatePeerDomainRes() {}
-
-// Fields associated with a domain that are to be updated.
-// Ref: #/components/schemas/NewDomainSettings
-type NewDomainSettings struct {
-	// A list of admin contact details that have been validated.
-	ActiveAdminContacts []string `json:"activeAdminContacts"`
-	// A list of admin contact details that are pending validation.
-	PendingAdminContacts []string `json:"pendingAdminContacts"`
-	// User friendly custom display name.
-	DefaultDisplayName OptString `json:"defaultDisplayName"`
-	// The default lifetime in seconds of a domain authentication token generated for this domain.
-	DefaultTokenLifetime OptInt `json:"defaultTokenLifetime"`
-	// The maximum lifetime in seconds that a domain authentication token can be generated for.
-	MaximumTokenLifetime OptInt `json:"maximumTokenLifetime"`
-}
-
-// GetActiveAdminContacts returns the value of ActiveAdminContacts.
-func (s *NewDomainSettings) GetActiveAdminContacts() []string {
-	return s.ActiveAdminContacts
-}
-
-// GetPendingAdminContacts returns the value of PendingAdminContacts.
-func (s *NewDomainSettings) GetPendingAdminContacts() []string {
-	return s.PendingAdminContacts
-}
-
-// GetDefaultDisplayName returns the value of DefaultDisplayName.
-func (s *NewDomainSettings) GetDefaultDisplayName() OptString {
-	return s.DefaultDisplayName
-}
-
-// GetDefaultTokenLifetime returns the value of DefaultTokenLifetime.
-func (s *NewDomainSettings) GetDefaultTokenLifetime() OptInt {
-	return s.DefaultTokenLifetime
-}
-
-// GetMaximumTokenLifetime returns the value of MaximumTokenLifetime.
-func (s *NewDomainSettings) GetMaximumTokenLifetime() OptInt {
-	return s.MaximumTokenLifetime
-}
-
-// SetActiveAdminContacts sets the value of ActiveAdminContacts.
-func (s *NewDomainSettings) SetActiveAdminContacts(val []string) {
-	s.ActiveAdminContacts = val
-}
-
-// SetPendingAdminContacts sets the value of PendingAdminContacts.
-func (s *NewDomainSettings) SetPendingAdminContacts(val []string) {
-	s.PendingAdminContacts = val
-}
-
-// SetDefaultDisplayName sets the value of DefaultDisplayName.
-func (s *NewDomainSettings) SetDefaultDisplayName(val OptString) {
-	s.DefaultDisplayName = val
-}
-
-// SetDefaultTokenLifetime sets the value of DefaultTokenLifetime.
-func (s *NewDomainSettings) SetDefaultTokenLifetime(val OptInt) {
-	s.DefaultTokenLifetime = val
-}
-
-// SetMaximumTokenLifetime sets the value of MaximumTokenLifetime.
-func (s *NewDomainSettings) SetMaximumTokenLifetime(val OptInt) {
-	s.MaximumTokenLifetime = val
-}
 
 // A fact is a piece of auxiliary information that can be used as part of an authorization policy.
 // They are usually expressed as a statement such as has_role(principal, role_name).
@@ -6813,38 +7437,38 @@ func (s *OAuthToken) SetToken(val string) {
 	s.Token = val
 }
 
-// NewOptAPIKeyDomainIdentityProviderDetails returns new OptAPIKeyDomainIdentityProviderDetails with value set to v.
-func NewOptAPIKeyDomainIdentityProviderDetails(v APIKeyDomainIdentityProviderDetails) OptAPIKeyDomainIdentityProviderDetails {
-	return OptAPIKeyDomainIdentityProviderDetails{
+// NewOptAPIKeyDomainIdentityProviderDetailsType returns new OptAPIKeyDomainIdentityProviderDetailsType with value set to v.
+func NewOptAPIKeyDomainIdentityProviderDetailsType(v APIKeyDomainIdentityProviderDetailsType) OptAPIKeyDomainIdentityProviderDetailsType {
+	return OptAPIKeyDomainIdentityProviderDetailsType{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptAPIKeyDomainIdentityProviderDetails is optional APIKeyDomainIdentityProviderDetails.
-type OptAPIKeyDomainIdentityProviderDetails struct {
-	Value APIKeyDomainIdentityProviderDetails
+// OptAPIKeyDomainIdentityProviderDetailsType is optional APIKeyDomainIdentityProviderDetailsType.
+type OptAPIKeyDomainIdentityProviderDetailsType struct {
+	Value APIKeyDomainIdentityProviderDetailsType
 	Set   bool
 }
 
-// IsSet returns true if OptAPIKeyDomainIdentityProviderDetails was set.
-func (o OptAPIKeyDomainIdentityProviderDetails) IsSet() bool { return o.Set }
+// IsSet returns true if OptAPIKeyDomainIdentityProviderDetailsType was set.
+func (o OptAPIKeyDomainIdentityProviderDetailsType) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptAPIKeyDomainIdentityProviderDetails) Reset() {
-	var v APIKeyDomainIdentityProviderDetails
+func (o *OptAPIKeyDomainIdentityProviderDetailsType) Reset() {
+	var v APIKeyDomainIdentityProviderDetailsType
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptAPIKeyDomainIdentityProviderDetails) SetTo(v APIKeyDomainIdentityProviderDetails) {
+func (o *OptAPIKeyDomainIdentityProviderDetailsType) SetTo(v APIKeyDomainIdentityProviderDetailsType) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptAPIKeyDomainIdentityProviderDetails) Get() (v APIKeyDomainIdentityProviderDetails, ok bool) {
+func (o OptAPIKeyDomainIdentityProviderDetailsType) Get() (v APIKeyDomainIdentityProviderDetailsType, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -6852,7 +7476,7 @@ func (o OptAPIKeyDomainIdentityProviderDetails) Get() (v APIKeyDomainIdentityPro
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptAPIKeyDomainIdentityProviderDetails) Or(d APIKeyDomainIdentityProviderDetails) APIKeyDomainIdentityProviderDetails {
+func (o OptAPIKeyDomainIdentityProviderDetailsType) Or(d APIKeyDomainIdentityProviderDetailsType) APIKeyDomainIdentityProviderDetailsType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7595,6 +8219,144 @@ func (o OptDomainID) Or(d DomainID) DomainID {
 	return d
 }
 
+// NewOptDomainIdentityAPIKeyPrincipalParamsType returns new OptDomainIdentityAPIKeyPrincipalParamsType with value set to v.
+func NewOptDomainIdentityAPIKeyPrincipalParamsType(v DomainIdentityAPIKeyPrincipalParamsType) OptDomainIdentityAPIKeyPrincipalParamsType {
+	return OptDomainIdentityAPIKeyPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityAPIKeyPrincipalParamsType is optional DomainIdentityAPIKeyPrincipalParamsType.
+type OptDomainIdentityAPIKeyPrincipalParamsType struct {
+	Value DomainIdentityAPIKeyPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityAPIKeyPrincipalParamsType was set.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityAPIKeyPrincipalParamsType) Reset() {
+	var v DomainIdentityAPIKeyPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityAPIKeyPrincipalParamsType) SetTo(v DomainIdentityAPIKeyPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) Get() (v DomainIdentityAPIKeyPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityAPIKeyPrincipalParamsType) Or(d DomainIdentityAPIKeyPrincipalParamsType) DomainIdentityAPIKeyPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDomainIdentityEmailPrincipalParamsType returns new OptDomainIdentityEmailPrincipalParamsType with value set to v.
+func NewOptDomainIdentityEmailPrincipalParamsType(v DomainIdentityEmailPrincipalParamsType) OptDomainIdentityEmailPrincipalParamsType {
+	return OptDomainIdentityEmailPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityEmailPrincipalParamsType is optional DomainIdentityEmailPrincipalParamsType.
+type OptDomainIdentityEmailPrincipalParamsType struct {
+	Value DomainIdentityEmailPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityEmailPrincipalParamsType was set.
+func (o OptDomainIdentityEmailPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityEmailPrincipalParamsType) Reset() {
+	var v DomainIdentityEmailPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityEmailPrincipalParamsType) SetTo(v DomainIdentityEmailPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityEmailPrincipalParamsType) Get() (v DomainIdentityEmailPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityEmailPrincipalParamsType) Or(d DomainIdentityEmailPrincipalParamsType) DomainIdentityEmailPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDomainIdentityHostedDomainPrincipalParamsType returns new OptDomainIdentityHostedDomainPrincipalParamsType with value set to v.
+func NewOptDomainIdentityHostedDomainPrincipalParamsType(v DomainIdentityHostedDomainPrincipalParamsType) OptDomainIdentityHostedDomainPrincipalParamsType {
+	return OptDomainIdentityHostedDomainPrincipalParamsType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDomainIdentityHostedDomainPrincipalParamsType is optional DomainIdentityHostedDomainPrincipalParamsType.
+type OptDomainIdentityHostedDomainPrincipalParamsType struct {
+	Value DomainIdentityHostedDomainPrincipalParamsType
+	Set   bool
+}
+
+// IsSet returns true if OptDomainIdentityHostedDomainPrincipalParamsType was set.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDomainIdentityHostedDomainPrincipalParamsType) Reset() {
+	var v DomainIdentityHostedDomainPrincipalParamsType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDomainIdentityHostedDomainPrincipalParamsType) SetTo(v DomainIdentityHostedDomainPrincipalParamsType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) Get() (v DomainIdentityHostedDomainPrincipalParamsType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDomainIdentityHostedDomainPrincipalParamsType) Or(d DomainIdentityHostedDomainPrincipalParamsType) DomainIdentityHostedDomainPrincipalParamsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDomainIdentityProviderDetails returns new OptDomainIdentityProviderDetails with value set to v.
 func NewOptDomainIdentityProviderDetails(v DomainIdentityProviderDetails) OptDomainIdentityProviderDetails {
 	return OptDomainIdentityProviderDetails{
@@ -7641,38 +8403,38 @@ func (o OptDomainIdentityProviderDetails) Or(d DomainIdentityProviderDetails) Do
 	return d
 }
 
-// NewOptDomainListCapsulesSortOn returns new OptDomainListCapsulesSortOn with value set to v.
-func NewOptDomainListCapsulesSortOn(v DomainListCapsulesSortOn) OptDomainListCapsulesSortOn {
-	return OptDomainListCapsulesSortOn{
+// NewOptFactPolicyRulesItemArgumentsItemSource returns new OptFactPolicyRulesItemArgumentsItemSource with value set to v.
+func NewOptFactPolicyRulesItemArgumentsItemSource(v FactPolicyRulesItemArgumentsItemSource) OptFactPolicyRulesItemArgumentsItemSource {
+	return OptFactPolicyRulesItemArgumentsItemSource{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptDomainListCapsulesSortOn is optional DomainListCapsulesSortOn.
-type OptDomainListCapsulesSortOn struct {
-	Value DomainListCapsulesSortOn
+// OptFactPolicyRulesItemArgumentsItemSource is optional FactPolicyRulesItemArgumentsItemSource.
+type OptFactPolicyRulesItemArgumentsItemSource struct {
+	Value FactPolicyRulesItemArgumentsItemSource
 	Set   bool
 }
 
-// IsSet returns true if OptDomainListCapsulesSortOn was set.
-func (o OptDomainListCapsulesSortOn) IsSet() bool { return o.Set }
+// IsSet returns true if OptFactPolicyRulesItemArgumentsItemSource was set.
+func (o OptFactPolicyRulesItemArgumentsItemSource) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptDomainListCapsulesSortOn) Reset() {
-	var v DomainListCapsulesSortOn
+func (o *OptFactPolicyRulesItemArgumentsItemSource) Reset() {
+	var v FactPolicyRulesItemArgumentsItemSource
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptDomainListCapsulesSortOn) SetTo(v DomainListCapsulesSortOn) {
+func (o *OptFactPolicyRulesItemArgumentsItemSource) SetTo(v FactPolicyRulesItemArgumentsItemSource) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptDomainListCapsulesSortOn) Get() (v DomainListCapsulesSortOn, ok bool) {
+func (o OptFactPolicyRulesItemArgumentsItemSource) Get() (v FactPolicyRulesItemArgumentsItemSource, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7680,99 +8442,7 @@ func (o OptDomainListCapsulesSortOn) Get() (v DomainListCapsulesSortOn, ok bool)
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptDomainListCapsulesSortOn) Or(d DomainListCapsulesSortOn) DomainListCapsulesSortOn {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptDomainQueryAccessLogOperationType returns new OptDomainQueryAccessLogOperationType with value set to v.
-func NewOptDomainQueryAccessLogOperationType(v DomainQueryAccessLogOperationType) OptDomainQueryAccessLogOperationType {
-	return OptDomainQueryAccessLogOperationType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptDomainQueryAccessLogOperationType is optional DomainQueryAccessLogOperationType.
-type OptDomainQueryAccessLogOperationType struct {
-	Value DomainQueryAccessLogOperationType
-	Set   bool
-}
-
-// IsSet returns true if OptDomainQueryAccessLogOperationType was set.
-func (o OptDomainQueryAccessLogOperationType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptDomainQueryAccessLogOperationType) Reset() {
-	var v DomainQueryAccessLogOperationType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptDomainQueryAccessLogOperationType) SetTo(v DomainQueryAccessLogOperationType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptDomainQueryAccessLogOperationType) Get() (v DomainQueryAccessLogOperationType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptDomainQueryAccessLogOperationType) Or(d DomainQueryAccessLogOperationType) DomainQueryAccessLogOperationType {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptDomainQueryAccessLogSingleCapsuleOperationType returns new OptDomainQueryAccessLogSingleCapsuleOperationType with value set to v.
-func NewOptDomainQueryAccessLogSingleCapsuleOperationType(v DomainQueryAccessLogSingleCapsuleOperationType) OptDomainQueryAccessLogSingleCapsuleOperationType {
-	return OptDomainQueryAccessLogSingleCapsuleOperationType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptDomainQueryAccessLogSingleCapsuleOperationType is optional DomainQueryAccessLogSingleCapsuleOperationType.
-type OptDomainQueryAccessLogSingleCapsuleOperationType struct {
-	Value DomainQueryAccessLogSingleCapsuleOperationType
-	Set   bool
-}
-
-// IsSet returns true if OptDomainQueryAccessLogSingleCapsuleOperationType was set.
-func (o OptDomainQueryAccessLogSingleCapsuleOperationType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptDomainQueryAccessLogSingleCapsuleOperationType) Reset() {
-	var v DomainQueryAccessLogSingleCapsuleOperationType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptDomainQueryAccessLogSingleCapsuleOperationType) SetTo(v DomainQueryAccessLogSingleCapsuleOperationType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptDomainQueryAccessLogSingleCapsuleOperationType) Get() (v DomainQueryAccessLogSingleCapsuleOperationType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptDomainQueryAccessLogSingleCapsuleOperationType) Or(d DomainQueryAccessLogSingleCapsuleOperationType) DomainQueryAccessLogSingleCapsuleOperationType {
+func (o OptFactPolicyRulesItemArgumentsItemSource) Or(d FactPolicyRulesItemArgumentsItemSource) FactPolicyRulesItemArgumentsItemSource {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7825,38 +8495,38 @@ func (o OptGCPServiceAccountKeyInfoProviderName) Or(d GCPServiceAccountKeyInfoPr
 	return d
 }
 
-// NewOptGoogleOAuthDomainIdentityProviderDetails returns new OptGoogleOAuthDomainIdentityProviderDetails with value set to v.
-func NewOptGoogleOAuthDomainIdentityProviderDetails(v GoogleOAuthDomainIdentityProviderDetails) OptGoogleOAuthDomainIdentityProviderDetails {
-	return OptGoogleOAuthDomainIdentityProviderDetails{
+// NewOptGoogleOAuthDomainIdentityProviderDetailsType returns new OptGoogleOAuthDomainIdentityProviderDetailsType with value set to v.
+func NewOptGoogleOAuthDomainIdentityProviderDetailsType(v GoogleOAuthDomainIdentityProviderDetailsType) OptGoogleOAuthDomainIdentityProviderDetailsType {
+	return OptGoogleOAuthDomainIdentityProviderDetailsType{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptGoogleOAuthDomainIdentityProviderDetails is optional GoogleOAuthDomainIdentityProviderDetails.
-type OptGoogleOAuthDomainIdentityProviderDetails struct {
-	Value GoogleOAuthDomainIdentityProviderDetails
+// OptGoogleOAuthDomainIdentityProviderDetailsType is optional GoogleOAuthDomainIdentityProviderDetailsType.
+type OptGoogleOAuthDomainIdentityProviderDetailsType struct {
+	Value GoogleOAuthDomainIdentityProviderDetailsType
 	Set   bool
 }
 
-// IsSet returns true if OptGoogleOAuthDomainIdentityProviderDetails was set.
-func (o OptGoogleOAuthDomainIdentityProviderDetails) IsSet() bool { return o.Set }
+// IsSet returns true if OptGoogleOAuthDomainIdentityProviderDetailsType was set.
+func (o OptGoogleOAuthDomainIdentityProviderDetailsType) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptGoogleOAuthDomainIdentityProviderDetails) Reset() {
-	var v GoogleOAuthDomainIdentityProviderDetails
+func (o *OptGoogleOAuthDomainIdentityProviderDetailsType) Reset() {
+	var v GoogleOAuthDomainIdentityProviderDetailsType
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptGoogleOAuthDomainIdentityProviderDetails) SetTo(v GoogleOAuthDomainIdentityProviderDetails) {
+func (o *OptGoogleOAuthDomainIdentityProviderDetailsType) SetTo(v GoogleOAuthDomainIdentityProviderDetailsType) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptGoogleOAuthDomainIdentityProviderDetails) Get() (v GoogleOAuthDomainIdentityProviderDetails, ok bool) {
+func (o OptGoogleOAuthDomainIdentityProviderDetailsType) Get() (v GoogleOAuthDomainIdentityProviderDetailsType, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -7864,7 +8534,53 @@ func (o OptGoogleOAuthDomainIdentityProviderDetails) Get() (v GoogleOAuthDomainI
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptGoogleOAuthDomainIdentityProviderDetails) Or(d GoogleOAuthDomainIdentityProviderDetails) GoogleOAuthDomainIdentityProviderDetails {
+func (o OptGoogleOAuthDomainIdentityProviderDetailsType) Or(d GoogleOAuthDomainIdentityProviderDetailsType) GoogleOAuthDomainIdentityProviderDetailsType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptHookName returns new OptHookName with value set to v.
+func NewOptHookName(v HookName) OptHookName {
+	return OptHookName{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptHookName is optional HookName.
+type OptHookName struct {
+	Value HookName
+	Set   bool
+}
+
+// IsSet returns true if OptHookName was set.
+func (o OptHookName) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptHookName) Reset() {
+	var v HookName
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptHookName) SetTo(v HookName) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptHookName) Get() (v HookName, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptHookName) Or(d HookName) HookName {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8147,52 +8863,6 @@ func (o OptLogEntryID) Or(d LogEntryID) LogEntryID {
 	return d
 }
 
-// NewOptMicrosoftOAuthDomainIdentityProviderDetails returns new OptMicrosoftOAuthDomainIdentityProviderDetails with value set to v.
-func NewOptMicrosoftOAuthDomainIdentityProviderDetails(v MicrosoftOAuthDomainIdentityProviderDetails) OptMicrosoftOAuthDomainIdentityProviderDetails {
-	return OptMicrosoftOAuthDomainIdentityProviderDetails{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptMicrosoftOAuthDomainIdentityProviderDetails is optional MicrosoftOAuthDomainIdentityProviderDetails.
-type OptMicrosoftOAuthDomainIdentityProviderDetails struct {
-	Value MicrosoftOAuthDomainIdentityProviderDetails
-	Set   bool
-}
-
-// IsSet returns true if OptMicrosoftOAuthDomainIdentityProviderDetails was set.
-func (o OptMicrosoftOAuthDomainIdentityProviderDetails) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptMicrosoftOAuthDomainIdentityProviderDetails) Reset() {
-	var v MicrosoftOAuthDomainIdentityProviderDetails
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptMicrosoftOAuthDomainIdentityProviderDetails) SetTo(v MicrosoftOAuthDomainIdentityProviderDetails) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptMicrosoftOAuthDomainIdentityProviderDetails) Get() (v MicrosoftOAuthDomainIdentityProviderDetails, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptMicrosoftOAuthDomainIdentityProviderDetails) Or(d MicrosoftOAuthDomainIdentityProviderDetails) MicrosoftOAuthDomainIdentityProviderDetails {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptNewReadContextConfigRuleTokenFormat returns new OptNewReadContextConfigRuleTokenFormat with value set to v.
 func NewOptNewReadContextConfigRuleTokenFormat(v NewReadContextConfigRuleTokenFormat) OptNewReadContextConfigRuleTokenFormat {
 	return OptNewReadContextConfigRuleTokenFormat{
@@ -8279,6 +8949,98 @@ func (o OptNewReadContextConfigRuleTokenScope) Get() (v NewReadContextConfigRule
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNewReadContextConfigRuleTokenScope) Or(d NewReadContextConfigRuleTokenScope) NewReadContextConfigRuleTokenScope {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptQueryCapsulesSortOn returns new OptQueryCapsulesSortOn with value set to v.
+func NewOptQueryCapsulesSortOn(v QueryCapsulesSortOn) OptQueryCapsulesSortOn {
+	return OptQueryCapsulesSortOn{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptQueryCapsulesSortOn is optional QueryCapsulesSortOn.
+type OptQueryCapsulesSortOn struct {
+	Value QueryCapsulesSortOn
+	Set   bool
+}
+
+// IsSet returns true if OptQueryCapsulesSortOn was set.
+func (o OptQueryCapsulesSortOn) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptQueryCapsulesSortOn) Reset() {
+	var v QueryCapsulesSortOn
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptQueryCapsulesSortOn) SetTo(v QueryCapsulesSortOn) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptQueryCapsulesSortOn) Get() (v QueryCapsulesSortOn, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptQueryCapsulesSortOn) Or(d QueryCapsulesSortOn) QueryCapsulesSortOn {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptQueryOperationType returns new OptQueryOperationType with value set to v.
+func NewOptQueryOperationType(v QueryOperationType) OptQueryOperationType {
+	return OptQueryOperationType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptQueryOperationType is optional QueryOperationType.
+type OptQueryOperationType struct {
+	Value QueryOperationType
+	Set   bool
+}
+
+// IsSet returns true if OptQueryOperationType was set.
+func (o OptQueryOperationType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptQueryOperationType) Reset() {
+	var v QueryOperationType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptQueryOperationType) SetTo(v QueryOperationType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptQueryOperationType) Get() (v QueryOperationType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptQueryOperationType) Or(d QueryOperationType) QueryOperationType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8745,6 +9507,52 @@ func (o OptTagValueField) Or(d TagValueField) TagValueField {
 	return d
 }
 
+// NewOptVersionConstraint returns new OptVersionConstraint with value set to v.
+func NewOptVersionConstraint(v VersionConstraint) OptVersionConstraint {
+	return OptVersionConstraint{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptVersionConstraint is optional VersionConstraint.
+type OptVersionConstraint struct {
+	Value VersionConstraint
+	Set   bool
+}
+
+// IsSet returns true if OptVersionConstraint was set.
+func (o OptVersionConstraint) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptVersionConstraint) Reset() {
+	var v VersionConstraint
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptVersionConstraint) SetTo(v VersionConstraint) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptVersionConstraint) Get() (v VersionConstraint, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptVersionConstraint) Or(d VersionConstraint) VersionConstraint {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptWriteContextName returns new OptWriteContextName with value set to v.
 func NewOptWriteContextName(v WriteContextName) OptWriteContextName {
 	return OptWriteContextName{
@@ -8837,6 +9645,188 @@ func (o OptWriteContextReference) Or(d WriteContextReference) WriteContextRefere
 	return d
 }
 
+type PatchRequest []PatchRequestItem
+
+// PatchRequestItem represents sum type.
+type PatchRequestItem struct {
+	Type                    PatchRequestItemType // switch on this field
+	JSONPatchRequestAdd     JSONPatchRequestAdd
+	JSONPatchRequestReplace JSONPatchRequestReplace
+	JSONPatchRequestTst     JSONPatchRequestTst
+	JSONPatchRequestRemove  JSONPatchRequestRemove
+	JSONPatchRequestMove    JSONPatchRequestMove
+	JSONPatchRequestCopy    JSONPatchRequestCopy
+}
+
+// PatchRequestItemType is oneOf type of PatchRequestItem.
+type PatchRequestItemType string
+
+// Possible values for PatchRequestItemType.
+const (
+	JSONPatchRequestAddPatchRequestItem     PatchRequestItemType = "add"
+	JSONPatchRequestReplacePatchRequestItem PatchRequestItemType = "replace"
+	JSONPatchRequestTstPatchRequestItem     PatchRequestItemType = "test"
+	JSONPatchRequestRemovePatchRequestItem  PatchRequestItemType = "remove"
+	JSONPatchRequestMovePatchRequestItem    PatchRequestItemType = "move"
+	JSONPatchRequestCopyPatchRequestItem    PatchRequestItemType = "copy"
+)
+
+// IsJSONPatchRequestAdd reports whether PatchRequestItem is JSONPatchRequestAdd.
+func (s PatchRequestItem) IsJSONPatchRequestAdd() bool {
+	return s.Type == JSONPatchRequestAddPatchRequestItem
+}
+
+// IsJSONPatchRequestReplace reports whether PatchRequestItem is JSONPatchRequestReplace.
+func (s PatchRequestItem) IsJSONPatchRequestReplace() bool {
+	return s.Type == JSONPatchRequestReplacePatchRequestItem
+}
+
+// IsJSONPatchRequestTst reports whether PatchRequestItem is JSONPatchRequestTst.
+func (s PatchRequestItem) IsJSONPatchRequestTst() bool {
+	return s.Type == JSONPatchRequestTstPatchRequestItem
+}
+
+// IsJSONPatchRequestRemove reports whether PatchRequestItem is JSONPatchRequestRemove.
+func (s PatchRequestItem) IsJSONPatchRequestRemove() bool {
+	return s.Type == JSONPatchRequestRemovePatchRequestItem
+}
+
+// IsJSONPatchRequestMove reports whether PatchRequestItem is JSONPatchRequestMove.
+func (s PatchRequestItem) IsJSONPatchRequestMove() bool {
+	return s.Type == JSONPatchRequestMovePatchRequestItem
+}
+
+// IsJSONPatchRequestCopy reports whether PatchRequestItem is JSONPatchRequestCopy.
+func (s PatchRequestItem) IsJSONPatchRequestCopy() bool {
+	return s.Type == JSONPatchRequestCopyPatchRequestItem
+}
+
+// SetJSONPatchRequestAdd sets PatchRequestItem to JSONPatchRequestAdd.
+func (s *PatchRequestItem) SetJSONPatchRequestAdd(v JSONPatchRequestAdd) {
+	s.Type = JSONPatchRequestAddPatchRequestItem
+	s.JSONPatchRequestAdd = v
+}
+
+// GetJSONPatchRequestAdd returns JSONPatchRequestAdd and true boolean if PatchRequestItem is JSONPatchRequestAdd.
+func (s PatchRequestItem) GetJSONPatchRequestAdd() (v JSONPatchRequestAdd, ok bool) {
+	if !s.IsJSONPatchRequestAdd() {
+		return v, false
+	}
+	return s.JSONPatchRequestAdd, true
+}
+
+// NewJSONPatchRequestAddPatchRequestItem returns new PatchRequestItem from JSONPatchRequestAdd.
+func NewJSONPatchRequestAddPatchRequestItem(v JSONPatchRequestAdd) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestAdd(v)
+	return s
+}
+
+// SetJSONPatchRequestReplace sets PatchRequestItem to JSONPatchRequestReplace.
+func (s *PatchRequestItem) SetJSONPatchRequestReplace(v JSONPatchRequestReplace) {
+	s.Type = JSONPatchRequestReplacePatchRequestItem
+	s.JSONPatchRequestReplace = v
+}
+
+// GetJSONPatchRequestReplace returns JSONPatchRequestReplace and true boolean if PatchRequestItem is JSONPatchRequestReplace.
+func (s PatchRequestItem) GetJSONPatchRequestReplace() (v JSONPatchRequestReplace, ok bool) {
+	if !s.IsJSONPatchRequestReplace() {
+		return v, false
+	}
+	return s.JSONPatchRequestReplace, true
+}
+
+// NewJSONPatchRequestReplacePatchRequestItem returns new PatchRequestItem from JSONPatchRequestReplace.
+func NewJSONPatchRequestReplacePatchRequestItem(v JSONPatchRequestReplace) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestReplace(v)
+	return s
+}
+
+// SetJSONPatchRequestTst sets PatchRequestItem to JSONPatchRequestTst.
+func (s *PatchRequestItem) SetJSONPatchRequestTst(v JSONPatchRequestTst) {
+	s.Type = JSONPatchRequestTstPatchRequestItem
+	s.JSONPatchRequestTst = v
+}
+
+// GetJSONPatchRequestTst returns JSONPatchRequestTst and true boolean if PatchRequestItem is JSONPatchRequestTst.
+func (s PatchRequestItem) GetJSONPatchRequestTst() (v JSONPatchRequestTst, ok bool) {
+	if !s.IsJSONPatchRequestTst() {
+		return v, false
+	}
+	return s.JSONPatchRequestTst, true
+}
+
+// NewJSONPatchRequestTstPatchRequestItem returns new PatchRequestItem from JSONPatchRequestTst.
+func NewJSONPatchRequestTstPatchRequestItem(v JSONPatchRequestTst) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestTst(v)
+	return s
+}
+
+// SetJSONPatchRequestRemove sets PatchRequestItem to JSONPatchRequestRemove.
+func (s *PatchRequestItem) SetJSONPatchRequestRemove(v JSONPatchRequestRemove) {
+	s.Type = JSONPatchRequestRemovePatchRequestItem
+	s.JSONPatchRequestRemove = v
+}
+
+// GetJSONPatchRequestRemove returns JSONPatchRequestRemove and true boolean if PatchRequestItem is JSONPatchRequestRemove.
+func (s PatchRequestItem) GetJSONPatchRequestRemove() (v JSONPatchRequestRemove, ok bool) {
+	if !s.IsJSONPatchRequestRemove() {
+		return v, false
+	}
+	return s.JSONPatchRequestRemove, true
+}
+
+// NewJSONPatchRequestRemovePatchRequestItem returns new PatchRequestItem from JSONPatchRequestRemove.
+func NewJSONPatchRequestRemovePatchRequestItem(v JSONPatchRequestRemove) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestRemove(v)
+	return s
+}
+
+// SetJSONPatchRequestMove sets PatchRequestItem to JSONPatchRequestMove.
+func (s *PatchRequestItem) SetJSONPatchRequestMove(v JSONPatchRequestMove) {
+	s.Type = JSONPatchRequestMovePatchRequestItem
+	s.JSONPatchRequestMove = v
+}
+
+// GetJSONPatchRequestMove returns JSONPatchRequestMove and true boolean if PatchRequestItem is JSONPatchRequestMove.
+func (s PatchRequestItem) GetJSONPatchRequestMove() (v JSONPatchRequestMove, ok bool) {
+	if !s.IsJSONPatchRequestMove() {
+		return v, false
+	}
+	return s.JSONPatchRequestMove, true
+}
+
+// NewJSONPatchRequestMovePatchRequestItem returns new PatchRequestItem from JSONPatchRequestMove.
+func NewJSONPatchRequestMovePatchRequestItem(v JSONPatchRequestMove) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestMove(v)
+	return s
+}
+
+// SetJSONPatchRequestCopy sets PatchRequestItem to JSONPatchRequestCopy.
+func (s *PatchRequestItem) SetJSONPatchRequestCopy(v JSONPatchRequestCopy) {
+	s.Type = JSONPatchRequestCopyPatchRequestItem
+	s.JSONPatchRequestCopy = v
+}
+
+// GetJSONPatchRequestCopy returns JSONPatchRequestCopy and true boolean if PatchRequestItem is JSONPatchRequestCopy.
+func (s PatchRequestItem) GetJSONPatchRequestCopy() (v JSONPatchRequestCopy, ok bool) {
+	if !s.IsJSONPatchRequestCopy() {
+		return v, false
+	}
+	return s.JSONPatchRequestCopy, true
+}
+
+// NewJSONPatchRequestCopyPatchRequestItem returns new PatchRequestItem from JSONPatchRequestCopy.
+func NewJSONPatchRequestCopyPatchRequestItem(v JSONPatchRequestCopy) PatchRequestItem {
+	var s PatchRequestItem
+	s.SetJSONPatchRequestCopy(v)
+	return s
+}
+
 // Ref: #/components/responses/PermanentRedirect
 type PermanentRedirect struct {
 	Location string
@@ -8919,11 +9909,11 @@ func (*PermanentRedirect) domainListReadContextsRes()                      {}
 func (*PermanentRedirect) domainListResourcesRes()                         {}
 func (*PermanentRedirect) domainListWriteContextsRes()                     {}
 func (*PermanentRedirect) domainOpenCapsuleRes()                           {}
+func (*PermanentRedirect) domainPatchSettingsRes()                         {}
 func (*PermanentRedirect) domainPolicyFlushRes()                           {}
 func (*PermanentRedirect) domainPutCapabilityRes()                         {}
 func (*PermanentRedirect) domainPutDisasterRecoverySettingsRes()           {}
 func (*PermanentRedirect) domainPutFactTypeRes()                           {}
-func (*PermanentRedirect) domainPutSettingsRes()                           {}
 func (*PermanentRedirect) domainPutVendorSettingsRes()                     {}
 func (*PermanentRedirect) domainQueryAccessLogRes()                        {}
 func (*PermanentRedirect) domainQueryAccessLogSingleCapsuleRes()           {}
@@ -9117,6 +10107,109 @@ func (s *PrincipalSummary) SetPrincipalType(val DomainIdentityProviderPrincipalT
 // SetComment sets the value of Comment.
 func (s *PrincipalSummary) SetComment(val string) {
 	s.Comment = val
+}
+
+type QueryCapsulesSortOn string
+
+const (
+	QueryCapsulesSortOnCreated QueryCapsulesSortOn = "created"
+	QueryCapsulesSortOnID      QueryCapsulesSortOn = "id"
+	QueryCapsulesSortOnSize    QueryCapsulesSortOn = "size"
+)
+
+// AllValues returns all QueryCapsulesSortOn values.
+func (QueryCapsulesSortOn) AllValues() []QueryCapsulesSortOn {
+	return []QueryCapsulesSortOn{
+		QueryCapsulesSortOnCreated,
+		QueryCapsulesSortOnID,
+		QueryCapsulesSortOnSize,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s QueryCapsulesSortOn) MarshalText() ([]byte, error) {
+	switch s {
+	case QueryCapsulesSortOnCreated:
+		return []byte(s), nil
+	case QueryCapsulesSortOnID:
+		return []byte(s), nil
+	case QueryCapsulesSortOnSize:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *QueryCapsulesSortOn) UnmarshalText(data []byte) error {
+	switch QueryCapsulesSortOn(data) {
+	case QueryCapsulesSortOnCreated:
+		*s = QueryCapsulesSortOnCreated
+		return nil
+	case QueryCapsulesSortOnID:
+		*s = QueryCapsulesSortOnID
+		return nil
+	case QueryCapsulesSortOnSize:
+		*s = QueryCapsulesSortOnSize
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type QueryOperationType string
+
+const (
+	QueryOperationTypeCreate QueryOperationType = "create"
+	QueryOperationTypeOpen   QueryOperationType = "open"
+	QueryOperationTypeRead   QueryOperationType = "read"
+	QueryOperationTypeWrite  QueryOperationType = "write"
+)
+
+// AllValues returns all QueryOperationType values.
+func (QueryOperationType) AllValues() []QueryOperationType {
+	return []QueryOperationType{
+		QueryOperationTypeCreate,
+		QueryOperationTypeOpen,
+		QueryOperationTypeRead,
+		QueryOperationTypeWrite,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s QueryOperationType) MarshalText() ([]byte, error) {
+	switch s {
+	case QueryOperationTypeCreate:
+		return []byte(s), nil
+	case QueryOperationTypeOpen:
+		return []byte(s), nil
+	case QueryOperationTypeRead:
+		return []byte(s), nil
+	case QueryOperationTypeWrite:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *QueryOperationType) UnmarshalText(data []byte) error {
+	switch QueryOperationType(data) {
+	case QueryOperationTypeCreate:
+		*s = QueryOperationTypeCreate
+		return nil
+	case QueryOperationTypeOpen:
+		*s = QueryOperationTypeOpen
+		return nil
+	case QueryOperationTypeRead:
+		*s = QueryOperationTypeRead
+		return nil
+	case QueryOperationTypeWrite:
+		*s = QueryOperationTypeWrite
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Information about what must be done to data when it is read from a capsule.
@@ -9406,10 +10499,10 @@ type ReadContextDetails struct {
 	// A longer form description of this read context.
 	Description string `json:"description"`
 	// If true, skip creation of audit log events on read.
-	DisableReadLogging bool `json:"disableReadLogging"`
+	DisableReadLogging OptBool `json:"disableReadLogging"`
 	// Number of seconds for which cached encryption keys will be
 	// considered valid by the client.
-	KeyCacheTTL    int32                     `json:"keyCacheTTL"`
+	KeyCacheTTL    OptInt32                  `json:"keyCacheTTL"`
 	RequiredHooks  []ReadContextRequiredHook `json:"requiredHooks"`
 	ReadParameters []ReadContextParameter    `json:"readParameters"`
 	Rules          []ReadContextConfigRule   `json:"rules"`
@@ -9417,7 +10510,8 @@ type ReadContextDetails struct {
 	Imported         bool        `json:"imported"`
 	SourceDomainID   OptDomainID `json:"sourceDomainID"`
 	SourceDomainName OptString   `json:"sourceDomainName"`
-	// A WASM bundle version of the policy associated with this read context.
+	// A WASM bundle version of the policy associated with this
+	// read context.
 	PolicyAssembly []byte `json:"policyAssembly"`
 }
 
@@ -9437,12 +10531,12 @@ func (s *ReadContextDetails) GetDescription() string {
 }
 
 // GetDisableReadLogging returns the value of DisableReadLogging.
-func (s *ReadContextDetails) GetDisableReadLogging() bool {
+func (s *ReadContextDetails) GetDisableReadLogging() OptBool {
 	return s.DisableReadLogging
 }
 
 // GetKeyCacheTTL returns the value of KeyCacheTTL.
-func (s *ReadContextDetails) GetKeyCacheTTL() int32 {
+func (s *ReadContextDetails) GetKeyCacheTTL() OptInt32 {
 	return s.KeyCacheTTL
 }
 
@@ -9497,12 +10591,12 @@ func (s *ReadContextDetails) SetDescription(val string) {
 }
 
 // SetDisableReadLogging sets the value of DisableReadLogging.
-func (s *ReadContextDetails) SetDisableReadLogging(val bool) {
+func (s *ReadContextDetails) SetDisableReadLogging(val OptBool) {
 	s.DisableReadLogging = val
 }
 
 // SetKeyCacheTTL sets the value of KeyCacheTTL.
-func (s *ReadContextDetails) SetKeyCacheTTL(val int32) {
+func (s *ReadContextDetails) SetKeyCacheTTL(val OptInt32) {
 	s.KeyCacheTTL = val
 }
 
@@ -9607,18 +10701,18 @@ type ReadContextReference string
 
 // Ref: #/components/schemas/ReadContextRequiredHook
 type ReadContextRequiredHook struct {
-	Hook         HookName            `json:"hook"`
-	Constraint   VersionConstraint   `json:"constraint"`
-	WriteContext OptWriteContextName `json:"writeContext"`
+	Hook         OptHookName          `json:"hook"`
+	Constraint   OptVersionConstraint `json:"constraint"`
+	WriteContext OptWriteContextName  `json:"writeContext"`
 }
 
 // GetHook returns the value of Hook.
-func (s *ReadContextRequiredHook) GetHook() HookName {
+func (s *ReadContextRequiredHook) GetHook() OptHookName {
 	return s.Hook
 }
 
 // GetConstraint returns the value of Constraint.
-func (s *ReadContextRequiredHook) GetConstraint() VersionConstraint {
+func (s *ReadContextRequiredHook) GetConstraint() OptVersionConstraint {
 	return s.Constraint
 }
 
@@ -9628,12 +10722,12 @@ func (s *ReadContextRequiredHook) GetWriteContext() OptWriteContextName {
 }
 
 // SetHook sets the value of Hook.
-func (s *ReadContextRequiredHook) SetHook(val HookName) {
+func (s *ReadContextRequiredHook) SetHook(val OptHookName) {
 	s.Hook = val
 }
 
 // SetConstraint sets the value of Constraint.
-func (s *ReadContextRequiredHook) SetConstraint(val VersionConstraint) {
+func (s *ReadContextRequiredHook) SetConstraint(val OptVersionConstraint) {
 	s.Constraint = val
 }
 
@@ -10014,10 +11108,10 @@ type ReadContextShortDetails struct {
 	// A longer form description of this read context.
 	Description string `json:"description"`
 	// If true, skip creation of audit log events on read.
-	DisableReadLogging bool `json:"disableReadLogging"`
+	DisableReadLogging OptBool `json:"disableReadLogging"`
 	// Number of seconds for which cached encryption keys will be
 	// considered valid by the client.
-	KeyCacheTTL    int32                  `json:"keyCacheTTL"`
+	KeyCacheTTL    OptInt32               `json:"keyCacheTTL"`
 	ReadParameters []ReadContextParameter `json:"readParameters"`
 	// True if this read context is imported.
 	Imported         bool        `json:"imported"`
@@ -10041,12 +11135,12 @@ func (s *ReadContextShortDetails) GetDescription() string {
 }
 
 // GetDisableReadLogging returns the value of DisableReadLogging.
-func (s *ReadContextShortDetails) GetDisableReadLogging() bool {
+func (s *ReadContextShortDetails) GetDisableReadLogging() OptBool {
 	return s.DisableReadLogging
 }
 
 // GetKeyCacheTTL returns the value of KeyCacheTTL.
-func (s *ReadContextShortDetails) GetKeyCacheTTL() int32 {
+func (s *ReadContextShortDetails) GetKeyCacheTTL() OptInt32 {
 	return s.KeyCacheTTL
 }
 
@@ -10086,12 +11180,12 @@ func (s *ReadContextShortDetails) SetDescription(val string) {
 }
 
 // SetDisableReadLogging sets the value of DisableReadLogging.
-func (s *ReadContextShortDetails) SetDisableReadLogging(val bool) {
+func (s *ReadContextShortDetails) SetDisableReadLogging(val OptBool) {
 	s.DisableReadLogging = val
 }
 
 // SetKeyCacheTTL sets the value of KeyCacheTTL.
-func (s *ReadContextShortDetails) SetKeyCacheTTL(val int32) {
+func (s *ReadContextShortDetails) SetKeyCacheTTL(val OptInt32) {
 	s.KeyCacheTTL = val
 }
 
@@ -10191,7 +11285,6 @@ func (*ResourceExhaustedError) domainAddNewRes()                                
 func (*ResourceExhaustedError) domainAddReadContextRuleRes()                    {}
 func (*ResourceExhaustedError) domainAuthenticateRes()                          {}
 func (*ResourceExhaustedError) domainContactIssueVerifyRes()                    {}
-func (*ResourceExhaustedError) domainContactVerifyRes()                         {}
 func (*ResourceExhaustedError) domainCreateCapsuleRes()                         {}
 func (*ResourceExhaustedError) domainCreatePeerDomainRes()                      {}
 func (*ResourceExhaustedError) domainCreatePolicyRuleRes()                      {}
@@ -10251,11 +11344,11 @@ func (*ResourceExhaustedError) domainListReadContextsRes()                      
 func (*ResourceExhaustedError) domainListResourcesRes()                         {}
 func (*ResourceExhaustedError) domainListWriteContextsRes()                     {}
 func (*ResourceExhaustedError) domainOpenCapsuleRes()                           {}
+func (*ResourceExhaustedError) domainPatchSettingsRes()                         {}
 func (*ResourceExhaustedError) domainPolicyFlushRes()                           {}
 func (*ResourceExhaustedError) domainPutCapabilityRes()                         {}
 func (*ResourceExhaustedError) domainPutDisasterRecoverySettingsRes()           {}
 func (*ResourceExhaustedError) domainPutFactTypeRes()                           {}
-func (*ResourceExhaustedError) domainPutSettingsRes()                           {}
 func (*ResourceExhaustedError) domainPutVendorSettingsRes()                     {}
 func (*ResourceExhaustedError) domainQueryAccessLogRes()                        {}
 func (*ResourceExhaustedError) domainQueryAccessLogSingleCapsuleRes()           {}
@@ -10277,7 +11370,6 @@ func (*ResourceExhaustedError) domainUpsertSpanTagsRes()                        
 func (*ResourceExhaustedError) domainUpsertWriteContextConfigurationRes()       {}
 func (*ResourceExhaustedError) domainUpsertWriteContextRes()                    {}
 func (*ResourceExhaustedError) starredDomainAddRes()                            {}
-func (*ResourceExhaustedError) starredDomainListRes()                           {}
 func (*ResourceExhaustedError) starredDomainRemoveRes()                         {}
 
 // Returned when interacting with a valid URL, but the request references an unknown resource.
@@ -10388,11 +11480,11 @@ func (*ResourceNotFoundError) domainListReadContextsRes()                      {
 func (*ResourceNotFoundError) domainListResourcesRes()                         {}
 func (*ResourceNotFoundError) domainListWriteContextsRes()                     {}
 func (*ResourceNotFoundError) domainOpenCapsuleRes()                           {}
+func (*ResourceNotFoundError) domainPatchSettingsRes()                         {}
 func (*ResourceNotFoundError) domainPolicyFlushRes()                           {}
 func (*ResourceNotFoundError) domainPutCapabilityRes()                         {}
 func (*ResourceNotFoundError) domainPutDisasterRecoverySettingsRes()           {}
 func (*ResourceNotFoundError) domainPutFactTypeRes()                           {}
-func (*ResourceNotFoundError) domainPutSettingsRes()                           {}
 func (*ResourceNotFoundError) domainPutVendorSettingsRes()                     {}
 func (*ResourceNotFoundError) domainQueryAccessLogRes()                        {}
 func (*ResourceNotFoundError) domainQueryAccessLogSingleCapsuleRes()           {}
@@ -10524,21 +11616,7 @@ func (s *RootEncryptionKeyItem) SetSourceDomainName(val OptString) {
 
 func (*RootEncryptionKeyItem) domainGetActiveExternalRootEncryptionKeyRes() {}
 
-// Ref: #/components/schemas/RootEncryptionKeyListResponse
-type RootEncryptionKeyListResponse struct {
-	// The newly created root encryption key's ID.
-	Keys []RootEncryptionKeyItem `json:"keys"`
-}
-
-// GetKeys returns the value of Keys.
-func (s *RootEncryptionKeyListResponse) GetKeys() []RootEncryptionKeyItem {
-	return s.Keys
-}
-
-// SetKeys sets the value of Keys.
-func (s *RootEncryptionKeyListResponse) SetKeys(val []RootEncryptionKeyItem) {
-	s.Keys = val
-}
+type RootEncryptionKeyListResponse []RootEncryptionKeyItem
 
 func (*RootEncryptionKeyListResponse) domainListExternalRootEncryptionKeyRes() {}
 
@@ -11123,11 +12201,11 @@ func (*UnauthorizedError) domainListReadContextsRes()                      {}
 func (*UnauthorizedError) domainListResourcesRes()                         {}
 func (*UnauthorizedError) domainListWriteContextsRes()                     {}
 func (*UnauthorizedError) domainOpenCapsuleRes()                           {}
+func (*UnauthorizedError) domainPatchSettingsRes()                         {}
 func (*UnauthorizedError) domainPolicyFlushRes()                           {}
 func (*UnauthorizedError) domainPutCapabilityRes()                         {}
 func (*UnauthorizedError) domainPutDisasterRecoverySettingsRes()           {}
 func (*UnauthorizedError) domainPutFactTypeRes()                           {}
-func (*UnauthorizedError) domainPutSettingsRes()                           {}
 func (*UnauthorizedError) domainPutVendorSettingsRes()                     {}
 func (*UnauthorizedError) domainQueryAccessLogRes()                        {}
 func (*UnauthorizedError) domainQueryAccessLogSingleCapsuleRes()           {}
@@ -11154,7 +12232,8 @@ func (*UnauthorizedError) starredDomainRemoveRes()                         {}
 
 // Ref: #/components/schemas/UpsertSpanTagsRequest
 type UpsertSpanTagsRequest struct {
-	Summary TagSummary `json:"summary"`
+	Summary     TagSummary            `json:"summary"`
+	CreateToken CapsuleOperationToken `json:"createToken"`
 }
 
 // GetSummary returns the value of Summary.
@@ -11162,9 +12241,19 @@ func (s *UpsertSpanTagsRequest) GetSummary() TagSummary {
 	return s.Summary
 }
 
+// GetCreateToken returns the value of CreateToken.
+func (s *UpsertSpanTagsRequest) GetCreateToken() CapsuleOperationToken {
+	return s.CreateToken
+}
+
 // SetSummary sets the value of Summary.
 func (s *UpsertSpanTagsRequest) SetSummary(val TagSummary) {
 	s.Summary = val
+}
+
+// SetCreateToken sets the value of CreateToken.
+func (s *UpsertSpanTagsRequest) SetCreateToken(val CapsuleOperationToken) {
+	s.CreateToken = val
 }
 
 // Vendor settings for a domain.
