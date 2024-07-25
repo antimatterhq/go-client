@@ -284,6 +284,10 @@ func (s *Server) handleDomainAddAccessLogEntryRequest(args [2]string, argsEscape
 					Name: "capsuleID",
 					In:   "path",
 				}: params.CapsuleID,
+				{
+					Name: "openToken",
+					In:   "query",
+				}: params.OpenToken,
 			},
 			Raw: r,
 		}
@@ -339,12 +343,12 @@ func (s *Server) handleDomainAddAccessLogEntryRequest(args [2]string, argsEscape
 //
 // Add a new external root encryption key with its supporting access configuration.
 //
-// POST /domains/{domainID}/control/keys
+// POST /domains/{domainID}/control/encryption/keys
 func (s *Server) handleDomainAddExternalRootEncryptionKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
 	// Start a span for this request.
@@ -643,21 +647,29 @@ func (s *Server) handleDomainAddNewRequest(args [0]string, argsEscaped bool, w h
 	}
 }
 
-// handleDomainAddReadContextRuleRequest handles domainAddReadContextRule operation.
+// handleDomainAddPeerDomainRequest handles domainAddPeerDomain operation.
 //
-// Read context configuration is rule based, much like domain policy. This adds a new rule to the
-// read context. Rules are processed in priority order, stopping with the first matching rule.
+// Add a domain with a default "subordinate" peering relationship with the current domain.
+// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
+// parent's billing and admin contact settings, and the child domain will be configured to import
+// those settings.
+// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
+// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
+// `linkAll=true`.
+// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
+// This peering can be changed at any time, and there is no permanent difference between a domain
+// created in this way, and a domain created with POST /domains.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/config
-func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /domains/{domainID}/peer-domain
+func (s *Server) handleDomainAddPeerDomainRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainAddReadContextRule"),
+		otelogen.OperationID("domainAddPeerDomain"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainAddReadContextRule",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainAddPeerDomain",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -688,15 +700,15 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainAddReadContextRule",
-			ID:   "domainAddReadContextRule",
+			Name: "DomainAddPeerDomain",
+			ID:   "domainAddPeerDomain",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainAddReadContextRule", r)
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainAddPeerDomain", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -738,7 +750,7 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 			return
 		}
 	}
-	params, err := decodeDomainAddReadContextRuleParams(args, argsEscaped, r)
+	params, err := decodeDomainAddPeerDomainParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -748,7 +760,7 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeDomainAddReadContextRuleRequest(r)
+	request, close, err := s.decodeDomainAddPeerDomainRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -764,31 +776,27 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 		}
 	}()
 
-	var response DomainAddReadContextRuleRes
+	var response DomainAddPeerDomainRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "DomainAddReadContextRule",
-			OperationSummary: "Add a read context configuration rule",
-			OperationID:      "domainAddReadContextRule",
+			OperationName:    "DomainAddPeerDomain",
+			OperationSummary: "Add a peer domain",
+			OperationID:      "domainAddPeerDomain",
 			Body:             request,
 			Params: middleware.Parameters{
 				{
 					Name: "domainID",
 					In:   "path",
 				}: params.DomainID,
-				{
-					Name: "contextName",
-					In:   "path",
-				}: params.ContextName,
 			},
 			Raw: r,
 		}
 
 		type (
-			Request  = *NewReadContextConfigRule
-			Params   = DomainAddReadContextRuleParams
-			Response = DomainAddReadContextRuleRes
+			Request  = *CreatePeerDomain
+			Params   = DomainAddPeerDomainParams
+			Response = DomainAddPeerDomainRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -797,14 +805,14 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 		](
 			m,
 			mreq,
-			unpackDomainAddReadContextRuleParams,
+			unpackDomainAddPeerDomainParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainAddReadContextRule(ctx, request, params)
+				response, err = s.h.DomainAddPeerDomain(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.DomainAddReadContextRule(ctx, request, params)
+		response, err = s.h.DomainAddPeerDomain(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
@@ -823,7 +831,7 @@ func (s *Server) handleDomainAddReadContextRuleRequest(args [2]string, argsEscap
 		return
 	}
 
-	if err := encodeDomainAddReadContextRuleResponse(response, w, span); err != nil {
+	if err := encodeDomainAddPeerDomainResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -1450,29 +1458,20 @@ func (s *Server) handleDomainCreateCapsuleRequest(args [1]string, argsEscaped bo
 	}
 }
 
-// handleDomainCreatePeerDomainRequest handles domainCreatePeerDomain operation.
+// handleDomainCreateDataPolicyRequest handles domainCreateDataPolicy operation.
 //
-// Create a domain with a default "subordinate" peering relationship with the current domain.
-// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
-// parent's billing and admin contact settings, and the child domain will be configured to import
-// those settings.
-// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
-// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
-// `linkAll=true`.
-// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
-// This peering can be changed at any time, and there is no permanent difference between a domain
-// created in this way, and a domain created with POST /domains.
+// Create a new data policy.
 //
-// POST /domains/{domainID}/peer-domain
-func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /domains/{domainID}/control/data-policy
+func (s *Server) handleDomainCreateDataPolicyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainCreatePeerDomain"),
+		otelogen.OperationID("domainCreateDataPolicy"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainCreatePeerDomain",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainCreateDataPolicy",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -1503,15 +1502,15 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainCreatePeerDomain",
-			ID:   "domainCreatePeerDomain",
+			Name: "DomainCreateDataPolicy",
+			ID:   "domainCreateDataPolicy",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainCreatePeerDomain", r)
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainCreateDataPolicy", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -1553,7 +1552,7 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 			return
 		}
 	}
-	params, err := decodeDomainCreatePeerDomainParams(args, argsEscaped, r)
+	params, err := decodeDomainCreateDataPolicyParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1563,7 +1562,7 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeDomainCreatePeerDomainRequest(r)
+	request, close, err := s.decodeDomainCreateDataPolicyRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -1579,13 +1578,13 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		}
 	}()
 
-	var response DomainCreatePeerDomainRes
+	var response DomainCreateDataPolicyRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "DomainCreatePeerDomain",
-			OperationSummary: "Create a peer domain",
-			OperationID:      "domainCreatePeerDomain",
+			OperationName:    "DomainCreateDataPolicy",
+			OperationSummary: "Create a new data policy",
+			OperationID:      "domainCreateDataPolicy",
 			Body:             request,
 			Params: middleware.Parameters{
 				{
@@ -1597,9 +1596,9 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		}
 
 		type (
-			Request  = *CreatePeerDomain
-			Params   = DomainCreatePeerDomainParams
-			Response = DomainCreatePeerDomainRes
+			Request  = *NewDataPolicy
+			Params   = DomainCreateDataPolicyParams
+			Response = DomainCreateDataPolicyRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1608,14 +1607,14 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		](
 			m,
 			mreq,
-			unpackDomainCreatePeerDomainParams,
+			unpackDomainCreateDataPolicyParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainCreatePeerDomain(ctx, request, params)
+				response, err = s.h.DomainCreateDataPolicy(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.DomainCreatePeerDomain(ctx, request, params)
+		response, err = s.h.DomainCreateDataPolicy(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
@@ -1634,7 +1633,7 @@ func (s *Server) handleDomainCreatePeerDomainRequest(args [1]string, argsEscaped
 		return
 	}
 
-	if err := encodeDomainCreatePeerDomainResponse(response, w, span); err != nil {
+	if err := encodeDomainCreateDataPolicyResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -1819,6 +1818,386 @@ func (s *Server) handleDomainCreatePolicyRuleRequest(args [1]string, argsEscaped
 	}
 
 	if err := encodeDomainCreatePolicyRuleResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainDataPolicyConfigureRulesRequest handles domainDataPolicyConfigureRules operation.
+//
+// Add/Remove rules for a data policy.
+//
+// POST /domains/{domainID}/control/data-policy/{policyID}/rules
+func (s *Server) handleDomainDataPolicyConfigureRulesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataPolicyConfigureRules"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDataPolicyConfigureRules",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDataPolicyConfigureRules",
+			ID:   "domainDataPolicyConfigureRules",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDataPolicyConfigureRules", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDataPolicyConfigureRulesParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainDataPolicyConfigureRulesRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainDataPolicyConfigureRulesRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDataPolicyConfigureRules",
+			OperationSummary: "Configure data policy rules",
+			OperationID:      "domainDataPolicyConfigureRules",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *DataPolicyRuleChanges
+			Params   = DomainDataPolicyConfigureRulesParams
+			Response = DomainDataPolicyConfigureRulesRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDataPolicyConfigureRulesParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDataPolicyConfigureRules(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDataPolicyConfigureRules(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDataPolicyConfigureRulesResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainDataPolicyRuleUpdateRequest handles domainDataPolicyRuleUpdate operation.
+//
+// Configure a data policy rule.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (s *Server) handleDomainDataPolicyRuleUpdateRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataPolicyRuleUpdate"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDataPolicyRuleUpdate",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDataPolicyRuleUpdate",
+			ID:   "domainDataPolicyRuleUpdate",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDataPolicyRuleUpdate", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDataPolicyRuleUpdateParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainDataPolicyRuleUpdateRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainDataPolicyRuleUpdateRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDataPolicyRuleUpdate",
+			OperationSummary: "Configure data policy rule",
+			OperationID:      "domainDataPolicyRuleUpdate",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+				{
+					Name: "ruleID",
+					In:   "path",
+				}: params.RuleID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NewDataPolicyRule
+			Params   = DomainDataPolicyRuleUpdateParams
+			Response = DomainDataPolicyRuleUpdateRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDataPolicyRuleUpdateParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDataPolicyRuleUpdate(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDataPolicyRuleUpdate(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDataPolicyRuleUpdateResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -2211,8 +2590,8 @@ func (s *Server) handleDomainDataTaggingHookTestRequest(args [2]string, argsEsca
 
 // handleDomainDeleteCapabilityRequest handles domainDeleteCapability operation.
 //
-// Delete a capability. All domain policy rules that reference the capability must have already been
-// deleted, or you will receive a 409 error.
+// Delete a capability. All rules that reference the capability must have already been deleted, or
+// you will get an error.
 //
 // DELETE /domains/{domainID}/control/capabilities/{capability}
 func (s *Server) handleDomainDeleteCapabilityRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2571,18 +2950,368 @@ func (s *Server) handleDomainDeleteCapsuleTagsRequest(args [2]string, argsEscape
 	}
 }
 
+// handleDomainDeleteDataPolicyRequest handles domainDeleteDataPolicy operation.
+//
+// Delete an existing data policy and all its rules.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}
+func (s *Server) handleDomainDeleteDataPolicyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteDataPolicy"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDeleteDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDeleteDataPolicy",
+			ID:   "domainDeleteDataPolicy",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDeleteDataPolicy", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDeleteDataPolicyParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainDeleteDataPolicyRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDeleteDataPolicy",
+			OperationSummary: "Delete a data policy",
+			OperationID:      "domainDeleteDataPolicy",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainDeleteDataPolicyParams
+			Response = DomainDeleteDataPolicyRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDeleteDataPolicyParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDeleteDataPolicy(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDeleteDataPolicy(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDeleteDataPolicyResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainDeleteDataPolicyRuleRequest handles domainDeleteDataPolicyRule operation.
+//
+// Delete an existing data policy rule.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (s *Server) handleDomainDeleteDataPolicyRuleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteDataPolicyRule"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDeleteDataPolicyRule",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainDeleteDataPolicyRule",
+			ID:   "domainDeleteDataPolicyRule",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDeleteDataPolicyRule", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainDeleteDataPolicyRuleParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainDeleteDataPolicyRuleRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainDeleteDataPolicyRule",
+			OperationSummary: "Delete a data policy policy",
+			OperationID:      "domainDeleteDataPolicyRule",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+				{
+					Name: "ruleID",
+					In:   "path",
+				}: params.RuleID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainDeleteDataPolicyRuleParams
+			Response = DomainDeleteDataPolicyRuleRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainDeleteDataPolicyRuleParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainDeleteDataPolicyRule(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainDeleteDataPolicyRule(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainDeleteDataPolicyRuleResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainDeleteExternalRootEncryptionKeyRequest handles domainDeleteExternalRootEncryptionKey operation.
 //
 // Delete an external root encryption key using its ID. This operation is only successful if the
-// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
-// endpoint to ensure that all KEKs have been migrated to the active REK.
+// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
+// ensure that all KEKs have been migrated to the active REK.
 //
-// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
+// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
 func (s *Server) handleDomainDeleteExternalRootEncryptionKeyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"),
 	}
 
 	// Start a span for this request.
@@ -3972,183 +4701,6 @@ func (s *Server) handleDomainDeleteReadContextRequest(args [2]string, argsEscape
 	}
 }
 
-// handleDomainDeleteReadContextRuleRequest handles domainDeleteReadContextRule operation.
-//
-// Deletes a read context configuration rule by ID.
-//
-// DELETE /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (s *Server) handleDomainDeleteReadContextRuleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainDeleteReadContextRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config/{ruleID}"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainDeleteReadContextRule",
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainDeleteReadContextRule",
-			ID:   "domainDeleteReadContextRule",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainDeleteReadContextRule", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "DomainIdentity",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:DomainIdentity", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	params, err := decodeDomainDeleteReadContextRuleParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var response DomainDeleteReadContextRuleRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    "DomainDeleteReadContextRule",
-			OperationSummary: "Delete a read context configuration rule",
-			OperationID:      "domainDeleteReadContextRule",
-			Body:             nil,
-			Params: middleware.Parameters{
-				{
-					Name: "domainID",
-					In:   "path",
-				}: params.DomainID,
-				{
-					Name: "contextName",
-					In:   "path",
-				}: params.ContextName,
-				{
-					Name: "ruleID",
-					In:   "path",
-				}: params.RuleID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = DomainDeleteReadContextRuleParams
-			Response = DomainDeleteReadContextRuleRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackDomainDeleteReadContextRuleParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainDeleteReadContextRule(ctx, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.DomainDeleteReadContextRule(ctx, params)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeDomainDeleteReadContextRuleResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
 // handleDomainDeleteWriteContextRequest handles domainDeleteWriteContext operation.
 //
 // Delete a write context. All configuration associated with this write context will also be deleted.
@@ -4854,12 +5406,12 @@ func (s *Server) handleDomainDescribeWriteContextRequest(args [2]string, argsEsc
 //
 // Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 //
-// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
+// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
 func (s *Server) handleDomainExternalRootEncryptionKeyTestRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainExternalRootEncryptionKeyTest"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}/test"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test"),
 	}
 
 	// Start a span for this request.
@@ -5041,14 +5593,14 @@ func (s *Server) handleDomainExternalRootEncryptionKeyTestRequest(args [2]string
 // handleDomainFlushEncryptionKeysRequest handles domainFlushEncryptionKeys operation.
 //
 // Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-// check that the domain's root encryption key is still available.
+// check that the domain's root key is still available.
 //
-// POST /domains/{domainID}/encryption/flush
+// POST /domains/{domainID}/control/encryption/flush
 func (s *Server) handleDomainFlushEncryptionKeysRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainFlushEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/encryption/flush"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/flush"),
 	}
 
 	// Start a span for this request.
@@ -5227,12 +5779,12 @@ func (s *Server) handleDomainFlushEncryptionKeysRequest(args [1]string, argsEsca
 //
 // Return the details about the current active root encryption key used by the domain.
 //
-// GET /domains/{domainID}/control/keys/active
+// GET /domains/{domainID}/control/encryption/active-key
 func (s *Server) handleDomainGetActiveExternalRootEncryptionKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
 	// Start a span for this request.
@@ -5565,8 +6117,8 @@ func (s *Server) handleDomainGetCapabilitiesRequest(args [1]string, argsEscaped 
 
 // handleDomainGetCapabilityRequest handles domainGetCapability operation.
 //
-// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
-// identity provider. The capabilities can be referenced by the domain policy rules.
+// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
+// an identity provider. The capabilities can be referenced by the domain policy rules.
 //
 // GET /domains/{domainID}/control/capabilities/{capability}
 func (s *Server) handleDomainGetCapabilityRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5910,6 +6462,529 @@ func (s *Server) handleDomainGetCapsuleInfoRequest(args [2]string, argsEscaped b
 	}
 }
 
+// handleDomainGetDataPolicyRequest handles domainGetDataPolicy operation.
+//
+// Get a data policy, will include rules if the policy is not imported.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}
+func (s *Server) handleDomainGetDataPolicyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicy"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainGetDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainGetDataPolicy",
+			ID:   "domainGetDataPolicy",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainGetDataPolicy", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainGetDataPolicyParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainGetDataPolicyRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainGetDataPolicy",
+			OperationSummary: "Get a data policy",
+			OperationID:      "domainGetDataPolicy",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainGetDataPolicyParams
+			Response = DomainGetDataPolicyRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainGetDataPolicyParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainGetDataPolicy(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainGetDataPolicy(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainGetDataPolicyResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainGetDataPolicyBindingRequest handles domainGetDataPolicyBinding operation.
+//
+// Retrieve a data policy binding configuration.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/binding
+func (s *Server) handleDomainGetDataPolicyBindingRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicyBinding"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainGetDataPolicyBinding",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainGetDataPolicyBinding",
+			ID:   "domainGetDataPolicyBinding",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainGetDataPolicyBinding", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainGetDataPolicyBindingParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainGetDataPolicyBindingRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainGetDataPolicyBinding",
+			OperationSummary: "Retrieve a data policy binding",
+			OperationID:      "domainGetDataPolicyBinding",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainGetDataPolicyBindingParams
+			Response = DomainGetDataPolicyBindingRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainGetDataPolicyBindingParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainGetDataPolicyBinding(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainGetDataPolicyBinding(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainGetDataPolicyBindingResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainGetDataPolicyRuleRequest handles domainGetDataPolicyRule operation.
+//
+// Get a data policy rule.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (s *Server) handleDomainGetDataPolicyRuleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicyRule"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainGetDataPolicyRule",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainGetDataPolicyRule",
+			ID:   "domainGetDataPolicyRule",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainGetDataPolicyRule", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainGetDataPolicyRuleParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainGetDataPolicyRuleRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainGetDataPolicyRule",
+			OperationSummary: "Get a data policy rule",
+			OperationID:      "domainGetDataPolicyRule",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+				{
+					Name: "ruleID",
+					In:   "path",
+				}: params.RuleID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainGetDataPolicyRuleParams
+			Response = DomainGetDataPolicyRuleRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainGetDataPolicyRuleParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainGetDataPolicyRule(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainGetDataPolicyRule(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainGetDataPolicyRuleResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainGetDisasterRecoverySettingsRequest handles domainGetDisasterRecoverySettings operation.
 //
 // Return the current domain's disaster recovery settings.
@@ -6085,12 +7160,12 @@ func (s *Server) handleDomainGetDisasterRecoverySettingsRequest(args [1]string, 
 // relevant, any additional information required to use them (e.g. for the delegated key provider
 // `aws_am` the AWS account number to delegate to is returned).
 //
-// GET /domains/{domainID}/control/keys/providers
+// GET /domains/{domainID}/control/encryption/providers
 func (s *Server) handleDomainGetExternalRootEncryptionKeyProvidersRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetExternalRootEncryptionKeyProviders"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/providers"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/providers"),
 	}
 
 	// Start a span for this request.
@@ -9733,16 +10808,185 @@ func (s *Server) handleDomainListCapsulesRequest(args [1]string, argsEscaped boo
 	}
 }
 
+// handleDomainListDataPoliciesRequest handles domainListDataPolicies operation.
+//
+// Get a full listing of all data policies in the domain (including imported policies).
+//
+// GET /domains/{domainID}/control/data-policy
+func (s *Server) handleDomainListDataPoliciesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainListDataPolicies"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainListDataPolicies",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainListDataPolicies",
+			ID:   "domainListDataPolicies",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainListDataPolicies", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainListDataPoliciesParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response DomainListDataPoliciesRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainListDataPolicies",
+			OperationSummary: "",
+			OperationID:      "domainListDataPolicies",
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DomainListDataPoliciesParams
+			Response = DomainListDataPoliciesRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainListDataPoliciesParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainListDataPolicies(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainListDataPolicies(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainListDataPoliciesResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDomainListExternalRootEncryptionKeyRequest handles domainListExternalRootEncryptionKey operation.
 //
 // List all external root encryption keys for the domain.
 //
-// GET /domains/{domainID}/control/keys
+// GET /domains/{domainID}/control/encryption/keys
 func (s *Server) handleDomainListExternalRootEncryptionKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
 	// Start a span for this request.
@@ -10074,7 +11318,7 @@ func (s *Server) handleDomainListFactTypesRequest(args [1]string, argsEscaped bo
 
 // handleDomainListFactsRequest handles domainListFacts operation.
 //
-// Get the facts within a fact type.
+// Get the facts corresponding to a fact type.
 //
 // GET /domains/{domainID}/control/facts/{factType}/list
 func (s *Server) handleDomainListFactsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10419,7 +11663,7 @@ func (s *Server) handleDomainListHooksRequest(args [1]string, argsEscaped bool, 
 //
 // Retrieve the domain's identity providers and a brief overview of their configuration. This
 // endpoint requires authentication, but you can obtain an abridged list of the domain identity
-// providers prior to authentication by using the `/public-info` endpoint.
+// providers prior to authentication using the `/public-info` endpoint.
 //
 // GET /domains/{domainID}/control/identities
 func (s *Server) handleDomainListIdentityProvidersRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11632,190 +12876,6 @@ func (s *Server) handleDomainOpenCapsuleRequest(args [2]string, argsEscaped bool
 	}
 }
 
-// handleDomainPatchSettingsRequest handles domainPatchSettings operation.
-//
-// Applies the given patch to the domain settings.
-//
-// PATCH /domains/{domainID}/control/settings
-func (s *Server) handleDomainPatchSettingsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainPatchSettings"),
-		semconv.HTTPMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainPatchSettings",
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainPatchSettings",
-			ID:   "domainPatchSettings",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainPatchSettings", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "DomainIdentity",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:DomainIdentity", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	params, err := decodeDomainPatchSettingsParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-	request, close, err := s.decodeDomainPatchSettingsRequest(r)
-	if err != nil {
-		err = &ogenerrors.DecodeRequestError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeRequest", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-	defer func() {
-		if err := close(); err != nil {
-			recordError("CloseRequest", err)
-		}
-	}()
-
-	var response DomainPatchSettingsRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    "DomainPatchSettings",
-			OperationSummary: "Update the domain settings",
-			OperationID:      "domainPatchSettings",
-			Body:             request,
-			Params: middleware.Parameters{
-				{
-					Name: "domainID",
-					In:   "path",
-				}: params.DomainID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = *DomainSettingsPatch
-			Params   = DomainPatchSettingsParams
-			Response = DomainPatchSettingsRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackDomainPatchSettingsParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainPatchSettings(ctx, request, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.DomainPatchSettings(ctx, request, params)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeDomainPatchSettingsResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
 // handleDomainPolicyFlushRequest handles domainPolicyFlush operation.
 //
 // Flush the policy cache so that changes to permissions take effect.
@@ -11988,7 +13048,7 @@ func (s *Server) handleDomainPolicyFlushRequest(args [1]string, argsEscaped bool
 // handleDomainPutCapabilityRequest handles domainPutCapability operation.
 //
 // Create or update a capability. If you want to return an error if the capability already existed,
-// set `createonly` to true.
+// set createonly=true.
 //
 // PUT /domains/{domainID}/control/capabilities/{capability}
 func (s *Server) handleDomainPutCapabilityRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12366,7 +13426,7 @@ func (s *Server) handleDomainPutDisasterRecoverySettingsRequest(args [1]string, 
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
 // context configuration rules. This endpoint allows you to register a new fact type. To create a
-// fact within an existing type, use `/control/facts/{factType}/new`.
+// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
 //
 // PUT /domains/{domainID}/control/facts/{factType}
 func (s *Server) handleDomainPutFactTypeRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12544,6 +13604,190 @@ func (s *Server) handleDomainPutFactTypeRequest(args [2]string, argsEscaped bool
 	}
 
 	if err := encodeDomainPutFactTypeResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainPutSettingsRequest handles domainPutSettings operation.
+//
+// Replace the current settings with the new settings supplied.
+//
+// PUT /domains/{domainID}/control/settings
+func (s *Server) handleDomainPutSettingsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPutSettings"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainPutSettings",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainPutSettings",
+			ID:   "domainPutSettings",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainPutSettings", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainPutSettingsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainPutSettingsRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainPutSettingsRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainPutSettings",
+			OperationSummary: "Update the domain settings",
+			OperationID:      "domainPutSettings",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NewDomainSettings
+			Params   = DomainPutSettingsParams
+			Response = DomainPutSettingsRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainPutSettingsParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainPutSettings(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainPutSettings(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainPutSettingsResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -13357,20 +14601,20 @@ func (s *Server) handleDomainQueryControlLogRequest(args [1]string, argsEscaped 
 	}
 }
 
-// handleDomainReadContextFlushRequest handles domainReadContextFlush operation.
+// handleDomainRenumberDataPolicyRulesRequest handles domainRenumberDataPolicyRules operation.
 //
-// Flush the read context cache so that changes to permissions take effect.
+// Re-assign rule priority numbers to integer multiples of 10.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/flush
-func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /domains/{domainID}/control/data-policy/{policyID}/renumber
+func (s *Server) handleDomainRenumberDataPolicyRulesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainReadContextFlush"),
+		otelogen.OperationID("domainRenumberDataPolicyRules"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/flush"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/renumber"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainReadContextFlush",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainRenumberDataPolicyRules",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -13401,15 +14645,15 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainReadContextFlush",
-			ID:   "domainReadContextFlush",
+			Name: "DomainRenumberDataPolicyRules",
+			ID:   "domainRenumberDataPolicyRules",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainReadContextFlush", r)
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainRenumberDataPolicyRules", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -13451,7 +14695,7 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 			return
 		}
 	}
-	params, err := decodeDomainReadContextFlushParams(args, argsEscaped, r)
+	params, err := decodeDomainRenumberDataPolicyRulesParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -13462,13 +14706,13 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 		return
 	}
 
-	var response DomainReadContextFlushRes
+	var response DomainRenumberDataPolicyRulesRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "DomainReadContextFlush",
-			OperationSummary: "Flush the read context cache",
-			OperationID:      "domainReadContextFlush",
+			OperationName:    "DomainRenumberDataPolicyRules",
+			OperationSummary: "Re-assign rule numbers",
+			OperationID:      "domainRenumberDataPolicyRules",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -13476,17 +14720,17 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 					In:   "path",
 				}: params.DomainID,
 				{
-					Name: "contextName",
+					Name: "policyID",
 					In:   "path",
-				}: params.ContextName,
+				}: params.PolicyID,
 			},
 			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = DomainReadContextFlushParams
-			Response = DomainReadContextFlushRes
+			Params   = DomainRenumberDataPolicyRulesParams
+			Response = DomainRenumberDataPolicyRulesRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -13495,14 +14739,14 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 		](
 			m,
 			mreq,
-			unpackDomainReadContextFlushParams,
+			unpackDomainRenumberDataPolicyRulesParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainReadContextFlush(ctx, params)
+				response, err = s.h.DomainRenumberDataPolicyRules(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.DomainReadContextFlush(ctx, params)
+		response, err = s.h.DomainRenumberDataPolicyRules(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
@@ -13521,7 +14765,7 @@ func (s *Server) handleDomainReadContextFlushRequest(args [2]string, argsEscaped
 		return
 	}
 
-	if err := encodeDomainReadContextFlushResponse(response, w, span); err != nil {
+	if err := encodeDomainRenumberDataPolicyRulesResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -13722,12 +14966,12 @@ func (s *Server) handleDomainRenumberPolicyRulesRequest(args [1]string, argsEsca
 // In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 // caller will call this endpoint in a loop until has_more is false.
 //
-// POST /domains/{domainID}/control/keys/rotate
+// POST /domains/{domainID}/control/encryption/rotate
 func (s *Server) handleDomainRotateRootEncryptionKeysRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRotateRootEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/rotate"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/rotate"),
 	}
 
 	// Start a span for this request.
@@ -14039,6 +15283,10 @@ func (s *Server) handleDomainSealCapsuleRequest(args [2]string, argsEscaped bool
 					Name: "capsuleID",
 					In:   "path",
 				}: params.CapsuleID,
+				{
+					Name: "createToken",
+					In:   "query",
+				}: params.CreateToken,
 			},
 			Raw: r,
 		}
@@ -14093,14 +15341,14 @@ func (s *Server) handleDomainSealCapsuleRequest(args [2]string, argsEscaped bool
 // handleDomainSetActiveExternalRootEncryptionKeyRequest handles domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
+// encrypt KEKs when `rotate` is called.
 //
-// POST /domains/{domainID}/control/keys/active
+// POST /domains/{domainID}/control/encryption/active-key
 func (s *Server) handleDomainSetActiveExternalRootEncryptionKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
 	// Start a span for this request.
@@ -14267,6 +15515,382 @@ func (s *Server) handleDomainSetActiveExternalRootEncryptionKeyRequest(args [1]s
 	}
 
 	if err := encodeDomainSetActiveExternalRootEncryptionKeyResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainSetDataPolicyBindingRequest handles domainSetDataPolicyBinding operation.
+//
+// Configure data policy binding.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/binding
+func (s *Server) handleDomainSetDataPolicyBindingRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainSetDataPolicyBinding"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainSetDataPolicyBinding",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainSetDataPolicyBinding",
+			ID:   "domainSetDataPolicyBinding",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainSetDataPolicyBinding", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainSetDataPolicyBindingParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainSetDataPolicyBindingRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainSetDataPolicyBindingRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainSetDataPolicyBinding",
+			OperationSummary: "Configure data policy binding",
+			OperationID:      "domainSetDataPolicyBinding",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *SetDataPolicyBinding
+			Params   = DomainSetDataPolicyBindingParams
+			Response = DomainSetDataPolicyBindingRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainSetDataPolicyBindingParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainSetDataPolicyBinding(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainSetDataPolicyBinding(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainSetDataPolicyBindingResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleDomainUpdateDataPolicyRequest handles domainUpdateDataPolicy operation.
+//
+// Update a data policy (it must already exist).
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}
+func (s *Server) handleDomainUpdateDataPolicyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainUpdateDataPolicy"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainUpdateDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "DomainUpdateDataPolicy",
+			ID:   "domainUpdateDataPolicy",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainUpdateDataPolicy", r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "DomainIdentity",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:DomainIdentity", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDomainUpdateDataPolicyParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	request, close, err := s.decodeDomainUpdateDataPolicyRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response DomainUpdateDataPolicyRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "DomainUpdateDataPolicy",
+			OperationSummary: "Update a data policy",
+			OperationID:      "domainUpdateDataPolicy",
+			Body:             request,
+			Params: middleware.Parameters{
+				{
+					Name: "domainID",
+					In:   "path",
+				}: params.DomainID,
+				{
+					Name: "policyID",
+					In:   "path",
+				}: params.PolicyID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NewDataPolicy
+			Params   = DomainUpdateDataPolicyParams
+			Response = DomainUpdateDataPolicyRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDomainUpdateDataPolicyParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.DomainUpdateDataPolicy(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.DomainUpdateDataPolicy(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDomainUpdateDataPolicyResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -14848,198 +16472,6 @@ func (s *Server) handleDomainUpdatePolicyRuleRequest(args [2]string, argsEscaped
 	}
 }
 
-// handleDomainUpdateReadContextRuleRequest handles domainUpdateReadContextRule operation.
-//
-// Update a read context configuration rule. The rule must already exist.
-//
-// PUT /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (s *Server) handleDomainUpdateReadContextRuleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainUpdateReadContextRule"),
-		semconv.HTTPMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config/{ruleID}"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "DomainUpdateReadContextRule",
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: "DomainUpdateReadContextRule",
-			ID:   "domainUpdateReadContextRule",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securityDomainIdentity(ctx, "DomainUpdateReadContextRule", r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "DomainIdentity",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:DomainIdentity", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	params, err := decodeDomainUpdateReadContextRuleParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-	request, close, err := s.decodeDomainUpdateReadContextRuleRequest(r)
-	if err != nil {
-		err = &ogenerrors.DecodeRequestError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeRequest", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-	defer func() {
-		if err := close(); err != nil {
-			recordError("CloseRequest", err)
-		}
-	}()
-
-	var response DomainUpdateReadContextRuleRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    "DomainUpdateReadContextRule",
-			OperationSummary: "Update a read context configuration rule",
-			OperationID:      "domainUpdateReadContextRule",
-			Body:             request,
-			Params: middleware.Parameters{
-				{
-					Name: "domainID",
-					In:   "path",
-				}: params.DomainID,
-				{
-					Name: "contextName",
-					In:   "path",
-				}: params.ContextName,
-				{
-					Name: "ruleID",
-					In:   "path",
-				}: params.RuleID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = *NewReadContextConfigRule
-			Params   = DomainUpdateReadContextRuleParams
-			Response = DomainUpdateReadContextRuleRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackDomainUpdateReadContextRuleParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.DomainUpdateReadContextRule(ctx, request, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.DomainUpdateReadContextRule(ctx, request, params)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeDomainUpdateReadContextRuleResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
 // handleDomainUpsertCapsuleTagsRequest handles domainUpsertCapsuleTags operation.
 //
 // Upsert capsule-level tags. This is permitted even after a capsule is sealed.
@@ -15182,7 +16614,7 @@ func (s *Server) handleDomainUpsertCapsuleTagsRequest(args [2]string, argsEscape
 		}
 
 		type (
-			Request  = []Tag
+			Request  = *DomainUpsertCapsuleTagsReq
 			Params   = DomainUpsertCapsuleTagsParams
 			Response = DomainUpsertCapsuleTagsRes
 		)
@@ -15231,8 +16663,8 @@ func (s *Server) handleDomainUpsertCapsuleTagsRequest(args [2]string, argsEscape
 // handleDomainUpsertFactRequest handles domainUpsertFact operation.
 //
 // Create a new fact. The fact type must have been previously registered using
-// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
-// this call is a no-op and returns the same ID.
+// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
+// for all fields), this call is a no-op and returns the same ID.
 //
 // POST /domains/{domainID}/control/facts/{factType}/new
 func (s *Server) handleDomainUpsertFactRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15560,7 +16992,7 @@ func (s *Server) handleDomainUpsertIdentityProviderRequest(args [2]string, argsE
 		}
 
 		type (
-			Request  = DomainIdentityProviderDetails
+			Request  = *DomainIdentityProviderDetails
 			Params   = DomainUpsertIdentityProviderParams
 			Response = DomainUpsertIdentityProviderRes
 		)
@@ -15934,6 +17366,10 @@ func (s *Server) handleDomainUpsertSpanTagsRequest(args [2]string, argsEscaped b
 					Name: "capsuleID",
 					In:   "path",
 				}: params.CapsuleID,
+				{
+					Name: "createToken",
+					In:   "query",
+				}: params.CreateToken,
 			},
 			Raw: r,
 		}

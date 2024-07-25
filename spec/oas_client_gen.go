@@ -44,7 +44,7 @@ type Invoker interface {
 	//
 	// Add a new external root encryption key with its supporting access configuration.
 	//
-	// POST /domains/{domainID}/control/keys
+	// POST /domains/{domainID}/control/encryption/keys
 	DomainAddExternalRootEncryptionKey(ctx context.Context, request *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error)
 	// DomainAddNew invokes domainAddNew operation.
 	//
@@ -53,13 +53,21 @@ type Invoker interface {
 	//
 	// POST /domains
 	DomainAddNew(ctx context.Context, request *NewDomain) (DomainAddNewRes, error)
-	// DomainAddReadContextRule invokes domainAddReadContextRule operation.
+	// DomainAddPeerDomain invokes domainAddPeerDomain operation.
 	//
-	// Read context configuration is rule based, much like domain policy. This adds a new rule to the
-	// read context. Rules are processed in priority order, stopping with the first matching rule.
+	// Add a domain with a default "subordinate" peering relationship with the current domain.
+	// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
+	// parent's billing and admin contact settings, and the child domain will be configured to import
+	// those settings.
+	// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
+	// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
+	// `linkAll=true`.
+	// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
+	// This peering can be changed at any time, and there is no permanent difference between a domain
+	// created in this way, and a domain created with POST /domains.
 	//
-	// POST /domains/{domainID}/control/read-context/{contextName}/config
-	DomainAddReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainAddReadContextRuleParams) (DomainAddReadContextRuleRes, error)
+	// POST /domains/{domainID}/peer-domain
+	DomainAddPeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainAddPeerDomainParams) (DomainAddPeerDomainRes, error)
 	// DomainAuthenticate invokes domainAuthenticate operation.
 	//
 	// Use an authentication method to obtain a domain ID token which is used as the bearer for all other
@@ -91,27 +99,30 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/capsules
 	DomainCreateCapsule(ctx context.Context, request *DomainCreateCapsuleReq, params DomainCreateCapsuleParams) (DomainCreateCapsuleRes, error)
-	// DomainCreatePeerDomain invokes domainCreatePeerDomain operation.
+	// DomainCreateDataPolicy invokes domainCreateDataPolicy operation.
 	//
-	// Create a domain with a default "subordinate" peering relationship with the current domain.
-	// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
-	// parent's billing and admin contact settings, and the child domain will be configured to import
-	// those settings.
-	// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
-	// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
-	// `linkAll=true`.
-	// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
-	// This peering can be changed at any time, and there is no permanent difference between a domain
-	// created in this way, and a domain created with POST /domains.
+	// Create a new data policy.
 	//
-	// POST /domains/{domainID}/peer-domain
-	DomainCreatePeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainCreatePeerDomainParams) (DomainCreatePeerDomainRes, error)
+	// POST /domains/{domainID}/control/data-policy
+	DomainCreateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainCreateDataPolicyParams) (DomainCreateDataPolicyRes, error)
 	// DomainCreatePolicyRule invokes domainCreatePolicyRule operation.
 	//
 	// Create a domain policy rule.
 	//
 	// POST /domains/{domainID}/control/policy
 	DomainCreatePolicyRule(ctx context.Context, request *NewDomainPolicyRule, params DomainCreatePolicyRuleParams) (DomainCreatePolicyRuleRes, error)
+	// DomainDataPolicyConfigureRules invokes domainDataPolicyConfigureRules operation.
+	//
+	// Add/Remove rules for a data policy.
+	//
+	// POST /domains/{domainID}/control/data-policy/{policyID}/rules
+	DomainDataPolicyConfigureRules(ctx context.Context, request *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (DomainDataPolicyConfigureRulesRes, error)
+	// DomainDataPolicyRuleUpdate invokes domainDataPolicyRuleUpdate operation.
+	//
+	// Configure a data policy rule.
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainDataPolicyRuleUpdate(ctx context.Context, request *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (DomainDataPolicyRuleUpdateRes, error)
 	// DomainDataTaggingHookInvoke invokes domainDataTaggingHookInvoke operation.
 	//
 	// Invoke a hook that operates on data and returns tags.
@@ -128,8 +139,8 @@ type Invoker interface {
 	DomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability invokes domainDeleteCapability operation.
 	//
-	// Delete a capability. All domain policy rules that reference the capability must have already been
-	// deleted, or you will receive a 409 error.
+	// Delete a capability. All rules that reference the capability must have already been deleted, or
+	// you will get an error.
 	//
 	// DELETE /domains/{domainID}/control/capabilities/{capability}
 	DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error)
@@ -139,13 +150,25 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags/delete
 	DomainDeleteCapsuleTags(ctx context.Context, request *DeleteTags, params DomainDeleteCapsuleTagsParams) (DomainDeleteCapsuleTagsRes, error)
+	// DomainDeleteDataPolicy invokes domainDeleteDataPolicy operation.
+	//
+	// Delete an existing data policy and all its rules.
+	//
+	// DELETE /domains/{domainID}/control/data-policy/{policyID}
+	DomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (DomainDeleteDataPolicyRes, error)
+	// DomainDeleteDataPolicyRule invokes domainDeleteDataPolicyRule operation.
+	//
+	// Delete an existing data policy rule.
+	//
+	// DELETE /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (DomainDeleteDataPolicyRuleRes, error)
 	// DomainDeleteExternalRootEncryptionKey invokes domainDeleteExternalRootEncryptionKey operation.
 	//
 	// Delete an external root encryption key using its ID. This operation is only successful if the
-	// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
-	// endpoint to ensure that all KEKs have been migrated to the active REK.
+	// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
+	// ensure that all KEKs have been migrated to the active REK.
 	//
-	// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
+	// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
 	DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error)
 	// DomainDeleteFactByID invokes domainDeleteFactByID operation.
 	//
@@ -192,12 +215,6 @@ type Invoker interface {
 	//
 	// DELETE /domains/{domainID}/control/read-context/{contextName}
 	DomainDeleteReadContext(ctx context.Context, params DomainDeleteReadContextParams) (DomainDeleteReadContextRes, error)
-	// DomainDeleteReadContextRule invokes domainDeleteReadContextRule operation.
-	//
-	// Deletes a read context configuration rule by ID.
-	//
-	// DELETE /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-	DomainDeleteReadContextRule(ctx context.Context, params DomainDeleteReadContextRuleParams) (DomainDeleteReadContextRuleRes, error)
 	// DomainDeleteWriteContext invokes domainDeleteWriteContext operation.
 	//
 	// Delete a write context. All configuration associated with this write context will also be deleted.
@@ -227,20 +244,20 @@ type Invoker interface {
 	//
 	// Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 	//
-	// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
+	// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
 	DomainExternalRootEncryptionKeyTest(ctx context.Context, request *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error)
 	// DomainFlushEncryptionKeys invokes domainFlushEncryptionKeys operation.
 	//
 	// Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-	// check that the domain's root encryption key is still available.
+	// check that the domain's root key is still available.
 	//
-	// POST /domains/{domainID}/encryption/flush
+	// POST /domains/{domainID}/control/encryption/flush
 	DomainFlushEncryptionKeys(ctx context.Context, request *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error)
 	// DomainGetActiveExternalRootEncryptionKey invokes domainGetActiveExternalRootEncryptionKey operation.
 	//
 	// Return the details about the current active root encryption key used by the domain.
 	//
-	// GET /domains/{domainID}/control/keys/active
+	// GET /domains/{domainID}/control/encryption/active-key
 	DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error)
 	// DomainGetCapabilities invokes domainGetCapabilities operation.
 	//
@@ -252,8 +269,8 @@ type Invoker interface {
 	DomainGetCapabilities(ctx context.Context, params DomainGetCapabilitiesParams) (DomainGetCapabilitiesRes, error)
 	// DomainGetCapability invokes domainGetCapability operation.
 	//
-	// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
-	// identity provider. The capabilities can be referenced by the domain policy rules.
+	// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
+	// an identity provider. The capabilities can be referenced by the domain policy rules.
 	//
 	// GET /domains/{domainID}/control/capabilities/{capability}
 	DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error)
@@ -263,6 +280,24 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/capsules/{capsuleID}
 	DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (DomainGetCapsuleInfoRes, error)
+	// DomainGetDataPolicy invokes domainGetDataPolicy operation.
+	//
+	// Get a data policy, will include rules if the policy is not imported.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}
+	DomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (DomainGetDataPolicyRes, error)
+	// DomainGetDataPolicyBinding invokes domainGetDataPolicyBinding operation.
+	//
+	// Retrieve a data policy binding configuration.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}/binding
+	DomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (DomainGetDataPolicyBindingRes, error)
+	// DomainGetDataPolicyRule invokes domainGetDataPolicyRule operation.
+	//
+	// Get a data policy rule.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (DomainGetDataPolicyRuleRes, error)
 	// DomainGetDisasterRecoverySettings invokes domainGetDisasterRecoverySettings operation.
 	//
 	// Return the current domain's disaster recovery settings.
@@ -275,7 +310,7 @@ type Invoker interface {
 	// relevant, any additional information required to use them (e.g. for the delegated key provider
 	// `aws_am` the AWS account number to delegate to is returned).
 	//
-	// GET /domains/{domainID}/control/keys/providers
+	// GET /domains/{domainID}/control/encryption/providers
 	DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error)
 	// DomainGetFactByID invokes domainGetFactByID operation.
 	//
@@ -405,11 +440,17 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/capsules
 	DomainListCapsules(ctx context.Context, params DomainListCapsulesParams) (DomainListCapsulesRes, error)
+	// DomainListDataPolicies invokes domainListDataPolicies operation.
+	//
+	// Get a full listing of all data policies in the domain (including imported policies).
+	//
+	// GET /domains/{domainID}/control/data-policy
+	DomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (DomainListDataPoliciesRes, error)
 	// DomainListExternalRootEncryptionKey invokes domainListExternalRootEncryptionKey operation.
 	//
 	// List all external root encryption keys for the domain.
 	//
-	// GET /domains/{domainID}/control/keys
+	// GET /domains/{domainID}/control/encryption/keys
 	DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error)
 	// DomainListFactTypes invokes domainListFactTypes operation.
 	//
@@ -420,7 +461,7 @@ type Invoker interface {
 	DomainListFactTypes(ctx context.Context, params DomainListFactTypesParams) (DomainListFactTypesRes, error)
 	// DomainListFacts invokes domainListFacts operation.
 	//
-	// Get the facts within a fact type.
+	// Get the facts corresponding to a fact type.
 	//
 	// GET /domains/{domainID}/control/facts/{factType}/list
 	DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error)
@@ -435,7 +476,7 @@ type Invoker interface {
 	//
 	// Retrieve the domain's identity providers and a brief overview of their configuration. This
 	// endpoint requires authentication, but you can obtain an abridged list of the domain identity
-	// providers prior to authentication by using the `/public-info` endpoint.
+	// providers prior to authentication using the `/public-info` endpoint.
 	//
 	// GET /domains/{domainID}/control/identities
 	DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error)
@@ -484,12 +525,6 @@ type Invoker interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/open
 	DomainOpenCapsule(ctx context.Context, request *CapsuleOpenRequest, params DomainOpenCapsuleParams) (DomainOpenCapsuleRes, error)
-	// DomainPatchSettings invokes domainPatchSettings operation.
-	//
-	// Applies the given patch to the domain settings.
-	//
-	// PATCH /domains/{domainID}/control/settings
-	DomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error)
 	// DomainPolicyFlush invokes domainPolicyFlush operation.
 	//
 	// Flush the policy cache so that changes to permissions take effect.
@@ -499,7 +534,7 @@ type Invoker interface {
 	// DomainPutCapability invokes domainPutCapability operation.
 	//
 	// Create or update a capability. If you want to return an error if the capability already existed,
-	// set `createonly` to true.
+	// set createonly=true.
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
@@ -513,10 +548,16 @@ type Invoker interface {
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
 	// context configuration rules. This endpoint allows you to register a new fact type. To create a
-	// fact within an existing type, use `/control/facts/{factType}/new`.
+	// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
+	// DomainPutSettings invokes domainPutSettings operation.
+	//
+	// Replace the current settings with the new settings supplied.
+	//
+	// PUT /domains/{domainID}/control/settings
+	DomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error)
 	// DomainPutVendorSettings invokes domainPutVendorSettings operation.
 	//
 	// Create or update the vendor settings for a given domain.
@@ -543,12 +584,12 @@ type Invoker interface {
 	//
 	// GET /domains/{domainID}/control/log
 	DomainQueryControlLog(ctx context.Context, params DomainQueryControlLogParams) (DomainQueryControlLogRes, error)
-	// DomainReadContextFlush invokes domainReadContextFlush operation.
+	// DomainRenumberDataPolicyRules invokes domainRenumberDataPolicyRules operation.
 	//
-	// Flush the read context cache so that changes to permissions take effect.
+	// Re-assign rule priority numbers to integer multiples of 10.
 	//
-	// POST /domains/{domainID}/control/read-context/{contextName}/flush
-	DomainReadContextFlush(ctx context.Context, params DomainReadContextFlushParams) (DomainReadContextFlushRes, error)
+	// POST /domains/{domainID}/control/data-policy/{policyID}/renumber
+	DomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (DomainRenumberDataPolicyRulesRes, error)
 	// DomainRenumberPolicyRules invokes domainRenumberPolicyRules operation.
 	//
 	// Re-assign rule priority numbers to integer multiples of 10.
@@ -563,7 +604,7 @@ type Invoker interface {
 	// In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 	// caller will call this endpoint in a loop until has_more is false.
 	//
-	// POST /domains/{domainID}/control/keys/rotate
+	// POST /domains/{domainID}/control/encryption/rotate
 	DomainRotateRootEncryptionKeys(ctx context.Context, request *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error)
 	// DomainSealCapsule invokes domainSealCapsule operation.
 	//
@@ -574,10 +615,22 @@ type Invoker interface {
 	// DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 	//
 	// This will set which root encryption is active: i.e. is used for new capsules, or is used to
-	// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
+	// encrypt KEKs when `rotate` is called.
 	//
-	// POST /domains/{domainID}/control/keys/active
+	// POST /domains/{domainID}/control/encryption/active-key
 	DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error)
+	// DomainSetDataPolicyBinding invokes domainSetDataPolicyBinding operation.
+	//
+	// Configure data policy binding.
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}/binding
+	DomainSetDataPolicyBinding(ctx context.Context, request *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (DomainSetDataPolicyBindingRes, error)
+	// DomainUpdateDataPolicy invokes domainUpdateDataPolicy operation.
+	//
+	// Update a data policy (it must already exist).
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}
+	DomainUpdateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainUpdateDataPolicyParams) (DomainUpdateDataPolicyRes, error)
 	// DomainUpdateIdentityProviderPrincipal invokes domainUpdateIdentityProviderPrincipal operation.
 	//
 	// Update the set of capabilities assigned to an identity provider principal. The capabilities must
@@ -599,23 +652,17 @@ type Invoker interface {
 	//
 	// PUT /domains/{domainID}/control/policy/{ruleID}
 	DomainUpdatePolicyRule(ctx context.Context, request *NewDomainPolicyRule, params DomainUpdatePolicyRuleParams) (DomainUpdatePolicyRuleRes, error)
-	// DomainUpdateReadContextRule invokes domainUpdateReadContextRule operation.
-	//
-	// Update a read context configuration rule. The rule must already exist.
-	//
-	// PUT /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-	DomainUpdateReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainUpdateReadContextRuleParams) (DomainUpdateReadContextRuleRes, error)
 	// DomainUpsertCapsuleTags invokes domainUpsertCapsuleTags operation.
 	//
 	// Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-	DomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
+	DomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
 	// DomainUpsertFact invokes domainUpsertFact operation.
 	//
 	// Create a new fact. The fact type must have been previously registered using
-	// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
-	// this call is a no-op and returns the same ID.
+	// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
+	// for all fields), this call is a no-op and returns the same ID.
 	//
 	// POST /domains/{domainID}/control/facts/{factType}/new
 	DomainUpsertFact(ctx context.Context, request *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error)
@@ -624,7 +671,7 @@ type Invoker interface {
 	// Create or configure an identity provider.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}
-	DomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
+	DomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
 	// DomainUpsertReadContext invokes domainUpsertReadContext operation.
 	//
 	// Update or create a read context.
@@ -919,6 +966,27 @@ func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCa
 	pathParts[4] = "/log"
 	uri.AddPathParts(u, pathParts[:]...)
 
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "openToken" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "openToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if unwrapped := string(params.OpenToken); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -981,7 +1049,7 @@ func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCa
 //
 // Add a new external root encryption key with its supporting access configuration.
 //
-// POST /domains/{domainID}/control/keys
+// POST /domains/{domainID}/control/encryption/keys
 func (c *Client) DomainAddExternalRootEncryptionKey(ctx context.Context, request *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainAddExternalRootEncryptionKey(ctx, request, params)
 	return res, err
@@ -991,7 +1059,7 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
 	// Run stopwatch.
@@ -1046,7 +1114,7 @@ func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, req
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys"
+	pathParts[2] = "/control/encryption/keys"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1183,22 +1251,30 @@ func (c *Client) sendDomainAddNew(ctx context.Context, request *NewDomain) (res 
 	return result, nil
 }
 
-// DomainAddReadContextRule invokes domainAddReadContextRule operation.
+// DomainAddPeerDomain invokes domainAddPeerDomain operation.
 //
-// Read context configuration is rule based, much like domain policy. This adds a new rule to the
-// read context. Rules are processed in priority order, stopping with the first matching rule.
+// Add a domain with a default "subordinate" peering relationship with the current domain.
+// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
+// parent's billing and admin contact settings, and the child domain will be configured to import
+// those settings.
+// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
+// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
+// `linkAll=true`.
+// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
+// This peering can be changed at any time, and there is no permanent difference between a domain
+// created in this way, and a domain created with POST /domains.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/config
-func (c *Client) DomainAddReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainAddReadContextRuleParams) (DomainAddReadContextRuleRes, error) {
-	res, err := c.sendDomainAddReadContextRule(ctx, request, params)
+// POST /domains/{domainID}/peer-domain
+func (c *Client) DomainAddPeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainAddPeerDomainParams) (DomainAddPeerDomainRes, error) {
+	res, err := c.sendDomainAddPeerDomain(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainAddReadContextRuleParams) (res DomainAddReadContextRuleRes, err error) {
+func (c *Client) sendDomainAddPeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainAddPeerDomainParams) (res DomainAddPeerDomainRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainAddReadContextRule"),
+		otelogen.OperationID("domainAddPeerDomain"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
 	}
 
 	// Run stopwatch.
@@ -1213,7 +1289,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainAddReadContextRule",
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainAddPeerDomain",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1230,7 +1306,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
+	var pathParts [3]string
 	pathParts[0] = "/domains/"
 	{
 		// Encode "domainID" parameter.
@@ -1253,29 +1329,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/read-context/"
-	{
-		// Encode "contextName" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "contextName",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.ContextName); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	pathParts[4] = "/config"
+	pathParts[2] = "/peer-domain"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1283,7 +1337,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeDomainAddReadContextRuleRequest(request, r); err != nil {
+	if err := encodeDomainAddPeerDomainRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -1292,7 +1346,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 		var satisfied bitset
 		{
 			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainAddReadContextRule", r); {
+			switch err := c.securityDomainIdentity(ctx, "DomainAddPeerDomain", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -1328,7 +1382,7 @@ func (c *Client) sendDomainAddReadContextRule(ctx context.Context, request *NewR
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeDomainAddReadContextRuleResponse(resp)
+	result, err := decodeDomainAddPeerDomainResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1892,30 +1946,21 @@ func (c *Client) sendDomainCreateCapsule(ctx context.Context, request *DomainCre
 	return result, nil
 }
 
-// DomainCreatePeerDomain invokes domainCreatePeerDomain operation.
+// DomainCreateDataPolicy invokes domainCreateDataPolicy operation.
 //
-// Create a domain with a default "subordinate" peering relationship with the current domain.
-// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
-// parent's billing and admin contact settings, and the child domain will be configured to import
-// those settings.
-// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
-// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
-// `linkAll=true`.
-// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
-// This peering can be changed at any time, and there is no permanent difference between a domain
-// created in this way, and a domain created with POST /domains.
+// Create a new data policy.
 //
-// POST /domains/{domainID}/peer-domain
-func (c *Client) DomainCreatePeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainCreatePeerDomainParams) (DomainCreatePeerDomainRes, error) {
-	res, err := c.sendDomainCreatePeerDomain(ctx, request, params)
+// POST /domains/{domainID}/control/data-policy
+func (c *Client) DomainCreateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainCreateDataPolicyParams) (DomainCreateDataPolicyRes, error) {
+	res, err := c.sendDomainCreateDataPolicy(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainCreatePeerDomainParams) (res DomainCreatePeerDomainRes, err error) {
+func (c *Client) sendDomainCreateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainCreateDataPolicyParams) (res DomainCreateDataPolicyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainCreatePeerDomain"),
+		otelogen.OperationID("domainCreateDataPolicy"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
 	}
 
 	// Run stopwatch.
@@ -1930,7 +1975,7 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainCreatePeerDomain",
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainCreateDataPolicy",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1970,7 +2015,7 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/peer-domain"
+	pathParts[2] = "/control/data-policy"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1978,7 +2023,7 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeDomainCreatePeerDomainRequest(request, r); err != nil {
+	if err := encodeDomainCreateDataPolicyRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -1987,7 +2032,7 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 		var satisfied bitset
 		{
 			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainCreatePeerDomain", r); {
+			switch err := c.securityDomainIdentity(ctx, "DomainCreateDataPolicy", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -2023,7 +2068,7 @@ func (c *Client) sendDomainCreatePeerDomain(ctx context.Context, request *Create
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeDomainCreatePeerDomainResponse(resp)
+	result, err := decodeDomainCreateDataPolicyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2154,6 +2199,331 @@ func (c *Client) sendDomainCreatePolicyRule(ctx context.Context, request *NewDom
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainCreatePolicyRuleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainDataPolicyConfigureRules invokes domainDataPolicyConfigureRules operation.
+//
+// Add/Remove rules for a data policy.
+//
+// POST /domains/{domainID}/control/data-policy/{policyID}/rules
+func (c *Client) DomainDataPolicyConfigureRules(ctx context.Context, request *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (DomainDataPolicyConfigureRulesRes, error) {
+	res, err := c.sendDomainDataPolicyConfigureRules(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDataPolicyConfigureRules(ctx context.Context, request *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (res DomainDataPolicyConfigureRulesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataPolicyConfigureRules"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDataPolicyConfigureRules",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/rules"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainDataPolicyConfigureRulesRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDataPolicyConfigureRules", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDataPolicyConfigureRulesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainDataPolicyRuleUpdate invokes domainDataPolicyRuleUpdate operation.
+//
+// Configure a data policy rule.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (c *Client) DomainDataPolicyRuleUpdate(ctx context.Context, request *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (DomainDataPolicyRuleUpdateRes, error) {
+	res, err := c.sendDomainDataPolicyRuleUpdate(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDataPolicyRuleUpdate(ctx context.Context, request *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (res DomainDataPolicyRuleUpdateRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDataPolicyRuleUpdate"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDataPolicyRuleUpdate",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/rules/"
+	{
+		// Encode "ruleID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "ruleID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.RuleID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainDataPolicyRuleUpdateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDataPolicyRuleUpdate", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDataPolicyRuleUpdateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2493,8 +2863,8 @@ func (c *Client) sendDomainDataTaggingHookTest(ctx context.Context, request *Dom
 
 // DomainDeleteCapability invokes domainDeleteCapability operation.
 //
-// Delete a capability. All domain policy rules that reference the capability must have already been
-// deleted, or you will receive a 409 error.
+// Delete a capability. All rules that reference the capability must have already been deleted, or
+// you will get an error.
 //
 // DELETE /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error) {
@@ -2792,13 +3162,331 @@ func (c *Client) sendDomainDeleteCapsuleTags(ctx context.Context, request *Delet
 	return result, nil
 }
 
+// DomainDeleteDataPolicy invokes domainDeleteDataPolicy operation.
+//
+// Delete an existing data policy and all its rules.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}
+func (c *Client) DomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (DomainDeleteDataPolicyRes, error) {
+	res, err := c.sendDomainDeleteDataPolicy(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (res DomainDeleteDataPolicyRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteDataPolicy"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDeleteDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDeleteDataPolicy", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDeleteDataPolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainDeleteDataPolicyRule invokes domainDeleteDataPolicyRule operation.
+//
+// Delete an existing data policy rule.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (c *Client) DomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (DomainDeleteDataPolicyRuleRes, error) {
+	res, err := c.sendDomainDeleteDataPolicyRule(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (res DomainDeleteDataPolicyRuleRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteDataPolicyRule"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDeleteDataPolicyRule",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/rules/"
+	{
+		// Encode "ruleID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "ruleID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.RuleID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDeleteDataPolicyRule", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDeleteDataPolicyRuleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainDeleteExternalRootEncryptionKey invokes domainDeleteExternalRootEncryptionKey operation.
 //
 // Delete an external root encryption key using its ID. This operation is only successful if the
-// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
-// endpoint to ensure that all KEKs have been migrated to the active REK.
+// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
+// ensure that all KEKs have been migrated to the active REK.
 //
-// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
+// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
 func (c *Client) DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainDeleteExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -2808,7 +3496,7 @@ func (c *Client) sendDomainDeleteExternalRootEncryptionKey(ctx context.Context, 
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"),
 	}
 
 	// Run stopwatch.
@@ -2863,7 +3551,7 @@ func (c *Client) sendDomainDeleteExternalRootEncryptionKey(ctx context.Context, 
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/"
+	pathParts[2] = "/control/encryption/keys/"
 	{
 		// Encode "rootEncryptionKeyID" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -4046,176 +4734,6 @@ func (c *Client) sendDomainDeleteReadContext(ctx context.Context, params DomainD
 	return result, nil
 }
 
-// DomainDeleteReadContextRule invokes domainDeleteReadContextRule operation.
-//
-// Deletes a read context configuration rule by ID.
-//
-// DELETE /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (c *Client) DomainDeleteReadContextRule(ctx context.Context, params DomainDeleteReadContextRuleParams) (DomainDeleteReadContextRuleRes, error) {
-	res, err := c.sendDomainDeleteReadContextRule(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendDomainDeleteReadContextRule(ctx context.Context, params DomainDeleteReadContextRuleParams) (res DomainDeleteReadContextRuleRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainDeleteReadContextRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config/{ruleID}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDeleteReadContextRule",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [6]string
-	pathParts[0] = "/domains/"
-	{
-		// Encode "domainID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "domainID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.DomainID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/control/read-context/"
-	{
-		// Encode "contextName" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "contextName",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.ContextName); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	pathParts[4] = "/config/"
-	{
-		// Encode "ruleID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "ruleID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.RuleID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[5] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "DELETE", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainDeleteReadContextRule", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"DomainIdentity\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDomainDeleteReadContextRuleResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // DomainDeleteWriteContext invokes domainDeleteWriteContext operation.
 //
 // Delete a write context. All configuration associated with this write context will also be deleted.
@@ -4857,7 +5375,7 @@ func (c *Client) sendDomainDescribeWriteContext(ctx context.Context, params Doma
 //
 // Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 //
-// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
+// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
 func (c *Client) DomainExternalRootEncryptionKeyTest(ctx context.Context, request *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error) {
 	res, err := c.sendDomainExternalRootEncryptionKeyTest(ctx, request, params)
 	return res, err
@@ -4867,7 +5385,7 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainExternalRootEncryptionKeyTest"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/{rootEncryptionKeyID}/test"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test"),
 	}
 
 	// Run stopwatch.
@@ -4922,7 +5440,7 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/"
+	pathParts[2] = "/control/encryption/keys/"
 	{
 		// Encode "rootEncryptionKeyID" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -5008,9 +5526,9 @@ func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, re
 // DomainFlushEncryptionKeys invokes domainFlushEncryptionKeys operation.
 //
 // Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-// check that the domain's root encryption key is still available.
+// check that the domain's root key is still available.
 //
-// POST /domains/{domainID}/encryption/flush
+// POST /domains/{domainID}/control/encryption/flush
 func (c *Client) DomainFlushEncryptionKeys(ctx context.Context, request *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error) {
 	res, err := c.sendDomainFlushEncryptionKeys(ctx, request, params)
 	return res, err
@@ -5020,7 +5538,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainFlushEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/encryption/flush"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/flush"),
 	}
 
 	// Run stopwatch.
@@ -5075,7 +5593,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/encryption/flush"
+	pathParts[2] = "/control/encryption/flush"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5140,7 +5658,7 @@ func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *Dom
 //
 // Return the details about the current active root encryption key used by the domain.
 //
-// GET /domains/{domainID}/control/keys/active
+// GET /domains/{domainID}/control/encryption/active-key
 func (c *Client) DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainGetActiveExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -5150,7 +5668,7 @@ func (c *Client) sendDomainGetActiveExternalRootEncryptionKey(ctx context.Contex
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
 	// Run stopwatch.
@@ -5205,7 +5723,7 @@ func (c *Client) sendDomainGetActiveExternalRootEncryptionKey(ctx context.Contex
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/active"
+	pathParts[2] = "/control/encryption/active-key"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -5394,8 +5912,8 @@ func (c *Client) sendDomainGetCapabilities(ctx context.Context, params DomainGet
 
 // DomainGetCapability invokes domainGetCapability operation.
 //
-// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
-// identity provider. The capabilities can be referenced by the domain policy rules.
+// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
+// an identity provider. The capabilities can be referenced by the domain policy rules.
 //
 // GET /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error) {
@@ -5689,6 +6207,473 @@ func (c *Client) sendDomainGetCapsuleInfo(ctx context.Context, params DomainGetC
 	return result, nil
 }
 
+// DomainGetDataPolicy invokes domainGetDataPolicy operation.
+//
+// Get a data policy, will include rules if the policy is not imported.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}
+func (c *Client) DomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (DomainGetDataPolicyRes, error) {
+	res, err := c.sendDomainGetDataPolicy(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (res DomainGetDataPolicyRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicy"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetDataPolicy", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetDataPolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainGetDataPolicyBinding invokes domainGetDataPolicyBinding operation.
+//
+// Retrieve a data policy binding configuration.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/binding
+func (c *Client) DomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (DomainGetDataPolicyBindingRes, error) {
+	res, err := c.sendDomainGetDataPolicyBinding(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (res DomainGetDataPolicyBindingRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicyBinding"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetDataPolicyBinding",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/binding"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetDataPolicyBinding", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetDataPolicyBindingResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainGetDataPolicyRule invokes domainGetDataPolicyRule operation.
+//
+// Get a data policy rule.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (c *Client) DomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (DomainGetDataPolicyRuleRes, error) {
+	res, err := c.sendDomainGetDataPolicyRule(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (res DomainGetDataPolicyRuleRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainGetDataPolicyRule"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainGetDataPolicyRule",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/rules/"
+	{
+		// Encode "ruleID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "ruleID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.RuleID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainGetDataPolicyRule", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainGetDataPolicyRuleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainGetDisasterRecoverySettings invokes domainGetDisasterRecoverySettings operation.
 //
 // Return the current domain's disaster recovery settings.
@@ -5822,7 +6807,7 @@ func (c *Client) sendDomainGetDisasterRecoverySettings(ctx context.Context, para
 // relevant, any additional information required to use them (e.g. for the delegated key provider
 // `aws_am` the AWS account number to delegate to is returned).
 //
-// GET /domains/{domainID}/control/keys/providers
+// GET /domains/{domainID}/control/encryption/providers
 func (c *Client) DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error) {
 	res, err := c.sendDomainGetExternalRootEncryptionKeyProviders(ctx, params)
 	return res, err
@@ -5832,7 +6817,7 @@ func (c *Client) sendDomainGetExternalRootEncryptionKeyProviders(ctx context.Con
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetExternalRootEncryptionKeyProviders"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/providers"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/providers"),
 	}
 
 	// Run stopwatch.
@@ -5887,7 +6872,7 @@ func (c *Client) sendDomainGetExternalRootEncryptionKeyProviders(ctx context.Con
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/providers"
+	pathParts[2] = "/control/encryption/providers"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -8956,11 +9941,138 @@ func (c *Client) sendDomainListCapsules(ctx context.Context, params DomainListCa
 	return result, nil
 }
 
+// DomainListDataPolicies invokes domainListDataPolicies operation.
+//
+// Get a full listing of all data policies in the domain (including imported policies).
+//
+// GET /domains/{domainID}/control/data-policy
+func (c *Client) DomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (DomainListDataPoliciesRes, error) {
+	res, err := c.sendDomainListDataPolicies(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (res DomainListDataPoliciesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainListDataPolicies"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainListDataPolicies",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainListDataPolicies", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainListDataPoliciesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DomainListExternalRootEncryptionKey invokes domainListExternalRootEncryptionKey operation.
 //
 // List all external root encryption keys for the domain.
 //
-// GET /domains/{domainID}/control/keys
+// GET /domains/{domainID}/control/encryption/keys
 func (c *Client) DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainListExternalRootEncryptionKey(ctx, params)
 	return res, err
@@ -8970,7 +10082,7 @@ func (c *Client) sendDomainListExternalRootEncryptionKey(ctx context.Context, pa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
 	// Run stopwatch.
@@ -9025,7 +10137,7 @@ func (c *Client) sendDomainListExternalRootEncryptionKey(ctx context.Context, pa
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys"
+	pathParts[2] = "/control/encryption/keys"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -9213,7 +10325,7 @@ func (c *Client) sendDomainListFactTypes(ctx context.Context, params DomainListF
 
 // DomainListFacts invokes domainListFacts operation.
 //
-// Get the facts within a fact type.
+// Get the facts corresponding to a fact type.
 //
 // GET /domains/{domainID}/control/facts/{factType}/list
 func (c *Client) DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error) {
@@ -9492,7 +10604,7 @@ func (c *Client) sendDomainListHooks(ctx context.Context, params DomainListHooks
 //
 // Retrieve the domain's identity providers and a brief overview of their configuration. This
 // endpoint requires authentication, but you can obtain an abridged list of the domain identity
-// providers prior to authentication by using the `/public-info` endpoint.
+// providers prior to authentication using the `/public-info` endpoint.
 //
 // GET /domains/{domainID}/control/identities
 func (c *Client) DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error) {
@@ -10434,136 +11546,6 @@ func (c *Client) sendDomainOpenCapsule(ctx context.Context, request *CapsuleOpen
 	return result, nil
 }
 
-// DomainPatchSettings invokes domainPatchSettings operation.
-//
-// Applies the given patch to the domain settings.
-//
-// PATCH /domains/{domainID}/control/settings
-func (c *Client) DomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error) {
-	res, err := c.sendDomainPatchSettings(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendDomainPatchSettings(ctx context.Context, request *DomainSettingsPatch, params DomainPatchSettingsParams) (res DomainPatchSettingsRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainPatchSettings"),
-		semconv.HTTPMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPatchSettings",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/domains/"
-	{
-		// Encode "domainID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "domainID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.DomainID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/control/settings"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PATCH", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeDomainPatchSettingsRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainPatchSettings", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"DomainIdentity\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDomainPatchSettingsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // DomainPolicyFlush invokes domainPolicyFlush operation.
 //
 // Flush the policy cache so that changes to permissions take effect.
@@ -10694,7 +11676,7 @@ func (c *Client) sendDomainPolicyFlush(ctx context.Context, params DomainPolicyF
 // DomainPutCapability invokes domainPutCapability operation.
 //
 // Create or update a capability. If you want to return an error if the capability already existed,
-// set `createonly` to true.
+// set createonly=true.
 //
 // PUT /domains/{domainID}/control/capabilities/{capability}
 func (c *Client) DomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error) {
@@ -10998,7 +11980,7 @@ func (c *Client) sendDomainPutDisasterRecoverySettings(ctx context.Context, requ
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
 // context configuration rules. This endpoint allows you to register a new fact type. To create a
-// fact within an existing type, use `/control/facts/{factType}/new`.
+// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
 //
 // PUT /domains/{domainID}/control/facts/{factType}
 func (c *Client) DomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error) {
@@ -11140,6 +12122,136 @@ func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactType
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainPutFactTypeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainPutSettings invokes domainPutSettings operation.
+//
+// Replace the current settings with the new settings supplied.
+//
+// PUT /domains/{domainID}/control/settings
+func (c *Client) DomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error) {
+	res, err := c.sendDomainPutSettings(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (res DomainPutSettingsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainPutSettings"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainPutSettings",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/settings"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainPutSettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainPutSettings", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainPutSettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -12174,21 +13286,21 @@ func (c *Client) sendDomainQueryControlLog(ctx context.Context, params DomainQue
 	return result, nil
 }
 
-// DomainReadContextFlush invokes domainReadContextFlush operation.
+// DomainRenumberDataPolicyRules invokes domainRenumberDataPolicyRules operation.
 //
-// Flush the read context cache so that changes to permissions take effect.
+// Re-assign rule priority numbers to integer multiples of 10.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/flush
-func (c *Client) DomainReadContextFlush(ctx context.Context, params DomainReadContextFlushParams) (DomainReadContextFlushRes, error) {
-	res, err := c.sendDomainReadContextFlush(ctx, params)
+// POST /domains/{domainID}/control/data-policy/{policyID}/renumber
+func (c *Client) DomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (DomainRenumberDataPolicyRulesRes, error) {
+	res, err := c.sendDomainRenumberDataPolicyRules(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainReadContextFlushParams) (res DomainReadContextFlushRes, err error) {
+func (c *Client) sendDomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (res DomainRenumberDataPolicyRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainReadContextFlush"),
+		otelogen.OperationID("domainRenumberDataPolicyRules"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/flush"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/renumber"),
 	}
 
 	// Run stopwatch.
@@ -12203,7 +13315,7 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainReadContextFlush",
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainRenumberDataPolicyRules",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -12243,16 +13355,16 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/read-context/"
+	pathParts[2] = "/control/data-policy/"
 	{
-		// Encode "contextName" parameter.
+		// Encode "policyID" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "contextName",
+			Param:   "policyID",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			if unwrapped := string(params.ContextName); true {
+			if unwrapped := string(params.PolicyID); true {
 				return e.EncodeValue(conv.StringToString(unwrapped))
 			}
 			return nil
@@ -12265,7 +13377,7 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/flush"
+	pathParts[4] = "/renumber"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -12279,7 +13391,7 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 		var satisfied bitset
 		{
 			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainReadContextFlush", r); {
+			switch err := c.securityDomainIdentity(ctx, "DomainRenumberDataPolicyRules", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -12315,7 +13427,7 @@ func (c *Client) sendDomainReadContextFlush(ctx context.Context, params DomainRe
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeDomainReadContextFlushResponse(resp)
+	result, err := decodeDomainRenumberDataPolicyRulesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -12461,7 +13573,7 @@ func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, request *Dom
 // In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 // caller will call this endpoint in a loop until has_more is false.
 //
-// POST /domains/{domainID}/control/keys/rotate
+// POST /domains/{domainID}/control/encryption/rotate
 func (c *Client) DomainRotateRootEncryptionKeys(ctx context.Context, request *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error) {
 	res, err := c.sendDomainRotateRootEncryptionKeys(ctx, request, params)
 	return res, err
@@ -12471,7 +13583,7 @@ func (c *Client) sendDomainRotateRootEncryptionKeys(ctx context.Context, request
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRotateRootEncryptionKeys"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/rotate"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/rotate"),
 	}
 
 	// Run stopwatch.
@@ -12526,7 +13638,7 @@ func (c *Client) sendDomainRotateRootEncryptionKeys(ctx context.Context, request
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/rotate"
+	pathParts[2] = "/control/encryption/rotate"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -12681,6 +13793,27 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 	pathParts[4] = "/seal"
 	uri.AddPathParts(u, pathParts[:]...)
 
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "createToken" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if unwrapped := string(params.CreateToken); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -12742,9 +13875,9 @@ func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSeal
 // DomainSetActiveExternalRootEncryptionKey invokes domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
+// encrypt KEKs when `rotate` is called.
 //
-// POST /domains/{domainID}/control/keys/active
+// POST /domains/{domainID}/control/encryption/active-key
 func (c *Client) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error) {
 	res, err := c.sendDomainSetActiveExternalRootEncryptionKey(ctx, request, params)
 	return res, err
@@ -12754,7 +13887,7 @@ func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Contex
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSetActiveExternalRootEncryptionKey"),
 		semconv.HTTPMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/active"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
 	// Run stopwatch.
@@ -12809,7 +13942,7 @@ func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Contex
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/control/keys/active"
+	pathParts[2] = "/control/encryption/active-key"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -12863,6 +13996,309 @@ func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Contex
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainSetActiveExternalRootEncryptionKeyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainSetDataPolicyBinding invokes domainSetDataPolicyBinding operation.
+//
+// Configure data policy binding.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/binding
+func (c *Client) DomainSetDataPolicyBinding(ctx context.Context, request *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (DomainSetDataPolicyBindingRes, error) {
+	res, err := c.sendDomainSetDataPolicyBinding(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainSetDataPolicyBinding(ctx context.Context, request *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (res DomainSetDataPolicyBindingRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainSetDataPolicyBinding"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainSetDataPolicyBinding",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/binding"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainSetDataPolicyBindingRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainSetDataPolicyBinding", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainSetDataPolicyBindingResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainUpdateDataPolicy invokes domainUpdateDataPolicy operation.
+//
+// Update a data policy (it must already exist).
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}
+func (c *Client) DomainUpdateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainUpdateDataPolicyParams) (DomainUpdateDataPolicyRes, error) {
+	res, err := c.sendDomainUpdateDataPolicy(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainUpdateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainUpdateDataPolicyParams) (res DomainUpdateDataPolicyRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainUpdateDataPolicy"),
+		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainUpdateDataPolicy",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/data-policy/"
+	{
+		// Encode "policyID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "policyID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.PolicyID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainUpdateDataPolicyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainUpdateDataPolicy", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainUpdateDataPolicyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13350,190 +14786,17 @@ func (c *Client) sendDomainUpdatePolicyRule(ctx context.Context, request *NewDom
 	return result, nil
 }
 
-// DomainUpdateReadContextRule invokes domainUpdateReadContextRule operation.
-//
-// Update a read context configuration rule. The rule must already exist.
-//
-// PUT /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (c *Client) DomainUpdateReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainUpdateReadContextRuleParams) (DomainUpdateReadContextRuleRes, error) {
-	res, err := c.sendDomainUpdateReadContextRule(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendDomainUpdateReadContextRule(ctx context.Context, request *NewReadContextConfigRule, params DomainUpdateReadContextRuleParams) (res DomainUpdateReadContextRuleRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("domainUpdateReadContextRule"),
-		semconv.HTTPMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}/config/{ruleID}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "DomainUpdateReadContextRule",
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [6]string
-	pathParts[0] = "/domains/"
-	{
-		// Encode "domainID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "domainID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.DomainID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/control/read-context/"
-	{
-		// Encode "contextName" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "contextName",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.ContextName); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	pathParts[4] = "/config/"
-	{
-		// Encode "ruleID" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "ruleID",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := string(params.RuleID); true {
-				return e.EncodeValue(conv.StringToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[5] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeDomainUpdateReadContextRuleRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:DomainIdentity"
-			switch err := c.securityDomainIdentity(ctx, "DomainUpdateReadContextRule", r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"DomainIdentity\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDomainUpdateReadContextRuleResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // DomainUpsertCapsuleTags invokes domainUpsertCapsuleTags operation.
 //
 // Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 //
 // POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-func (c *Client) DomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error) {
+func (c *Client) DomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error) {
 	res, err := c.sendDomainUpsertCapsuleTags(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request []Tag, params DomainUpsertCapsuleTagsParams) (res DomainUpsertCapsuleTagsRes, err error) {
+func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (res DomainUpsertCapsuleTagsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertCapsuleTags"),
 		semconv.HTTPMethodKey.String("POST"),
@@ -13678,8 +14941,8 @@ func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request []Tag,
 // DomainUpsertFact invokes domainUpsertFact operation.
 //
 // Create a new fact. The fact type must have been previously registered using
-// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
-// this call is a no-op and returns the same ID.
+// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
+// for all fields), this call is a no-op and returns the same ID.
 //
 // POST /domains/{domainID}/control/facts/{factType}/new
 func (c *Client) DomainUpsertFact(ctx context.Context, request *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error) {
@@ -13834,12 +15097,12 @@ func (c *Client) sendDomainUpsertFact(ctx context.Context, request *NewFact, par
 // Create or configure an identity provider.
 //
 // PUT /domains/{domainID}/control/identities/{identityProviderName}
-func (c *Client) DomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error) {
+func (c *Client) DomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error) {
 	res, err := c.sendDomainUpsertIdentityProvider(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainUpsertIdentityProvider(ctx context.Context, request DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (res DomainUpsertIdentityProviderRes, err error) {
+func (c *Client) sendDomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (res DomainUpsertIdentityProviderRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertIdentityProvider"),
 		semconv.HTTPMethodKey.String("PUT"),
@@ -14227,6 +15490,27 @@ func (c *Client) sendDomainUpsertSpanTags(ctx context.Context, request *UpsertSp
 	}
 	pathParts[4] = "/span-tags"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "createToken" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if unwrapped := string(params.CreateToken); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "PUT", u)

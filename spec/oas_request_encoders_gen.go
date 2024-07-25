@@ -53,8 +53,8 @@ func encodeDomainAddNewRequest(
 	return nil
 }
 
-func encodeDomainAddReadContextRuleRequest(
-	req *NewReadContextConfigRule,
+func encodeDomainAddPeerDomainRequest(
+	req *CreatePeerDomain,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -109,8 +109,8 @@ func encodeDomainCreateCapsuleRequest(
 	return nil
 }
 
-func encodeDomainCreatePeerDomainRequest(
-	req *CreatePeerDomain,
+func encodeDomainCreateDataPolicyRequest(
+	req *NewDataPolicy,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -125,6 +125,34 @@ func encodeDomainCreatePeerDomainRequest(
 
 func encodeDomainCreatePolicyRuleRequest(
 	req *NewDomainPolicyRule,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainDataPolicyConfigureRulesRequest(
+	req *DataPolicyRuleChanges,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainDataPolicyRuleUpdateRequest(
+	req *NewDataPolicyRule,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -265,20 +293,6 @@ func encodeDomainOpenCapsuleRequest(
 	return nil
 }
 
-func encodeDomainPatchSettingsRequest(
-	req *DomainSettingsPatch,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
 func encodeDomainPutCapabilityRequest(
 	req *NewCapabilityDefinition,
 	r *http.Request,
@@ -309,6 +323,20 @@ func encodeDomainPutDisasterRecoverySettingsRequest(
 
 func encodeDomainPutFactTypeRequest(
 	req *NewFactTypeDefinition,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainPutSettingsRequest(
+	req *NewDomainSettings,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -393,6 +421,34 @@ func encodeDomainSetActiveExternalRootEncryptionKeyRequest(
 	return nil
 }
 
+func encodeDomainSetDataPolicyBindingRequest(
+	req *SetDataPolicyBinding,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDomainUpdateDataPolicyRequest(
+	req *NewDataPolicy,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDomainUpdateIdentityProviderPrincipalRequest(
 	req *CapabilityList,
 	r *http.Request,
@@ -435,32 +491,14 @@ func encodeDomainUpdatePolicyRuleRequest(
 	return nil
 }
 
-func encodeDomainUpdateReadContextRuleRequest(
-	req *NewReadContextConfigRule,
+func encodeDomainUpsertCapsuleTagsRequest(
+	req *DomainUpsertCapsuleTagsReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeDomainUpsertCapsuleTagsRequest(
-	req []Tag,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		e.ArrStart()
-		for _, elem := range req {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)
@@ -482,7 +520,7 @@ func encodeDomainUpsertFactRequest(
 }
 
 func encodeDomainUpsertIdentityProviderRequest(
-	req DomainIdentityProviderDetails,
+	req *DomainIdentityProviderDetails,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

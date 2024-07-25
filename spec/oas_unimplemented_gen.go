@@ -39,7 +39,7 @@ func (UnimplementedHandler) DomainAddAccessLogEntry(ctx context.Context, req *Ad
 //
 // Add a new external root encryption key with its supporting access configuration.
 //
-// POST /domains/{domainID}/control/keys
+// POST /domains/{domainID}/control/encryption/keys
 func (UnimplementedHandler) DomainAddExternalRootEncryptionKey(ctx context.Context, req *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (r DomainAddExternalRootEncryptionKeyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -54,13 +54,21 @@ func (UnimplementedHandler) DomainAddNew(ctx context.Context, req *NewDomain) (r
 	return r, ht.ErrNotImplemented
 }
 
-// DomainAddReadContextRule implements domainAddReadContextRule operation.
+// DomainAddPeerDomain implements domainAddPeerDomain operation.
 //
-// Read context configuration is rule based, much like domain policy. This adds a new rule to the
-// read context. Rules are processed in priority order, stopping with the first matching rule.
+// Add a domain with a default "subordinate" peering relationship with the current domain.
+// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
+// parent's billing and admin contact settings, and the child domain will be configured to import
+// those settings.
+// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
+// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
+// `linkAll=true`.
+// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
+// This peering can be changed at any time, and there is no permanent difference between a domain
+// created in this way, and a domain created with POST /domains.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/config
-func (UnimplementedHandler) DomainAddReadContextRule(ctx context.Context, req *NewReadContextConfigRule, params DomainAddReadContextRuleParams) (r DomainAddReadContextRuleRes, _ error) {
+// POST /domains/{domainID}/peer-domain
+func (UnimplementedHandler) DomainAddPeerDomain(ctx context.Context, req *CreatePeerDomain, params DomainAddPeerDomainParams) (r DomainAddPeerDomainRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -107,21 +115,12 @@ func (UnimplementedHandler) DomainCreateCapsule(ctx context.Context, req *Domain
 	return r, ht.ErrNotImplemented
 }
 
-// DomainCreatePeerDomain implements domainCreatePeerDomain operation.
+// DomainCreateDataPolicy implements domainCreateDataPolicy operation.
 //
-// Create a domain with a default "subordinate" peering relationship with the current domain.
-// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
-// parent's billing and admin contact settings, and the child domain will be configured to import
-// those settings.
-// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
-// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
-// `linkAll=true`.
-// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
-// This peering can be changed at any time, and there is no permanent difference between a domain
-// created in this way, and a domain created with POST /domains.
+// Create a new data policy.
 //
-// POST /domains/{domainID}/peer-domain
-func (UnimplementedHandler) DomainCreatePeerDomain(ctx context.Context, req *CreatePeerDomain, params DomainCreatePeerDomainParams) (r DomainCreatePeerDomainRes, _ error) {
+// POST /domains/{domainID}/control/data-policy
+func (UnimplementedHandler) DomainCreateDataPolicy(ctx context.Context, req *NewDataPolicy, params DomainCreateDataPolicyParams) (r DomainCreateDataPolicyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -131,6 +130,24 @@ func (UnimplementedHandler) DomainCreatePeerDomain(ctx context.Context, req *Cre
 //
 // POST /domains/{domainID}/control/policy
 func (UnimplementedHandler) DomainCreatePolicyRule(ctx context.Context, req *NewDomainPolicyRule, params DomainCreatePolicyRuleParams) (r DomainCreatePolicyRuleRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainDataPolicyConfigureRules implements domainDataPolicyConfigureRules operation.
+//
+// Add/Remove rules for a data policy.
+//
+// POST /domains/{domainID}/control/data-policy/{policyID}/rules
+func (UnimplementedHandler) DomainDataPolicyConfigureRules(ctx context.Context, req *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (r DomainDataPolicyConfigureRulesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainDataPolicyRuleUpdate implements domainDataPolicyRuleUpdate operation.
+//
+// Configure a data policy rule.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (UnimplementedHandler) DomainDataPolicyRuleUpdate(ctx context.Context, req *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (r DomainDataPolicyRuleUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -156,8 +173,8 @@ func (UnimplementedHandler) DomainDataTaggingHookTest(ctx context.Context, req *
 
 // DomainDeleteCapability implements domainDeleteCapability operation.
 //
-// Delete a capability. All domain policy rules that reference the capability must have already been
-// deleted, or you will receive a 409 error.
+// Delete a capability. All rules that reference the capability must have already been deleted, or
+// you will get an error.
 //
 // DELETE /domains/{domainID}/control/capabilities/{capability}
 func (UnimplementedHandler) DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (r DomainDeleteCapabilityRes, _ error) {
@@ -173,13 +190,31 @@ func (UnimplementedHandler) DomainDeleteCapsuleTags(ctx context.Context, req *De
 	return r, ht.ErrNotImplemented
 }
 
+// DomainDeleteDataPolicy implements domainDeleteDataPolicy operation.
+//
+// Delete an existing data policy and all its rules.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}
+func (UnimplementedHandler) DomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (r DomainDeleteDataPolicyRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainDeleteDataPolicyRule implements domainDeleteDataPolicyRule operation.
+//
+// Delete an existing data policy rule.
+//
+// DELETE /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (UnimplementedHandler) DomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (r DomainDeleteDataPolicyRuleRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainDeleteExternalRootEncryptionKey implements domainDeleteExternalRootEncryptionKey operation.
 //
 // Delete an external root encryption key using its ID. This operation is only successful if the
-// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
-// endpoint to ensure that all KEKs have been migrated to the active REK.
+// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
+// ensure that all KEKs have been migrated to the active REK.
 //
-// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
+// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
 func (UnimplementedHandler) DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (r DomainDeleteExternalRootEncryptionKeyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -250,15 +285,6 @@ func (UnimplementedHandler) DomainDeleteReadContext(ctx context.Context, params 
 	return r, ht.ErrNotImplemented
 }
 
-// DomainDeleteReadContextRule implements domainDeleteReadContextRule operation.
-//
-// Deletes a read context configuration rule by ID.
-//
-// DELETE /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (UnimplementedHandler) DomainDeleteReadContextRule(ctx context.Context, params DomainDeleteReadContextRuleParams) (r DomainDeleteReadContextRuleRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // DomainDeleteWriteContext implements domainDeleteWriteContext operation.
 //
 // Delete a write context. All configuration associated with this write context will also be deleted.
@@ -300,7 +326,7 @@ func (UnimplementedHandler) DomainDescribeWriteContext(ctx context.Context, para
 //
 // Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 //
-// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
+// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
 func (UnimplementedHandler) DomainExternalRootEncryptionKeyTest(ctx context.Context, req *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (r DomainExternalRootEncryptionKeyTestRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -308,9 +334,9 @@ func (UnimplementedHandler) DomainExternalRootEncryptionKeyTest(ctx context.Cont
 // DomainFlushEncryptionKeys implements domainFlushEncryptionKeys operation.
 //
 // Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-// check that the domain's root encryption key is still available.
+// check that the domain's root key is still available.
 //
-// POST /domains/{domainID}/encryption/flush
+// POST /domains/{domainID}/control/encryption/flush
 func (UnimplementedHandler) DomainFlushEncryptionKeys(ctx context.Context, req *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (r DomainFlushEncryptionKeysRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -319,7 +345,7 @@ func (UnimplementedHandler) DomainFlushEncryptionKeys(ctx context.Context, req *
 //
 // Return the details about the current active root encryption key used by the domain.
 //
-// GET /domains/{domainID}/control/keys/active
+// GET /domains/{domainID}/control/encryption/active-key
 func (UnimplementedHandler) DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (r DomainGetActiveExternalRootEncryptionKeyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -337,8 +363,8 @@ func (UnimplementedHandler) DomainGetCapabilities(ctx context.Context, params Do
 
 // DomainGetCapability implements domainGetCapability operation.
 //
-// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
-// identity provider. The capabilities can be referenced by the domain policy rules.
+// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
+// an identity provider. The capabilities can be referenced by the domain policy rules.
 //
 // GET /domains/{domainID}/control/capabilities/{capability}
 func (UnimplementedHandler) DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (r DomainGetCapabilityRes, _ error) {
@@ -351,6 +377,33 @@ func (UnimplementedHandler) DomainGetCapability(ctx context.Context, params Doma
 //
 // GET /domains/{domainID}/capsules/{capsuleID}
 func (UnimplementedHandler) DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (r DomainGetCapsuleInfoRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainGetDataPolicy implements domainGetDataPolicy operation.
+//
+// Get a data policy, will include rules if the policy is not imported.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}
+func (UnimplementedHandler) DomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (r DomainGetDataPolicyRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainGetDataPolicyBinding implements domainGetDataPolicyBinding operation.
+//
+// Retrieve a data policy binding configuration.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/binding
+func (UnimplementedHandler) DomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (r DomainGetDataPolicyBindingRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainGetDataPolicyRule implements domainGetDataPolicyRule operation.
+//
+// Get a data policy rule.
+//
+// GET /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+func (UnimplementedHandler) DomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (r DomainGetDataPolicyRuleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -369,7 +422,7 @@ func (UnimplementedHandler) DomainGetDisasterRecoverySettings(ctx context.Contex
 // relevant, any additional information required to use them (e.g. for the delegated key provider
 // `aws_am` the AWS account number to delegate to is returned).
 //
-// GET /domains/{domainID}/control/keys/providers
+// GET /domains/{domainID}/control/encryption/providers
 func (UnimplementedHandler) DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (r DomainGetExternalRootEncryptionKeyProvidersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -562,11 +615,20 @@ func (UnimplementedHandler) DomainListCapsules(ctx context.Context, params Domai
 	return r, ht.ErrNotImplemented
 }
 
+// DomainListDataPolicies implements domainListDataPolicies operation.
+//
+// Get a full listing of all data policies in the domain (including imported policies).
+//
+// GET /domains/{domainID}/control/data-policy
+func (UnimplementedHandler) DomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (r DomainListDataPoliciesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainListExternalRootEncryptionKey implements domainListExternalRootEncryptionKey operation.
 //
 // List all external root encryption keys for the domain.
 //
-// GET /domains/{domainID}/control/keys
+// GET /domains/{domainID}/control/encryption/keys
 func (UnimplementedHandler) DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (r DomainListExternalRootEncryptionKeyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -583,7 +645,7 @@ func (UnimplementedHandler) DomainListFactTypes(ctx context.Context, params Doma
 
 // DomainListFacts implements domainListFacts operation.
 //
-// Get the facts within a fact type.
+// Get the facts corresponding to a fact type.
 //
 // GET /domains/{domainID}/control/facts/{factType}/list
 func (UnimplementedHandler) DomainListFacts(ctx context.Context, params DomainListFactsParams) (r DomainListFactsRes, _ error) {
@@ -604,7 +666,7 @@ func (UnimplementedHandler) DomainListHooks(ctx context.Context, params DomainLi
 //
 // Retrieve the domain's identity providers and a brief overview of their configuration. This
 // endpoint requires authentication, but you can obtain an abridged list of the domain identity
-// providers prior to authentication by using the `/public-info` endpoint.
+// providers prior to authentication using the `/public-info` endpoint.
 //
 // GET /domains/{domainID}/control/identities
 func (UnimplementedHandler) DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (r DomainListIdentityProvidersRes, _ error) {
@@ -674,15 +736,6 @@ func (UnimplementedHandler) DomainOpenCapsule(ctx context.Context, req *CapsuleO
 	return r, ht.ErrNotImplemented
 }
 
-// DomainPatchSettings implements domainPatchSettings operation.
-//
-// Applies the given patch to the domain settings.
-//
-// PATCH /domains/{domainID}/control/settings
-func (UnimplementedHandler) DomainPatchSettings(ctx context.Context, req *DomainSettingsPatch, params DomainPatchSettingsParams) (r DomainPatchSettingsRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // DomainPolicyFlush implements domainPolicyFlush operation.
 //
 // Flush the policy cache so that changes to permissions take effect.
@@ -695,7 +748,7 @@ func (UnimplementedHandler) DomainPolicyFlush(ctx context.Context, params Domain
 // DomainPutCapability implements domainPutCapability operation.
 //
 // Create or update a capability. If you want to return an error if the capability already existed,
-// set `createonly` to true.
+// set createonly=true.
 //
 // PUT /domains/{domainID}/control/capabilities/{capability}
 func (UnimplementedHandler) DomainPutCapability(ctx context.Context, req *NewCapabilityDefinition, params DomainPutCapabilityParams) (r DomainPutCapabilityRes, _ error) {
@@ -715,10 +768,19 @@ func (UnimplementedHandler) DomainPutDisasterRecoverySettings(ctx context.Contex
 //
 // Facts are used to store ancillary information that helps express domain policy rules and read
 // context configuration rules. This endpoint allows you to register a new fact type. To create a
-// fact within an existing type, use `/control/facts/{factType}/new`.
+// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
 //
 // PUT /domains/{domainID}/control/facts/{factType}
 func (UnimplementedHandler) DomainPutFactType(ctx context.Context, req *NewFactTypeDefinition, params DomainPutFactTypeParams) (r DomainPutFactTypeRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainPutSettings implements domainPutSettings operation.
+//
+// Replace the current settings with the new settings supplied.
+//
+// PUT /domains/{domainID}/control/settings
+func (UnimplementedHandler) DomainPutSettings(ctx context.Context, req *NewDomainSettings, params DomainPutSettingsParams) (r DomainPutSettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -760,12 +822,12 @@ func (UnimplementedHandler) DomainQueryControlLog(ctx context.Context, params Do
 	return r, ht.ErrNotImplemented
 }
 
-// DomainReadContextFlush implements domainReadContextFlush operation.
+// DomainRenumberDataPolicyRules implements domainRenumberDataPolicyRules operation.
 //
-// Flush the read context cache so that changes to permissions take effect.
+// Re-assign rule priority numbers to integer multiples of 10.
 //
-// POST /domains/{domainID}/control/read-context/{contextName}/flush
-func (UnimplementedHandler) DomainReadContextFlush(ctx context.Context, params DomainReadContextFlushParams) (r DomainReadContextFlushRes, _ error) {
+// POST /domains/{domainID}/control/data-policy/{policyID}/renumber
+func (UnimplementedHandler) DomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (r DomainRenumberDataPolicyRulesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -786,7 +848,7 @@ func (UnimplementedHandler) DomainRenumberPolicyRules(ctx context.Context, req *
 // In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 // caller will call this endpoint in a loop until has_more is false.
 //
-// POST /domains/{domainID}/control/keys/rotate
+// POST /domains/{domainID}/control/encryption/rotate
 func (UnimplementedHandler) DomainRotateRootEncryptionKeys(ctx context.Context, req *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (r DomainRotateRootEncryptionKeysRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -803,10 +865,28 @@ func (UnimplementedHandler) DomainSealCapsule(ctx context.Context, req *CapsuleS
 // DomainSetActiveExternalRootEncryptionKey implements domainSetActiveExternalRootEncryptionKey operation.
 //
 // This will set which root encryption is active: i.e. is used for new capsules, or is used to
-// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
+// encrypt KEKs when `rotate` is called.
 //
-// POST /domains/{domainID}/control/keys/active
+// POST /domains/{domainID}/control/encryption/active-key
 func (UnimplementedHandler) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, req *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (r DomainSetActiveExternalRootEncryptionKeyRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainSetDataPolicyBinding implements domainSetDataPolicyBinding operation.
+//
+// Configure data policy binding.
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}/binding
+func (UnimplementedHandler) DomainSetDataPolicyBinding(ctx context.Context, req *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (r DomainSetDataPolicyBindingRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainUpdateDataPolicy implements domainUpdateDataPolicy operation.
+//
+// Update a data policy (it must already exist).
+//
+// PUT /domains/{domainID}/control/data-policy/{policyID}
+func (UnimplementedHandler) DomainUpdateDataPolicy(ctx context.Context, req *NewDataPolicy, params DomainUpdateDataPolicyParams) (r DomainUpdateDataPolicyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -842,29 +922,20 @@ func (UnimplementedHandler) DomainUpdatePolicyRule(ctx context.Context, req *New
 	return r, ht.ErrNotImplemented
 }
 
-// DomainUpdateReadContextRule implements domainUpdateReadContextRule operation.
-//
-// Update a read context configuration rule. The rule must already exist.
-//
-// PUT /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-func (UnimplementedHandler) DomainUpdateReadContextRule(ctx context.Context, req *NewReadContextConfigRule, params DomainUpdateReadContextRuleParams) (r DomainUpdateReadContextRuleRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // DomainUpsertCapsuleTags implements domainUpsertCapsuleTags operation.
 //
 // Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 //
 // POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-func (UnimplementedHandler) DomainUpsertCapsuleTags(ctx context.Context, req []Tag, params DomainUpsertCapsuleTagsParams) (r DomainUpsertCapsuleTagsRes, _ error) {
+func (UnimplementedHandler) DomainUpsertCapsuleTags(ctx context.Context, req *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (r DomainUpsertCapsuleTagsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // DomainUpsertFact implements domainUpsertFact operation.
 //
 // Create a new fact. The fact type must have been previously registered using
-// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
-// this call is a no-op and returns the same ID.
+// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
+// for all fields), this call is a no-op and returns the same ID.
 //
 // POST /domains/{domainID}/control/facts/{factType}/new
 func (UnimplementedHandler) DomainUpsertFact(ctx context.Context, req *NewFact, params DomainUpsertFactParams) (r DomainUpsertFactRes, _ error) {
@@ -876,7 +947,7 @@ func (UnimplementedHandler) DomainUpsertFact(ctx context.Context, req *NewFact, 
 // Create or configure an identity provider.
 //
 // PUT /domains/{domainID}/control/identities/{identityProviderName}
-func (UnimplementedHandler) DomainUpsertIdentityProvider(ctx context.Context, req DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (r DomainUpsertIdentityProviderRes, _ error) {
+func (UnimplementedHandler) DomainUpsertIdentityProvider(ctx context.Context, req *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (r DomainUpsertIdentityProviderRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

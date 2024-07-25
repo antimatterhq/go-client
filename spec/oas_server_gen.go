@@ -28,7 +28,7 @@ type Handler interface {
 	//
 	// Add a new external root encryption key with its supporting access configuration.
 	//
-	// POST /domains/{domainID}/control/keys
+	// POST /domains/{domainID}/control/encryption/keys
 	DomainAddExternalRootEncryptionKey(ctx context.Context, req *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (DomainAddExternalRootEncryptionKeyRes, error)
 	// DomainAddNew implements domainAddNew operation.
 	//
@@ -37,13 +37,21 @@ type Handler interface {
 	//
 	// POST /domains
 	DomainAddNew(ctx context.Context, req *NewDomain) (DomainAddNewRes, error)
-	// DomainAddReadContextRule implements domainAddReadContextRule operation.
+	// DomainAddPeerDomain implements domainAddPeerDomain operation.
 	//
-	// Read context configuration is rule based, much like domain policy. This adds a new rule to the
-	// read context. Rules are processed in priority order, stopping with the first matching rule.
+	// Add a domain with a default "subordinate" peering relationship with the current domain.
+	// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
+	// parent's billing and admin contact settings, and the child domain will be configured to import
+	// those settings.
+	// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
+	// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
+	// `linkAll=true`.
+	// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
+	// This peering can be changed at any time, and there is no permanent difference between a domain
+	// created in this way, and a domain created with POST /domains.
 	//
-	// POST /domains/{domainID}/control/read-context/{contextName}/config
-	DomainAddReadContextRule(ctx context.Context, req *NewReadContextConfigRule, params DomainAddReadContextRuleParams) (DomainAddReadContextRuleRes, error)
+	// POST /domains/{domainID}/peer-domain
+	DomainAddPeerDomain(ctx context.Context, req *CreatePeerDomain, params DomainAddPeerDomainParams) (DomainAddPeerDomainRes, error)
 	// DomainAuthenticate implements domainAuthenticate operation.
 	//
 	// Use an authentication method to obtain a domain ID token which is used as the bearer for all other
@@ -75,27 +83,30 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/capsules
 	DomainCreateCapsule(ctx context.Context, req *DomainCreateCapsuleReq, params DomainCreateCapsuleParams) (DomainCreateCapsuleRes, error)
-	// DomainCreatePeerDomain implements domainCreatePeerDomain operation.
+	// DomainCreateDataPolicy implements domainCreateDataPolicy operation.
 	//
-	// Create a domain with a default "subordinate" peering relationship with the current domain.
-	// Namely, the current "parent" domain will be configured to allow the new "child" domain to use the
-	// parent's billing and admin contact settings, and the child domain will be configured to import
-	// those settings.
-	// Optionally, similar linking can be performed for identity providers, read/write contexts and facts
-	// by setting the appropriate linkX parameter to true. In most cases, what you want is to set
-	// `linkAll=true`.
-	// Note, that a "subdomain" is just shorthand for a domain with the above-described peering config.
-	// This peering can be changed at any time, and there is no permanent difference between a domain
-	// created in this way, and a domain created with POST /domains.
+	// Create a new data policy.
 	//
-	// POST /domains/{domainID}/peer-domain
-	DomainCreatePeerDomain(ctx context.Context, req *CreatePeerDomain, params DomainCreatePeerDomainParams) (DomainCreatePeerDomainRes, error)
+	// POST /domains/{domainID}/control/data-policy
+	DomainCreateDataPolicy(ctx context.Context, req *NewDataPolicy, params DomainCreateDataPolicyParams) (DomainCreateDataPolicyRes, error)
 	// DomainCreatePolicyRule implements domainCreatePolicyRule operation.
 	//
 	// Create a domain policy rule.
 	//
 	// POST /domains/{domainID}/control/policy
 	DomainCreatePolicyRule(ctx context.Context, req *NewDomainPolicyRule, params DomainCreatePolicyRuleParams) (DomainCreatePolicyRuleRes, error)
+	// DomainDataPolicyConfigureRules implements domainDataPolicyConfigureRules operation.
+	//
+	// Add/Remove rules for a data policy.
+	//
+	// POST /domains/{domainID}/control/data-policy/{policyID}/rules
+	DomainDataPolicyConfigureRules(ctx context.Context, req *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (DomainDataPolicyConfigureRulesRes, error)
+	// DomainDataPolicyRuleUpdate implements domainDataPolicyRuleUpdate operation.
+	//
+	// Configure a data policy rule.
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainDataPolicyRuleUpdate(ctx context.Context, req *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (DomainDataPolicyRuleUpdateRes, error)
 	// DomainDataTaggingHookInvoke implements domainDataTaggingHookInvoke operation.
 	//
 	// Invoke a hook that operates on data and returns tags.
@@ -112,8 +123,8 @@ type Handler interface {
 	DomainDataTaggingHookTest(ctx context.Context, req *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (DomainDataTaggingHookTestRes, error)
 	// DomainDeleteCapability implements domainDeleteCapability operation.
 	//
-	// Delete a capability. All domain policy rules that reference the capability must have already been
-	// deleted, or you will receive a 409 error.
+	// Delete a capability. All rules that reference the capability must have already been deleted, or
+	// you will get an error.
 	//
 	// DELETE /domains/{domainID}/control/capabilities/{capability}
 	DomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (DomainDeleteCapabilityRes, error)
@@ -123,13 +134,25 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags/delete
 	DomainDeleteCapsuleTags(ctx context.Context, req *DeleteTags, params DomainDeleteCapsuleTagsParams) (DomainDeleteCapsuleTagsRes, error)
+	// DomainDeleteDataPolicy implements domainDeleteDataPolicy operation.
+	//
+	// Delete an existing data policy and all its rules.
+	//
+	// DELETE /domains/{domainID}/control/data-policy/{policyID}
+	DomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (DomainDeleteDataPolicyRes, error)
+	// DomainDeleteDataPolicyRule implements domainDeleteDataPolicyRule operation.
+	//
+	// Delete an existing data policy rule.
+	//
+	// DELETE /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (DomainDeleteDataPolicyRuleRes, error)
 	// DomainDeleteExternalRootEncryptionKey implements domainDeleteExternalRootEncryptionKey operation.
 	//
 	// Delete an external root encryption key using its ID. This operation is only successful if the
-	// external root encryption key is not in use by any key encryption keys. Call the /keys/rotate
-	// endpoint to ensure that all KEKs have been migrated to the active REK.
+	// external root encryption key is not in use by any key encryption keys. Call the rotate endpoint to
+	// ensure that all KEKs have been migrated to the active REK.
 	//
-	// DELETE /domains/{domainID}/control/keys/{rootEncryptionKeyID}
+	// DELETE /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
 	DomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (DomainDeleteExternalRootEncryptionKeyRes, error)
 	// DomainDeleteFactByID implements domainDeleteFactByID operation.
 	//
@@ -176,12 +199,6 @@ type Handler interface {
 	//
 	// DELETE /domains/{domainID}/control/read-context/{contextName}
 	DomainDeleteReadContext(ctx context.Context, params DomainDeleteReadContextParams) (DomainDeleteReadContextRes, error)
-	// DomainDeleteReadContextRule implements domainDeleteReadContextRule operation.
-	//
-	// Deletes a read context configuration rule by ID.
-	//
-	// DELETE /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-	DomainDeleteReadContextRule(ctx context.Context, params DomainDeleteReadContextRuleParams) (DomainDeleteReadContextRuleRes, error)
 	// DomainDeleteWriteContext implements domainDeleteWriteContext operation.
 	//
 	// Delete a write context. All configuration associated with this write context will also be deleted.
@@ -211,20 +228,20 @@ type Handler interface {
 	//
 	// Attempts to use a root encryption key to encrypt and decrypt, validating its availability.
 	//
-	// POST /domains/{domainID}/control/keys/{rootEncryptionKeyID}/test
+	// POST /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test
 	DomainExternalRootEncryptionKeyTest(ctx context.Context, req *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (DomainExternalRootEncryptionKeyTestRes, error)
 	// DomainFlushEncryptionKeys implements domainFlushEncryptionKeys operation.
 	//
 	// Flush all keys in memory. The keys will be immediately reloaded from persistent storage, forcing a
-	// check that the domain's root encryption key is still available.
+	// check that the domain's root key is still available.
 	//
-	// POST /domains/{domainID}/encryption/flush
+	// POST /domains/{domainID}/control/encryption/flush
 	DomainFlushEncryptionKeys(ctx context.Context, req *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (DomainFlushEncryptionKeysRes, error)
 	// DomainGetActiveExternalRootEncryptionKey implements domainGetActiveExternalRootEncryptionKey operation.
 	//
 	// Return the details about the current active root encryption key used by the domain.
 	//
-	// GET /domains/{domainID}/control/keys/active
+	// GET /domains/{domainID}/control/encryption/active-key
 	DomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (DomainGetActiveExternalRootEncryptionKeyRes, error)
 	// DomainGetCapabilities implements domainGetCapabilities operation.
 	//
@@ -236,8 +253,8 @@ type Handler interface {
 	DomainGetCapabilities(ctx context.Context, params DomainGetCapabilitiesParams) (DomainGetCapabilitiesRes, error)
 	// DomainGetCapability implements domainGetCapability operation.
 	//
-	// Get a capability. A capability is a key/value pair that can be  attached to a principal by an
-	// identity provider. The capabilities can be referenced by the domain policy rules.
+	// Get a capability. A capability is a key/value pair that can be  attached to a domain identity by
+	// an identity provider. The capabilities can be referenced by the domain policy rules.
 	//
 	// GET /domains/{domainID}/control/capabilities/{capability}
 	DomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (DomainGetCapabilityRes, error)
@@ -247,6 +264,24 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/capsules/{capsuleID}
 	DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (DomainGetCapsuleInfoRes, error)
+	// DomainGetDataPolicy implements domainGetDataPolicy operation.
+	//
+	// Get a data policy, will include rules if the policy is not imported.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}
+	DomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (DomainGetDataPolicyRes, error)
+	// DomainGetDataPolicyBinding implements domainGetDataPolicyBinding operation.
+	//
+	// Retrieve a data policy binding configuration.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}/binding
+	DomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (DomainGetDataPolicyBindingRes, error)
+	// DomainGetDataPolicyRule implements domainGetDataPolicyRule operation.
+	//
+	// Get a data policy rule.
+	//
+	// GET /domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}
+	DomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (DomainGetDataPolicyRuleRes, error)
 	// DomainGetDisasterRecoverySettings implements domainGetDisasterRecoverySettings operation.
 	//
 	// Return the current domain's disaster recovery settings.
@@ -259,7 +294,7 @@ type Handler interface {
 	// relevant, any additional information required to use them (e.g. for the delegated key provider
 	// `aws_am` the AWS account number to delegate to is returned).
 	//
-	// GET /domains/{domainID}/control/keys/providers
+	// GET /domains/{domainID}/control/encryption/providers
 	DomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (DomainGetExternalRootEncryptionKeyProvidersRes, error)
 	// DomainGetFactByID implements domainGetFactByID operation.
 	//
@@ -389,11 +424,17 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/capsules
 	DomainListCapsules(ctx context.Context, params DomainListCapsulesParams) (DomainListCapsulesRes, error)
+	// DomainListDataPolicies implements domainListDataPolicies operation.
+	//
+	// Get a full listing of all data policies in the domain (including imported policies).
+	//
+	// GET /domains/{domainID}/control/data-policy
+	DomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (DomainListDataPoliciesRes, error)
 	// DomainListExternalRootEncryptionKey implements domainListExternalRootEncryptionKey operation.
 	//
 	// List all external root encryption keys for the domain.
 	//
-	// GET /domains/{domainID}/control/keys
+	// GET /domains/{domainID}/control/encryption/keys
 	DomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (DomainListExternalRootEncryptionKeyRes, error)
 	// DomainListFactTypes implements domainListFactTypes operation.
 	//
@@ -404,7 +445,7 @@ type Handler interface {
 	DomainListFactTypes(ctx context.Context, params DomainListFactTypesParams) (DomainListFactTypesRes, error)
 	// DomainListFacts implements domainListFacts operation.
 	//
-	// Get the facts within a fact type.
+	// Get the facts corresponding to a fact type.
 	//
 	// GET /domains/{domainID}/control/facts/{factType}/list
 	DomainListFacts(ctx context.Context, params DomainListFactsParams) (DomainListFactsRes, error)
@@ -419,7 +460,7 @@ type Handler interface {
 	//
 	// Retrieve the domain's identity providers and a brief overview of their configuration. This
 	// endpoint requires authentication, but you can obtain an abridged list of the domain identity
-	// providers prior to authentication by using the `/public-info` endpoint.
+	// providers prior to authentication using the `/public-info` endpoint.
 	//
 	// GET /domains/{domainID}/control/identities
 	DomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (DomainListIdentityProvidersRes, error)
@@ -468,12 +509,6 @@ type Handler interface {
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/open
 	DomainOpenCapsule(ctx context.Context, req *CapsuleOpenRequest, params DomainOpenCapsuleParams) (DomainOpenCapsuleRes, error)
-	// DomainPatchSettings implements domainPatchSettings operation.
-	//
-	// Applies the given patch to the domain settings.
-	//
-	// PATCH /domains/{domainID}/control/settings
-	DomainPatchSettings(ctx context.Context, req *DomainSettingsPatch, params DomainPatchSettingsParams) (DomainPatchSettingsRes, error)
 	// DomainPolicyFlush implements domainPolicyFlush operation.
 	//
 	// Flush the policy cache so that changes to permissions take effect.
@@ -483,7 +518,7 @@ type Handler interface {
 	// DomainPutCapability implements domainPutCapability operation.
 	//
 	// Create or update a capability. If you want to return an error if the capability already existed,
-	// set `createonly` to true.
+	// set createonly=true.
 	//
 	// PUT /domains/{domainID}/control/capabilities/{capability}
 	DomainPutCapability(ctx context.Context, req *NewCapabilityDefinition, params DomainPutCapabilityParams) (DomainPutCapabilityRes, error)
@@ -497,10 +532,16 @@ type Handler interface {
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read
 	// context configuration rules. This endpoint allows you to register a new fact type. To create a
-	// fact within an existing type, use `/control/facts/{factType}/new`.
+	// fact within an existing type, use `/domains/{domainID}/control/facts/{factType}/new`.
 	//
 	// PUT /domains/{domainID}/control/facts/{factType}
 	DomainPutFactType(ctx context.Context, req *NewFactTypeDefinition, params DomainPutFactTypeParams) (DomainPutFactTypeRes, error)
+	// DomainPutSettings implements domainPutSettings operation.
+	//
+	// Replace the current settings with the new settings supplied.
+	//
+	// PUT /domains/{domainID}/control/settings
+	DomainPutSettings(ctx context.Context, req *NewDomainSettings, params DomainPutSettingsParams) (DomainPutSettingsRes, error)
 	// DomainPutVendorSettings implements domainPutVendorSettings operation.
 	//
 	// Create or update the vendor settings for a given domain.
@@ -527,12 +568,12 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/control/log
 	DomainQueryControlLog(ctx context.Context, params DomainQueryControlLogParams) (DomainQueryControlLogRes, error)
-	// DomainReadContextFlush implements domainReadContextFlush operation.
+	// DomainRenumberDataPolicyRules implements domainRenumberDataPolicyRules operation.
 	//
-	// Flush the read context cache so that changes to permissions take effect.
+	// Re-assign rule priority numbers to integer multiples of 10.
 	//
-	// POST /domains/{domainID}/control/read-context/{contextName}/flush
-	DomainReadContextFlush(ctx context.Context, params DomainReadContextFlushParams) (DomainReadContextFlushRes, error)
+	// POST /domains/{domainID}/control/data-policy/{policyID}/renumber
+	DomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (DomainRenumberDataPolicyRulesRes, error)
 	// DomainRenumberPolicyRules implements domainRenumberPolicyRules operation.
 	//
 	// Re-assign rule priority numbers to integer multiples of 10.
@@ -547,7 +588,7 @@ type Handler interface {
 	// In the response, "has_more" will be true if there are more KEKs that can be rotated. Usually the
 	// caller will call this endpoint in a loop until has_more is false.
 	//
-	// POST /domains/{domainID}/control/keys/rotate
+	// POST /domains/{domainID}/control/encryption/rotate
 	DomainRotateRootEncryptionKeys(ctx context.Context, req *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (DomainRotateRootEncryptionKeysRes, error)
 	// DomainSealCapsule implements domainSealCapsule operation.
 	//
@@ -558,10 +599,22 @@ type Handler interface {
 	// DomainSetActiveExternalRootEncryptionKey implements domainSetActiveExternalRootEncryptionKey operation.
 	//
 	// This will set which root encryption is active: i.e. is used for new capsules, or is used to
-	// encrypt KEKs when `/keys/rotate` is called or when new capsules are created.
+	// encrypt KEKs when `rotate` is called.
 	//
-	// POST /domains/{domainID}/control/keys/active
+	// POST /domains/{domainID}/control/encryption/active-key
 	DomainSetActiveExternalRootEncryptionKey(ctx context.Context, req *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (DomainSetActiveExternalRootEncryptionKeyRes, error)
+	// DomainSetDataPolicyBinding implements domainSetDataPolicyBinding operation.
+	//
+	// Configure data policy binding.
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}/binding
+	DomainSetDataPolicyBinding(ctx context.Context, req *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (DomainSetDataPolicyBindingRes, error)
+	// DomainUpdateDataPolicy implements domainUpdateDataPolicy operation.
+	//
+	// Update a data policy (it must already exist).
+	//
+	// PUT /domains/{domainID}/control/data-policy/{policyID}
+	DomainUpdateDataPolicy(ctx context.Context, req *NewDataPolicy, params DomainUpdateDataPolicyParams) (DomainUpdateDataPolicyRes, error)
 	// DomainUpdateIdentityProviderPrincipal implements domainUpdateIdentityProviderPrincipal operation.
 	//
 	// Update the set of capabilities assigned to an identity provider principal. The capabilities must
@@ -583,23 +636,17 @@ type Handler interface {
 	//
 	// PUT /domains/{domainID}/control/policy/{ruleID}
 	DomainUpdatePolicyRule(ctx context.Context, req *NewDomainPolicyRule, params DomainUpdatePolicyRuleParams) (DomainUpdatePolicyRuleRes, error)
-	// DomainUpdateReadContextRule implements domainUpdateReadContextRule operation.
-	//
-	// Update a read context configuration rule. The rule must already exist.
-	//
-	// PUT /domains/{domainID}/control/read-context/{contextName}/config/{ruleID}
-	DomainUpdateReadContextRule(ctx context.Context, req *NewReadContextConfigRule, params DomainUpdateReadContextRuleParams) (DomainUpdateReadContextRuleRes, error)
 	// DomainUpsertCapsuleTags implements domainUpsertCapsuleTags operation.
 	//
 	// Upsert capsule-level tags. This is permitted even after a capsule is sealed.
 	//
 	// POST /domains/{domainID}/capsules/{capsuleID}/capsule-tags
-	DomainUpsertCapsuleTags(ctx context.Context, req []Tag, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
+	DomainUpsertCapsuleTags(ctx context.Context, req *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (DomainUpsertCapsuleTagsRes, error)
 	// DomainUpsertFact implements domainUpsertFact operation.
 	//
 	// Create a new fact. The fact type must have been previously registered using
-	// `/control/facts/{factType}`. If an identical fact exists (having the same value for all fields),
-	// this call is a no-op and returns the same ID.
+	// `/domains/{domainID}/control/facts/{factType}`. If an identical fact exists (having the same value
+	// for all fields), this call is a no-op and returns the same ID.
 	//
 	// POST /domains/{domainID}/control/facts/{factType}/new
 	DomainUpsertFact(ctx context.Context, req *NewFact, params DomainUpsertFactParams) (DomainUpsertFactRes, error)
@@ -608,7 +655,7 @@ type Handler interface {
 	// Create or configure an identity provider.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}
-	DomainUpsertIdentityProvider(ctx context.Context, req DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
+	DomainUpsertIdentityProvider(ctx context.Context, req *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (DomainUpsertIdentityProviderRes, error)
 	// DomainUpsertReadContext implements domainUpsertReadContext operation.
 	//
 	// Update or create a read context.

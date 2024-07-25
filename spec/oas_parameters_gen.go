@@ -102,6 +102,7 @@ func decodeCapsuleGetByIdParams(args [1]string, argsEscaped bool, r *http.Reques
 type DomainAddAccessLogEntryParams struct {
 	DomainID  DomainID
 	CapsuleID CapsuleID
+	OpenToken CapsuleOperationToken
 }
 
 func unpackDomainAddAccessLogEntryParams(packed middleware.Parameters) (params DomainAddAccessLogEntryParams) {
@@ -119,10 +120,18 @@ func unpackDomainAddAccessLogEntryParams(packed middleware.Parameters) (params D
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "openToken",
+			In:   "query",
+		}
+		params.OpenToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainAddAccessLogEntryParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainAddAccessLogEntryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -243,6 +252,57 @@ func decodeDomainAddAccessLogEntryParams(args [2]string, argsEscaped bool, r *ht
 			Err:  err,
 		}
 	}
+	// Decode query: openToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "openToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOpenTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOpenTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OpenToken = CapsuleOperationToken(paramsDotOpenTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.OpenToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "openToken",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	return params, nil
 }
 
@@ -326,13 +386,12 @@ func decodeDomainAddExternalRootEncryptionKeyParams(args [1]string, argsEscaped 
 	return params, nil
 }
 
-// DomainAddReadContextRuleParams is parameters of domainAddReadContextRule operation.
-type DomainAddReadContextRuleParams struct {
-	DomainID    DomainID
-	ContextName ReadContextName
+// DomainAddPeerDomainParams is parameters of domainAddPeerDomain operation.
+type DomainAddPeerDomainParams struct {
+	DomainID DomainID
 }
 
-func unpackDomainAddReadContextRuleParams(packed middleware.Parameters) (params DomainAddReadContextRuleParams) {
+func unpackDomainAddPeerDomainParams(packed middleware.Parameters) (params DomainAddPeerDomainParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "domainID",
@@ -340,17 +399,10 @@ func unpackDomainAddReadContextRuleParams(packed middleware.Parameters) (params 
 		}
 		params.DomainID = packed[key].(DomainID)
 	}
-	{
-		key := middleware.ParameterKey{
-			Name: "contextName",
-			In:   "path",
-		}
-		params.ContextName = packed[key].(ReadContextName)
-	}
 	return params
 }
 
-func decodeDomainAddReadContextRuleParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainAddReadContextRuleParams, _ error) {
+func decodeDomainAddPeerDomainParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainAddPeerDomainParams, _ error) {
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -407,66 +459,6 @@ func decodeDomainAddReadContextRuleParams(args [2]string, argsEscaped bool, r *h
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "domainID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: contextName.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "contextName",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotContextNameVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotContextNameVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.ContextName = ReadContextName(paramsDotContextNameVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.ContextName.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "contextName",
 			In:   "path",
 			Err:  err,
 		}
@@ -1183,12 +1175,12 @@ func decodeDomainCreateCapsuleParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
-// DomainCreatePeerDomainParams is parameters of domainCreatePeerDomain operation.
-type DomainCreatePeerDomainParams struct {
+// DomainCreateDataPolicyParams is parameters of domainCreateDataPolicy operation.
+type DomainCreateDataPolicyParams struct {
 	DomainID DomainID
 }
 
-func unpackDomainCreatePeerDomainParams(packed middleware.Parameters) (params DomainCreatePeerDomainParams) {
+func unpackDomainCreateDataPolicyParams(packed middleware.Parameters) (params DomainCreateDataPolicyParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "domainID",
@@ -1199,7 +1191,7 @@ func unpackDomainCreatePeerDomainParams(packed middleware.Parameters) (params Do
 	return params
 }
 
-func decodeDomainCreatePeerDomainParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainCreatePeerDomainParams, _ error) {
+func decodeDomainCreateDataPolicyParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainCreateDataPolicyParams, _ error) {
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -1336,6 +1328,370 @@ func decodeDomainCreatePolicyRuleParams(args [1]string, argsEscaped bool, r *htt
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainDataPolicyConfigureRulesParams is parameters of domainDataPolicyConfigureRules operation.
+type DomainDataPolicyConfigureRulesParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+}
+
+func unpackDomainDataPolicyConfigureRulesParams(packed middleware.Parameters) (params DomainDataPolicyConfigureRulesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	return params
+}
+
+func decodeDomainDataPolicyConfigureRulesParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainDataPolicyConfigureRulesParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainDataPolicyRuleUpdateParams is parameters of domainDataPolicyRuleUpdate operation.
+type DomainDataPolicyRuleUpdateParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+	RuleID   RuleID
+}
+
+func unpackDomainDataPolicyRuleUpdateParams(packed middleware.Parameters) (params DomainDataPolicyRuleUpdateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ruleID",
+			In:   "path",
+		}
+		params.RuleID = packed[key].(RuleID)
+	}
+	return params
+}
+
+func decodeDomainDataPolicyRuleUpdateParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainDataPolicyRuleUpdateParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: ruleID.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ruleID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotRuleIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotRuleIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.RuleID = RuleID(paramsDotRuleIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.RuleID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ruleID",
 			In:   "path",
 			Err:  err,
 		}
@@ -2003,6 +2359,370 @@ func decodeDomainDeleteCapsuleTagsParams(args [2]string, argsEscaped bool, r *ht
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainDeleteDataPolicyParams is parameters of domainDeleteDataPolicy operation.
+type DomainDeleteDataPolicyParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+}
+
+func unpackDomainDeleteDataPolicyParams(packed middleware.Parameters) (params DomainDeleteDataPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	return params
+}
+
+func decodeDomainDeleteDataPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainDeleteDataPolicyParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainDeleteDataPolicyRuleParams is parameters of domainDeleteDataPolicyRule operation.
+type DomainDeleteDataPolicyRuleParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+	RuleID   RuleID
+}
+
+func unpackDomainDeleteDataPolicyRuleParams(packed middleware.Parameters) (params DomainDeleteDataPolicyRuleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ruleID",
+			In:   "path",
+		}
+		params.RuleID = packed[key].(RuleID)
+	}
+	return params
+}
+
+func decodeDomainDeleteDataPolicyRuleParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainDeleteDataPolicyRuleParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: ruleID.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ruleID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotRuleIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotRuleIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.RuleID = RuleID(paramsDotRuleIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.RuleID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ruleID",
 			In:   "path",
 			Err:  err,
 		}
@@ -3394,222 +4114,6 @@ func decodeDomainDeleteReadContextParams(args [2]string, argsEscaped bool, r *ht
 	return params, nil
 }
 
-// DomainDeleteReadContextRuleParams is parameters of domainDeleteReadContextRule operation.
-type DomainDeleteReadContextRuleParams struct {
-	DomainID    DomainID
-	ContextName ReadContextName
-	RuleID      RuleID
-}
-
-func unpackDomainDeleteReadContextRuleParams(packed middleware.Parameters) (params DomainDeleteReadContextRuleParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domainID",
-			In:   "path",
-		}
-		params.DomainID = packed[key].(DomainID)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "contextName",
-			In:   "path",
-		}
-		params.ContextName = packed[key].(ReadContextName)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "ruleID",
-			In:   "path",
-		}
-		params.RuleID = packed[key].(RuleID)
-	}
-	return params
-}
-
-func decodeDomainDeleteReadContextRuleParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainDeleteReadContextRuleParams, _ error) {
-	// Decode path: domainID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domainID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotDomainIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotDomainIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.DomainID = DomainID(paramsDotDomainIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.DomainID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domainID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: contextName.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "contextName",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotContextNameVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotContextNameVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.ContextName = ReadContextName(paramsDotContextNameVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.ContextName.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "contextName",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: ruleID.
-	if err := func() error {
-		param := args[2]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[2])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "ruleID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotRuleIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotRuleIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.RuleID = RuleID(paramsDotRuleIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.RuleID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "ruleID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // DomainDeleteWriteContextParams is parameters of domainDeleteWriteContext operation.
 type DomainDeleteWriteContextParams struct {
 	DomainID    DomainID
@@ -4341,7 +4845,7 @@ func decodeDomainDescribeWriteContextParams(args [2]string, argsEscaped bool, r 
 // DomainExternalRootEncryptionKeyTestParams is parameters of domainExternalRootEncryptionKeyTest operation.
 type DomainExternalRootEncryptionKeyTestParams struct {
 	DomainID            DomainID
-	RootEncryptionKeyID RootEncryptionKeyID
+	RootEncryptionKeyID RootEncryptionKeyReference
 }
 
 func unpackDomainExternalRootEncryptionKeyTestParams(packed middleware.Parameters) (params DomainExternalRootEncryptionKeyTestParams) {
@@ -4357,7 +4861,7 @@ func unpackDomainExternalRootEncryptionKeyTestParams(packed middleware.Parameter
 			Name: "rootEncryptionKeyID",
 			In:   "path",
 		}
-		params.RootEncryptionKeyID = packed[key].(RootEncryptionKeyID)
+		params.RootEncryptionKeyID = packed[key].(RootEncryptionKeyReference)
 	}
 	return params
 }
@@ -4459,7 +4963,7 @@ func decodeDomainExternalRootEncryptionKeyTestParams(args [2]string, argsEscaped
 				}(); err != nil {
 					return err
 				}
-				params.RootEncryptionKeyID = RootEncryptionKeyID(paramsDotRootEncryptionKeyIDVal)
+				params.RootEncryptionKeyID = RootEncryptionKeyReference(paramsDotRootEncryptionKeyIDVal)
 				return nil
 			}(); err != nil {
 				return err
@@ -5016,6 +5520,518 @@ func decodeDomainGetCapsuleInfoParams(args [2]string, argsEscaped bool, r *http.
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainGetDataPolicyParams is parameters of domainGetDataPolicy operation.
+type DomainGetDataPolicyParams struct {
+	DomainID DomainID
+	PolicyID PolicyReference
+}
+
+func unpackDomainGetDataPolicyParams(packed middleware.Parameters) (params DomainGetDataPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyReference)
+	}
+	return params
+}
+
+func decodeDomainGetDataPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainGetDataPolicyParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyReference(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainGetDataPolicyBindingParams is parameters of domainGetDataPolicyBinding operation.
+type DomainGetDataPolicyBindingParams struct {
+	DomainID DomainID
+	PolicyID PolicyReference
+}
+
+func unpackDomainGetDataPolicyBindingParams(packed middleware.Parameters) (params DomainGetDataPolicyBindingParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyReference)
+	}
+	return params
+}
+
+func decodeDomainGetDataPolicyBindingParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainGetDataPolicyBindingParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyReference(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainGetDataPolicyRuleParams is parameters of domainGetDataPolicyRule operation.
+type DomainGetDataPolicyRuleParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+	RuleID   RuleID
+}
+
+func unpackDomainGetDataPolicyRuleParams(packed middleware.Parameters) (params DomainGetDataPolicyRuleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "ruleID",
+			In:   "path",
+		}
+		params.RuleID = packed[key].(RuleID)
+	}
+	return params
+}
+
+func decodeDomainGetDataPolicyRuleParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainGetDataPolicyRuleParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: ruleID.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ruleID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotRuleIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotRuleIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.RuleID = RuleID(paramsDotRuleIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.RuleID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ruleID",
 			In:   "path",
 			Err:  err,
 		}
@@ -8346,6 +9362,86 @@ func decodeDomainListCapsulesParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// DomainListDataPoliciesParams is parameters of domainListDataPolicies operation.
+type DomainListDataPoliciesParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainListDataPoliciesParams(packed middleware.Parameters) (params DomainListDataPoliciesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainListDataPoliciesParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainListDataPoliciesParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainListExternalRootEncryptionKeyParams is parameters of domainListExternalRootEncryptionKey operation.
 type DomainListExternalRootEncryptionKeyParams struct {
 	DomainID DomainID
@@ -9423,86 +10519,6 @@ func decodeDomainOpenCapsuleParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// DomainPatchSettingsParams is parameters of domainPatchSettings operation.
-type DomainPatchSettingsParams struct {
-	DomainID DomainID
-}
-
-func unpackDomainPatchSettingsParams(packed middleware.Parameters) (params DomainPatchSettingsParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domainID",
-			In:   "path",
-		}
-		params.DomainID = packed[key].(DomainID)
-	}
-	return params
-}
-
-func decodeDomainPatchSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPatchSettingsParams, _ error) {
-	// Decode path: domainID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domainID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotDomainIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotDomainIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.DomainID = DomainID(paramsDotDomainIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.DomainID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domainID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // DomainPolicyFlushParams is parameters of domainPolicyFlush operation.
 type DomainPolicyFlushParams struct {
 	DomainID DomainID
@@ -10014,6 +11030,86 @@ func decodeDomainPutFactTypeParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
+// DomainPutSettingsParams is parameters of domainPutSettings operation.
+type DomainPutSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainPutSettingsParams(packed middleware.Parameters) (params DomainPutSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainPutSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPutSettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainPutVendorSettingsParams is parameters of domainPutVendorSettings operation.
 type DomainPutVendorSettingsParams struct {
 	DomainID DomainID
@@ -10128,7 +11224,7 @@ type DomainQueryAccessLogParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName
@@ -10859,7 +11955,7 @@ type DomainQueryAccessLogSingleCapsuleParams struct {
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
 	AllowedTag OptTagName
-	// The redacted or tokenized tag key you would like to filter on. This accepts a tag key only and
+	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
 	RedactedOrTokenizedTag OptTagName
@@ -12135,13 +13231,13 @@ func decodeDomainQueryControlLogParams(args [1]string, argsEscaped bool, r *http
 	return params, nil
 }
 
-// DomainReadContextFlushParams is parameters of domainReadContextFlush operation.
-type DomainReadContextFlushParams struct {
-	DomainID    DomainID
-	ContextName ReadContextName
+// DomainRenumberDataPolicyRulesParams is parameters of domainRenumberDataPolicyRules operation.
+type DomainRenumberDataPolicyRulesParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
 }
 
-func unpackDomainReadContextFlushParams(packed middleware.Parameters) (params DomainReadContextFlushParams) {
+func unpackDomainRenumberDataPolicyRulesParams(packed middleware.Parameters) (params DomainRenumberDataPolicyRulesParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "domainID",
@@ -12151,15 +13247,15 @@ func unpackDomainReadContextFlushParams(packed middleware.Parameters) (params Do
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "contextName",
+			Name: "policyID",
 			In:   "path",
 		}
-		params.ContextName = packed[key].(ReadContextName)
+		params.PolicyID = packed[key].(PolicyID)
 	}
 	return params
 }
 
-func decodeDomainReadContextFlushParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainReadContextFlushParams, _ error) {
+func decodeDomainRenumberDataPolicyRulesParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainRenumberDataPolicyRulesParams, _ error) {
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -12220,7 +13316,7 @@ func decodeDomainReadContextFlushParams(args [2]string, argsEscaped bool, r *htt
 			Err:  err,
 		}
 	}
-	// Decode path: contextName.
+	// Decode path: policyID.
 	if err := func() error {
 		param := args[1]
 		if argsEscaped {
@@ -12232,14 +13328,14 @@ func decodeDomainReadContextFlushParams(args [2]string, argsEscaped bool, r *htt
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "contextName",
+				Param:   "policyID",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
 			})
 
 			if err := func() error {
-				var paramsDotContextNameVal string
+				var paramsDotPolicyIDVal string
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -12251,18 +13347,18 @@ func decodeDomainReadContextFlushParams(args [2]string, argsEscaped bool, r *htt
 						return err
 					}
 
-					paramsDotContextNameVal = c
+					paramsDotPolicyIDVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.ContextName = ReadContextName(paramsDotContextNameVal)
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
 				return nil
 			}(); err != nil {
 				return err
 			}
 			if err := func() error {
-				if err := params.ContextName.Validate(); err != nil {
+				if err := params.PolicyID.Validate(); err != nil {
 					return err
 				}
 				return nil
@@ -12275,7 +13371,7 @@ func decodeDomainReadContextFlushParams(args [2]string, argsEscaped bool, r *htt
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "contextName",
+			Name: "policyID",
 			In:   "path",
 			Err:  err,
 		}
@@ -12445,8 +13541,9 @@ func decodeDomainRotateRootEncryptionKeysParams(args [1]string, argsEscaped bool
 
 // DomainSealCapsuleParams is parameters of domainSealCapsule operation.
 type DomainSealCapsuleParams struct {
-	DomainID  DomainID
-	CapsuleID CapsuleID
+	DomainID    DomainID
+	CapsuleID   CapsuleID
+	CreateToken CapsuleOperationToken
 }
 
 func unpackDomainSealCapsuleParams(packed middleware.Parameters) (params DomainSealCapsuleParams) {
@@ -12464,10 +13561,18 @@ func unpackDomainSealCapsuleParams(packed middleware.Parameters) (params DomainS
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "createToken",
+			In:   "query",
+		}
+		params.CreateToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainSealCapsuleParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainSealCapsuleParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -12588,6 +13693,57 @@ func decodeDomainSealCapsuleParams(args [2]string, argsEscaped bool, r *http.Req
 			Err:  err,
 		}
 	}
+	// Decode query: createToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCreateTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCreateTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CreateToken = CapsuleOperationToken(paramsDotCreateTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.CreateToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "createToken",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	return params, nil
 }
 
@@ -12664,6 +13820,302 @@ func decodeDomainSetActiveExternalRootEncryptionKeyParams(args [1]string, argsEs
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainSetDataPolicyBindingParams is parameters of domainSetDataPolicyBinding operation.
+type DomainSetDataPolicyBindingParams struct {
+	DomainID DomainID
+	PolicyID PolicyReference
+}
+
+func unpackDomainSetDataPolicyBindingParams(packed middleware.Parameters) (params DomainSetDataPolicyBindingParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyReference)
+	}
+	return params
+}
+
+func decodeDomainSetDataPolicyBindingParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainSetDataPolicyBindingParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyReference(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainUpdateDataPolicyParams is parameters of domainUpdateDataPolicy operation.
+type DomainUpdateDataPolicyParams struct {
+	DomainID DomainID
+	PolicyID PolicyID
+}
+
+func unpackDomainUpdateDataPolicyParams(packed middleware.Parameters) (params DomainUpdateDataPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyID",
+			In:   "path",
+		}
+		params.PolicyID = packed[key].(PolicyID)
+	}
+	return params
+}
+
+func decodeDomainUpdateDataPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainUpdateDataPolicyParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotPolicyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicyID = PolicyID(paramsDotPolicyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.PolicyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyID",
 			In:   "path",
 			Err:  err,
 		}
@@ -13125,222 +14577,6 @@ func decodeDomainUpdatePolicyRuleParams(args [2]string, argsEscaped bool, r *htt
 		param := args[1]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "ruleID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotRuleIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotRuleIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.RuleID = RuleID(paramsDotRuleIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.RuleID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "ruleID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// DomainUpdateReadContextRuleParams is parameters of domainUpdateReadContextRule operation.
-type DomainUpdateReadContextRuleParams struct {
-	DomainID    DomainID
-	ContextName ReadContextName
-	RuleID      RuleID
-}
-
-func unpackDomainUpdateReadContextRuleParams(packed middleware.Parameters) (params DomainUpdateReadContextRuleParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "domainID",
-			In:   "path",
-		}
-		params.DomainID = packed[key].(DomainID)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "contextName",
-			In:   "path",
-		}
-		params.ContextName = packed[key].(ReadContextName)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "ruleID",
-			In:   "path",
-		}
-		params.RuleID = packed[key].(RuleID)
-	}
-	return params
-}
-
-func decodeDomainUpdateReadContextRuleParams(args [3]string, argsEscaped bool, r *http.Request) (params DomainUpdateReadContextRuleParams, _ error) {
-	// Decode path: domainID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "domainID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotDomainIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotDomainIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.DomainID = DomainID(paramsDotDomainIDVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.DomainID.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "domainID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: contextName.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "contextName",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotContextNameVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotContextNameVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.ContextName = ReadContextName(paramsDotContextNameVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.ContextName.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "contextName",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: ruleID.
-	if err := func() error {
-		param := args[2]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[2])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -13994,8 +15230,9 @@ func decodeDomainUpsertReadContextParams(args [2]string, argsEscaped bool, r *ht
 
 // DomainUpsertSpanTagsParams is parameters of domainUpsertSpanTags operation.
 type DomainUpsertSpanTagsParams struct {
-	DomainID  DomainID
-	CapsuleID CapsuleID
+	DomainID    DomainID
+	CapsuleID   CapsuleID
+	CreateToken CapsuleOperationToken
 }
 
 func unpackDomainUpsertSpanTagsParams(packed middleware.Parameters) (params DomainUpsertSpanTagsParams) {
@@ -14013,10 +15250,18 @@ func unpackDomainUpsertSpanTagsParams(packed middleware.Parameters) (params Doma
 		}
 		params.CapsuleID = packed[key].(CapsuleID)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "createToken",
+			In:   "query",
+		}
+		params.CreateToken = packed[key].(CapsuleOperationToken)
+	}
 	return params
 }
 
 func decodeDomainUpsertSpanTagsParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainUpsertSpanTagsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
@@ -14134,6 +15379,57 @@ func decodeDomainUpsertSpanTagsParams(args [2]string, argsEscaped bool, r *http.
 		return params, &ogenerrors.DecodeParamError{
 			Name: "capsuleID",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: createToken.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "createToken",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCreateTokenVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCreateTokenVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CreateToken = CapsuleOperationToken(paramsDotCreateTokenVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.CreateToken.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "createToken",
+			In:   "query",
 			Err:  err,
 		}
 	}

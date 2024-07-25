@@ -17,8 +17,8 @@ type DomainAddNewRes interface {
 	domainAddNewRes()
 }
 
-type DomainAddReadContextRuleRes interface {
-	domainAddReadContextRuleRes()
+type DomainAddPeerDomainRes interface {
+	domainAddPeerDomainRes()
 }
 
 type DomainAuthenticateRes interface {
@@ -37,12 +37,20 @@ type DomainCreateCapsuleRes interface {
 	domainCreateCapsuleRes()
 }
 
-type DomainCreatePeerDomainRes interface {
-	domainCreatePeerDomainRes()
+type DomainCreateDataPolicyRes interface {
+	domainCreateDataPolicyRes()
 }
 
 type DomainCreatePolicyRuleRes interface {
 	domainCreatePolicyRuleRes()
+}
+
+type DomainDataPolicyConfigureRulesRes interface {
+	domainDataPolicyConfigureRulesRes()
+}
+
+type DomainDataPolicyRuleUpdateRes interface {
+	domainDataPolicyRuleUpdateRes()
 }
 
 type DomainDataTaggingHookInvokeRes interface {
@@ -59,6 +67,14 @@ type DomainDeleteCapabilityRes interface {
 
 type DomainDeleteCapsuleTagsRes interface {
 	domainDeleteCapsuleTagsRes()
+}
+
+type DomainDeleteDataPolicyRes interface {
+	domainDeleteDataPolicyRes()
+}
+
+type DomainDeleteDataPolicyRuleRes interface {
+	domainDeleteDataPolicyRuleRes()
 }
 
 type DomainDeleteExternalRootEncryptionKeyRes interface {
@@ -91,10 +107,6 @@ type DomainDeletePolicyRuleRes interface {
 
 type DomainDeleteReadContextRes interface {
 	domainDeleteReadContextRes()
-}
-
-type DomainDeleteReadContextRuleRes interface {
-	domainDeleteReadContextRuleRes()
 }
 
 type DomainDeleteWriteContextClassifierRuleRes interface {
@@ -135,6 +147,18 @@ type DomainGetCapabilityRes interface {
 
 type DomainGetCapsuleInfoRes interface {
 	domainGetCapsuleInfoRes()
+}
+
+type DomainGetDataPolicyBindingRes interface {
+	domainGetDataPolicyBindingRes()
+}
+
+type DomainGetDataPolicyRes interface {
+	domainGetDataPolicyRes()
+}
+
+type DomainGetDataPolicyRuleRes interface {
+	domainGetDataPolicyRuleRes()
 }
 
 type DomainGetDisasterRecoverySettingsRes interface {
@@ -225,6 +249,10 @@ type DomainListCapsulesRes interface {
 	domainListCapsulesRes()
 }
 
+type DomainListDataPoliciesRes interface {
+	domainListDataPoliciesRes()
+}
+
 type DomainListExternalRootEncryptionKeyRes interface {
 	domainListExternalRootEncryptionKeyRes()
 }
@@ -269,10 +297,6 @@ type DomainOpenCapsuleRes interface {
 	domainOpenCapsuleRes()
 }
 
-type DomainPatchSettingsRes interface {
-	domainPatchSettingsRes()
-}
-
 type DomainPolicyFlushRes interface {
 	domainPolicyFlushRes()
 }
@@ -287,6 +311,10 @@ type DomainPutDisasterRecoverySettingsRes interface {
 
 type DomainPutFactTypeRes interface {
 	domainPutFactTypeRes()
+}
+
+type DomainPutSettingsRes interface {
+	domainPutSettingsRes()
 }
 
 type DomainPutVendorSettingsRes interface {
@@ -305,8 +333,8 @@ type DomainQueryControlLogRes interface {
 	domainQueryControlLogRes()
 }
 
-type DomainReadContextFlushRes interface {
-	domainReadContextFlushRes()
+type DomainRenumberDataPolicyRulesRes interface {
+	domainRenumberDataPolicyRulesRes()
 }
 
 type DomainRenumberPolicyRulesRes interface {
@@ -325,6 +353,14 @@ type DomainSetActiveExternalRootEncryptionKeyRes interface {
 	domainSetActiveExternalRootEncryptionKeyRes()
 }
 
+type DomainSetDataPolicyBindingRes interface {
+	domainSetDataPolicyBindingRes()
+}
+
+type DomainUpdateDataPolicyRes interface {
+	domainUpdateDataPolicyRes()
+}
+
 type DomainUpdateIdentityProviderPrincipalRes interface {
 	domainUpdateIdentityProviderPrincipalRes()
 }
@@ -335,10 +371,6 @@ type DomainUpdatePeerRes interface {
 
 type DomainUpdatePolicyRuleRes interface {
 	domainUpdatePolicyRuleRes()
-}
-
-type DomainUpdateReadContextRuleRes interface {
-	domainUpdateReadContextRuleRes()
 }
 
 type DomainUpsertCapsuleTagsRes interface {
