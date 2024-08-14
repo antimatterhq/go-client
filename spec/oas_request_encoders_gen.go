@@ -207,6 +207,20 @@ func encodeDomainDeleteCapsuleTagsRequest(
 	return nil
 }
 
+func encodeDomainDeleteFactByTupleRequest(
+	req *FactTuple,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDomainExternalRootEncryptionKeyTestRequest(
 	req *DomainExternalRootEncryptionKeyTestReq,
 	r *http.Request,
@@ -577,6 +591,34 @@ func encodeDomainUpsertWriteContextRequest(
 
 func encodeDomainUpsertWriteContextConfigurationRequest(
 	req *WriteContextConfigInfo,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeKeychainCreateWorkspaceRequest(
+	req *NewWorkspace,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeKeychainPutWorkspaceObjectsRequest(
+	req *NewWorkspaceObjects,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

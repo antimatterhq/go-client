@@ -1076,6 +1076,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												}
 
 												elem = origElem
+											case 't': // Prefix: "tuple"
+												origElem := elem
+												if l := len("tuple"); len(elem) >= l && elem[0:l] == "tuple" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "DELETE":
+														s.handleDomainDeleteFactByTupleRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, "DELETE")
+													}
+
+													return
+												}
+
+												elem = origElem
 											}
 											// Param: "factID"
 											// Leaf parameter
@@ -2235,6 +2259,117 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'k': // Prefix: "keychain/workspaces"
+				origElem := elem
+				if l := len("keychain/workspaces"); len(elem) >= l && elem[0:l] == "keychain/workspaces" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "POST":
+						s.handleKeychainCreateWorkspaceRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "POST")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "workspace"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "info"
+							origElem := elem
+							if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleKeychainGetWorkspaceInfoRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 'o': // Prefix: "objects"
+							origElem := elem
+							if l := len("objects"); len(elem) >= l && elem[0:l] == "objects" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleKeychainGetWorkspaceObjectsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleKeychainPutWorkspaceObjectsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET,POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -3435,6 +3570,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 														r.summary = "Upsert a fact"
 														r.operationID = "domainUpsertFact"
 														r.pathPattern = "/domains/{domainID}/control/facts/{factType}/new"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+
+												elem = origElem
+											case 't': // Prefix: "tuple"
+												origElem := elem
+												if l := len("tuple"); len(elem) >= l && elem[0:l] == "tuple" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "DELETE":
+														r.name = "DomainDeleteFactByTuple"
+														r.summary = "Delete a fact"
+														r.operationID = "domainDeleteFactByTuple"
+														r.pathPattern = "/domains/{domainID}/control/facts/{factType}/tuple"
 														r.args = args
 														r.count = 2
 														return r, true
@@ -4724,6 +4884,129 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'k': // Prefix: "keychain/workspaces"
+				origElem := elem
+				if l := len("keychain/workspaces"); len(elem) >= l && elem[0:l] == "keychain/workspaces" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "POST":
+						r.name = "KeychainCreateWorkspace"
+						r.summary = "Create a workspace"
+						r.operationID = "keychainCreateWorkspace"
+						r.pathPattern = "/keychain/workspaces"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "workspace"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'i': // Prefix: "info"
+							origElem := elem
+							if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = "KeychainGetWorkspaceInfo"
+									r.summary = "Get information about a workspace"
+									r.operationID = "keychainGetWorkspaceInfo"
+									r.pathPattern = "/keychain/workspaces/{workspace}/info"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 'o': // Prefix: "objects"
+							origElem := elem
+							if l := len("objects"); len(elem) >= l && elem[0:l] == "objects" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = "KeychainGetWorkspaceObjects"
+									r.summary = "Get a batch of objects in a workspace"
+									r.operationID = "keychainGetWorkspaceObjects"
+									r.pathPattern = "/keychain/workspaces/{workspace}/objects"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = "KeychainPutWorkspaceObjects"
+									r.summary = "Put a batch of objects in a workspace"
+									r.operationID = "keychainPutWorkspaceObjects"
+									r.pathPattern = "/keychain/workspaces/{workspace}/objects"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

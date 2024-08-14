@@ -160,6 +160,12 @@ type Handler interface {
 	//
 	// DELETE /domains/{domainID}/control/facts/{factType}/{factID}
 	DomainDeleteFactByID(ctx context.Context, params DomainDeleteFactByIDParams) (DomainDeleteFactByIDRes, error)
+	// DomainDeleteFactByTuple implements domainDeleteFactByTuple operation.
+	//
+	// Delete a fact by tuple.
+	//
+	// DELETE /domains/{domainID}/control/facts/{factType}/tuple
+	DomainDeleteFactByTuple(ctx context.Context, req *FactTuple, params DomainDeleteFactByTupleParams) (DomainDeleteFactByTupleRes, error)
 	// DomainDeleteFactType implements domainDeleteFactType operation.
 	//
 	// Deletes a fact type and all facts inside it.
@@ -684,6 +690,30 @@ type Handler interface {
 	//
 	// PUT /domains/{domainID}/control/write-context/{contextName}/config
 	DomainUpsertWriteContextConfiguration(ctx context.Context, req *WriteContextConfigInfo, params DomainUpsertWriteContextConfigurationParams) (DomainUpsertWriteContextConfigurationRes, error)
+	// KeychainCreateWorkspace implements keychainCreateWorkspace operation.
+	//
+	// Creates a new keychain workspace.
+	//
+	// POST /keychain/workspaces
+	KeychainCreateWorkspace(ctx context.Context, req *NewWorkspace) (KeychainCreateWorkspaceRes, error)
+	// KeychainGetWorkspaceInfo implements keychainGetWorkspaceInfo operation.
+	//
+	// This endpoint allows you to fetch information about a workspace.
+	//
+	// GET /keychain/workspaces/{workspace}/info
+	KeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (KeychainGetWorkspaceInfoRes, error)
+	// KeychainGetWorkspaceObjects implements keychainGetWorkspaceObjects operation.
+	//
+	// This endpoint allows you to fetch a set of objects in a workspace.
+	//
+	// GET /keychain/workspaces/{workspace}/objects
+	KeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (KeychainGetWorkspaceObjectsRes, error)
+	// KeychainPutWorkspaceObjects implements keychainPutWorkspaceObjects operation.
+	//
+	// This endpoint allows you to place a set of objects in a workspace.
+	//
+	// POST /keychain/workspaces/{workspace}/objects
+	KeychainPutWorkspaceObjects(ctx context.Context, req *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (KeychainPutWorkspaceObjectsRes, error)
 	// StarredDomainAdd implements starredDomainAdd operation.
 	//
 	// Adds the domain to the list of starred domains for the user.

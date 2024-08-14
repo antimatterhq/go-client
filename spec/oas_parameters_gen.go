@@ -3096,6 +3096,155 @@ func decodeDomainDeleteFactByIDParams(args [3]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// DomainDeleteFactByTupleParams is parameters of domainDeleteFactByTuple operation.
+type DomainDeleteFactByTupleParams struct {
+	DomainID DomainID
+	// The "type name" for this fact, like "has_role".
+	FactType FactTypeName
+}
+
+func unpackDomainDeleteFactByTupleParams(packed middleware.Parameters) (params DomainDeleteFactByTupleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "factType",
+			In:   "path",
+		}
+		params.FactType = packed[key].(FactTypeName)
+	}
+	return params
+}
+
+func decodeDomainDeleteFactByTupleParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainDeleteFactByTupleParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: factType.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "factType",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotFactTypeVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFactTypeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FactType = FactTypeName(paramsDotFactTypeVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.FactType.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "factType",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainDeleteFactTypeParams is parameters of domainDeleteFactType operation.
 type DomainDeleteFactTypeParams struct {
 	DomainID DomainID
@@ -15725,6 +15874,292 @@ func decodeDomainUpsertWriteContextConfigurationParams(args [2]string, argsEscap
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "contextName",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// KeychainGetWorkspaceInfoParams is parameters of keychainGetWorkspaceInfo operation.
+type KeychainGetWorkspaceInfoParams struct {
+	Workspace WorkspaceID
+}
+
+func unpackKeychainGetWorkspaceInfoParams(packed middleware.Parameters) (params KeychainGetWorkspaceInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace",
+			In:   "path",
+		}
+		params.Workspace = packed[key].(WorkspaceID)
+	}
+	return params
+}
+
+func decodeKeychainGetWorkspaceInfoParams(args [1]string, argsEscaped bool, r *http.Request) (params KeychainGetWorkspaceInfoParams, _ error) {
+	// Decode path: workspace.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "workspace",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotWorkspaceVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotWorkspaceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Workspace = WorkspaceID(paramsDotWorkspaceVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Workspace.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// KeychainGetWorkspaceObjectsParams is parameters of keychainGetWorkspaceObjects operation.
+type KeychainGetWorkspaceObjectsParams struct {
+	Workspace WorkspaceID
+	// From which object ID to fetch a batch of objects.
+	From string
+}
+
+func unpackKeychainGetWorkspaceObjectsParams(packed middleware.Parameters) (params KeychainGetWorkspaceObjectsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace",
+			In:   "path",
+		}
+		params.Workspace = packed[key].(WorkspaceID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "from",
+			In:   "query",
+		}
+		params.From = packed[key].(string)
+	}
+	return params
+}
+
+func decodeKeychainGetWorkspaceObjectsParams(args [1]string, argsEscaped bool, r *http.Request) (params KeychainGetWorkspaceObjectsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: workspace.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "workspace",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotWorkspaceVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotWorkspaceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Workspace = WorkspaceID(paramsDotWorkspaceVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Workspace.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: from.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.From = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "from",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// KeychainPutWorkspaceObjectsParams is parameters of keychainPutWorkspaceObjects operation.
+type KeychainPutWorkspaceObjectsParams struct {
+	Workspace WorkspaceID
+}
+
+func unpackKeychainPutWorkspaceObjectsParams(packed middleware.Parameters) (params KeychainPutWorkspaceObjectsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace",
+			In:   "path",
+		}
+		params.Workspace = packed[key].(WorkspaceID)
+	}
+	return params
+}
+
+func decodeKeychainPutWorkspaceObjectsParams(args [1]string, argsEscaped bool, r *http.Request) (params KeychainPutWorkspaceObjectsParams, _ error) {
+	// Decode path: workspace.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "workspace",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotWorkspaceVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotWorkspaceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Workspace = WorkspaceID(paramsDotWorkspaceVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.Workspace.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace",
 			In:   "path",
 			Err:  err,
 		}

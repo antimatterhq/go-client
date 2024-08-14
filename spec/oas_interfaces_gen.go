@@ -85,6 +85,10 @@ type DomainDeleteFactByIDRes interface {
 	domainDeleteFactByIDRes()
 }
 
+type DomainDeleteFactByTupleRes interface {
+	domainDeleteFactByTupleRes()
+}
+
 type DomainDeleteFactTypeRes interface {
 	domainDeleteFactTypeRes()
 }
@@ -399,6 +403,22 @@ type DomainUpsertWriteContextConfigurationRes interface {
 
 type DomainUpsertWriteContextRes interface {
 	domainUpsertWriteContextRes()
+}
+
+type KeychainCreateWorkspaceRes interface {
+	keychainCreateWorkspaceRes()
+}
+
+type KeychainGetWorkspaceInfoRes interface {
+	keychainGetWorkspaceInfoRes()
+}
+
+type KeychainGetWorkspaceObjectsRes interface {
+	keychainGetWorkspaceObjectsRes()
+}
+
+type KeychainPutWorkspaceObjectsRes interface {
+	keychainPutWorkspaceObjectsRes()
 }
 
 type StarredDomainAddRes interface {

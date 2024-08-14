@@ -176,6 +176,12 @@ type Invoker interface {
 	//
 	// DELETE /domains/{domainID}/control/facts/{factType}/{factID}
 	DomainDeleteFactByID(ctx context.Context, params DomainDeleteFactByIDParams) (DomainDeleteFactByIDRes, error)
+	// DomainDeleteFactByTuple invokes domainDeleteFactByTuple operation.
+	//
+	// Delete a fact by tuple.
+	//
+	// DELETE /domains/{domainID}/control/facts/{factType}/tuple
+	DomainDeleteFactByTuple(ctx context.Context, request *FactTuple, params DomainDeleteFactByTupleParams) (DomainDeleteFactByTupleRes, error)
 	// DomainDeleteFactType invokes domainDeleteFactType operation.
 	//
 	// Deletes a fact type and all facts inside it.
@@ -700,6 +706,30 @@ type Invoker interface {
 	//
 	// PUT /domains/{domainID}/control/write-context/{contextName}/config
 	DomainUpsertWriteContextConfiguration(ctx context.Context, request *WriteContextConfigInfo, params DomainUpsertWriteContextConfigurationParams) (DomainUpsertWriteContextConfigurationRes, error)
+	// KeychainCreateWorkspace invokes keychainCreateWorkspace operation.
+	//
+	// Creates a new keychain workspace.
+	//
+	// POST /keychain/workspaces
+	KeychainCreateWorkspace(ctx context.Context, request *NewWorkspace) (KeychainCreateWorkspaceRes, error)
+	// KeychainGetWorkspaceInfo invokes keychainGetWorkspaceInfo operation.
+	//
+	// This endpoint allows you to fetch information about a workspace.
+	//
+	// GET /keychain/workspaces/{workspace}/info
+	KeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (KeychainGetWorkspaceInfoRes, error)
+	// KeychainGetWorkspaceObjects invokes keychainGetWorkspaceObjects operation.
+	//
+	// This endpoint allows you to fetch a set of objects in a workspace.
+	//
+	// GET /keychain/workspaces/{workspace}/objects
+	KeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (KeychainGetWorkspaceObjectsRes, error)
+	// KeychainPutWorkspaceObjects invokes keychainPutWorkspaceObjects operation.
+	//
+	// This endpoint allows you to place a set of objects in a workspace.
+	//
+	// POST /keychain/workspaces/{workspace}/objects
+	KeychainPutWorkspaceObjects(ctx context.Context, request *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (KeychainPutWorkspaceObjectsRes, error)
 	// StarredDomainAdd invokes starredDomainAdd operation.
 	//
 	// Adds the domain to the list of starred domains for the user.
@@ -3793,6 +3823,158 @@ func (c *Client) sendDomainDeleteFactByID(ctx context.Context, params DomainDele
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainDeleteFactByIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DomainDeleteFactByTuple invokes domainDeleteFactByTuple operation.
+//
+// Delete a fact by tuple.
+//
+// DELETE /domains/{domainID}/control/facts/{factType}/tuple
+func (c *Client) DomainDeleteFactByTuple(ctx context.Context, request *FactTuple, params DomainDeleteFactByTupleParams) (DomainDeleteFactByTupleRes, error) {
+	res, err := c.sendDomainDeleteFactByTuple(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDomainDeleteFactByTuple(ctx context.Context, request *FactTuple, params DomainDeleteFactByTupleParams) (res DomainDeleteFactByTupleRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("domainDeleteFactByTuple"),
+		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/tuple"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "DomainDeleteFactByTuple",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/domains/"
+	{
+		// Encode "domainID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domainID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.DomainID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/control/facts/"
+	{
+		// Encode "factType" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "factType",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.FactType); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/tuple"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDomainDeleteFactByTupleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:DomainIdentity"
+			switch err := c.securityDomainIdentity(ctx, "DomainDeleteFactByTuple", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"DomainIdentity\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDomainDeleteFactByTupleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -15867,6 +16049,384 @@ func (c *Client) sendDomainUpsertWriteContextConfiguration(ctx context.Context, 
 
 	stage = "DecodeResponse"
 	result, err := decodeDomainUpsertWriteContextConfigurationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// KeychainCreateWorkspace invokes keychainCreateWorkspace operation.
+//
+// Creates a new keychain workspace.
+//
+// POST /keychain/workspaces
+func (c *Client) KeychainCreateWorkspace(ctx context.Context, request *NewWorkspace) (KeychainCreateWorkspaceRes, error) {
+	res, err := c.sendKeychainCreateWorkspace(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendKeychainCreateWorkspace(ctx context.Context, request *NewWorkspace) (res KeychainCreateWorkspaceRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("keychainCreateWorkspace"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/keychain/workspaces"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "KeychainCreateWorkspace",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/keychain/workspaces"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeKeychainCreateWorkspaceRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeKeychainCreateWorkspaceResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// KeychainGetWorkspaceInfo invokes keychainGetWorkspaceInfo operation.
+//
+// This endpoint allows you to fetch information about a workspace.
+//
+// GET /keychain/workspaces/{workspace}/info
+func (c *Client) KeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (KeychainGetWorkspaceInfoRes, error) {
+	res, err := c.sendKeychainGetWorkspaceInfo(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendKeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (res KeychainGetWorkspaceInfoRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("keychainGetWorkspaceInfo"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/info"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "KeychainGetWorkspaceInfo",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/keychain/workspaces/"
+	{
+		// Encode "workspace" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "workspace",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.Workspace); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/info"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeKeychainGetWorkspaceInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// KeychainGetWorkspaceObjects invokes keychainGetWorkspaceObjects operation.
+//
+// This endpoint allows you to fetch a set of objects in a workspace.
+//
+// GET /keychain/workspaces/{workspace}/objects
+func (c *Client) KeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (KeychainGetWorkspaceObjectsRes, error) {
+	res, err := c.sendKeychainGetWorkspaceObjects(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendKeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (res KeychainGetWorkspaceObjectsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("keychainGetWorkspaceObjects"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/objects"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "KeychainGetWorkspaceObjects",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/keychain/workspaces/"
+	{
+		// Encode "workspace" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "workspace",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.Workspace); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/objects"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.From))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeKeychainGetWorkspaceObjectsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// KeychainPutWorkspaceObjects invokes keychainPutWorkspaceObjects operation.
+//
+// This endpoint allows you to place a set of objects in a workspace.
+//
+// POST /keychain/workspaces/{workspace}/objects
+func (c *Client) KeychainPutWorkspaceObjects(ctx context.Context, request *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (KeychainPutWorkspaceObjectsRes, error) {
+	res, err := c.sendKeychainPutWorkspaceObjects(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendKeychainPutWorkspaceObjects(ctx context.Context, request *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (res KeychainPutWorkspaceObjectsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("keychainPutWorkspaceObjects"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/objects"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "KeychainPutWorkspaceObjects",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/keychain/workspaces/"
+	{
+		// Encode "workspace" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "workspace",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.Workspace); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/objects"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeKeychainPutWorkspaceObjectsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeKeychainPutWorkspaceObjectsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

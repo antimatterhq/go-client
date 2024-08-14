@@ -228,6 +228,15 @@ func (UnimplementedHandler) DomainDeleteFactByID(ctx context.Context, params Dom
 	return r, ht.ErrNotImplemented
 }
 
+// DomainDeleteFactByTuple implements domainDeleteFactByTuple operation.
+//
+// Delete a fact by tuple.
+//
+// DELETE /domains/{domainID}/control/facts/{factType}/tuple
+func (UnimplementedHandler) DomainDeleteFactByTuple(ctx context.Context, req *FactTuple, params DomainDeleteFactByTupleParams) (r DomainDeleteFactByTupleRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainDeleteFactType implements domainDeleteFactType operation.
 //
 // Deletes a fact type and all facts inside it.
@@ -988,6 +997,42 @@ func (UnimplementedHandler) DomainUpsertWriteContext(ctx context.Context, req *A
 //
 // PUT /domains/{domainID}/control/write-context/{contextName}/config
 func (UnimplementedHandler) DomainUpsertWriteContextConfiguration(ctx context.Context, req *WriteContextConfigInfo, params DomainUpsertWriteContextConfigurationParams) (r DomainUpsertWriteContextConfigurationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// KeychainCreateWorkspace implements keychainCreateWorkspace operation.
+//
+// Creates a new keychain workspace.
+//
+// POST /keychain/workspaces
+func (UnimplementedHandler) KeychainCreateWorkspace(ctx context.Context, req *NewWorkspace) (r KeychainCreateWorkspaceRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// KeychainGetWorkspaceInfo implements keychainGetWorkspaceInfo operation.
+//
+// This endpoint allows you to fetch information about a workspace.
+//
+// GET /keychain/workspaces/{workspace}/info
+func (UnimplementedHandler) KeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (r KeychainGetWorkspaceInfoRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// KeychainGetWorkspaceObjects implements keychainGetWorkspaceObjects operation.
+//
+// This endpoint allows you to fetch a set of objects in a workspace.
+//
+// GET /keychain/workspaces/{workspace}/objects
+func (UnimplementedHandler) KeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (r KeychainGetWorkspaceObjectsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// KeychainPutWorkspaceObjects implements keychainPutWorkspaceObjects operation.
+//
+// This endpoint allows you to place a set of objects in a workspace.
+//
+// POST /keychain/workspaces/{workspace}/objects
+func (UnimplementedHandler) KeychainPutWorkspaceObjects(ctx context.Context, req *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (r KeychainPutWorkspaceObjectsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

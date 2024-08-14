@@ -2291,6 +2291,7 @@ func (*ConflictError) domainDeleteDataPolicyRes()                      {}
 func (*ConflictError) domainDeleteDataPolicyRuleRes()                  {}
 func (*ConflictError) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*ConflictError) domainDeleteFactByIDRes()                        {}
+func (*ConflictError) domainDeleteFactByTupleRes()                     {}
 func (*ConflictError) domainDeleteFactTypeRes()                        {}
 func (*ConflictError) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*ConflictError) domainDeleteIdentityProviderRes()                {}
@@ -3793,6 +3794,8 @@ type DomainAuthenticateResponse struct {
 	// Optional advisory message for the caller. This can be used to indicate that the authenticating
 	// client is out of date.
 	Advisory []string `json:"advisory"`
+	// The public URL of the cell responding to the authentication request.
+	CellAddress OptString `json:"cellAddress"`
 }
 
 // GetToken returns the value of Token.
@@ -3810,6 +3813,11 @@ func (s *DomainAuthenticateResponse) GetAdvisory() []string {
 	return s.Advisory
 }
 
+// GetCellAddress returns the value of CellAddress.
+func (s *DomainAuthenticateResponse) GetCellAddress() OptString {
+	return s.CellAddress
+}
+
 // SetToken sets the value of Token.
 func (s *DomainAuthenticateResponse) SetToken(val string) {
 	s.Token = val
@@ -3823,6 +3831,11 @@ func (s *DomainAuthenticateResponse) SetExpiry(val time.Time) {
 // SetAdvisory sets the value of Advisory.
 func (s *DomainAuthenticateResponse) SetAdvisory(val []string) {
 	s.Advisory = val
+}
+
+// SetCellAddress sets the value of CellAddress.
+func (s *DomainAuthenticateResponse) SetCellAddress(val OptString) {
+	s.CellAddress = val
 }
 
 func (*DomainAuthenticateResponse) domainAuthenticateRes() {}
@@ -4078,6 +4091,16 @@ func (*DomainDeleteFactByIDMethodNotAllowed) domainDeleteFactByIDRes() {}
 type DomainDeleteFactByIDOK struct{}
 
 func (*DomainDeleteFactByIDOK) domainDeleteFactByIDRes() {}
+
+// DomainDeleteFactByTupleMethodNotAllowed is response for DomainDeleteFactByTuple operation.
+type DomainDeleteFactByTupleMethodNotAllowed struct{}
+
+func (*DomainDeleteFactByTupleMethodNotAllowed) domainDeleteFactByTupleRes() {}
+
+// DomainDeleteFactByTupleOK is response for DomainDeleteFactByTuple operation.
+type DomainDeleteFactByTupleOK struct{}
+
+func (*DomainDeleteFactByTupleOK) domainDeleteFactByTupleRes() {}
 
 // DomainDeleteFactTypeOK is response for DomainDeleteFactType operation.
 type DomainDeleteFactTypeOK struct{}
@@ -6758,6 +6781,22 @@ func (s *FactPolicyRulesItemOperator) UnmarshalText(data []byte) error {
 	}
 }
 
+// A fact tuple contains the argument tuple for the provided fact type.
+// Ref: #/components/schemas/FactTuple
+type FactTuple struct {
+	Arguments []string `json:"arguments"`
+}
+
+// GetArguments returns the value of Arguments.
+func (s *FactTuple) GetArguments() []string {
+	return s.Arguments
+}
+
+// SetArguments sets the value of Arguments.
+func (s *FactTuple) SetArguments(val []string) {
+	s.Arguments = val
+}
+
 // A type definition (schema) for a fact.
 // Ref: #/components/schemas/FactTypeDefinition
 type FactTypeDefinition struct {
@@ -7070,6 +7109,7 @@ func (*InvalidRequestError) domainDeleteDataPolicyRes()                      {}
 func (*InvalidRequestError) domainDeleteDataPolicyRuleRes()                  {}
 func (*InvalidRequestError) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*InvalidRequestError) domainDeleteFactByIDRes()                        {}
+func (*InvalidRequestError) domainDeleteFactByTupleRes()                     {}
 func (*InvalidRequestError) domainDeleteFactTypeRes()                        {}
 func (*InvalidRequestError) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*InvalidRequestError) domainDeleteIdentityProviderRes()                {}
@@ -7149,6 +7189,10 @@ func (*InvalidRequestError) domainUpsertReadContextRes()                     {}
 func (*InvalidRequestError) domainUpsertSpanTagsRes()                        {}
 func (*InvalidRequestError) domainUpsertWriteContextConfigurationRes()       {}
 func (*InvalidRequestError) domainUpsertWriteContextRes()                    {}
+func (*InvalidRequestError) keychainCreateWorkspaceRes()                     {}
+func (*InvalidRequestError) keychainGetWorkspaceInfoRes()                    {}
+func (*InvalidRequestError) keychainGetWorkspaceObjectsRes()                 {}
+func (*InvalidRequestError) keychainPutWorkspaceObjectsRes()                 {}
 func (*InvalidRequestError) starredDomainAddRes()                            {}
 func (*InvalidRequestError) starredDomainRemoveRes()                         {}
 
@@ -7386,6 +7430,11 @@ func NewBYOKKeyInfoKeyInfosKeyInformation(v BYOKKeyInfo) KeyInfosKeyInformation 
 	s.SetBYOKKeyInfo(v)
 	return s
 }
+
+// KeychainPutWorkspaceObjectsOK is response for KeychainPutWorkspaceObjects operation.
+type KeychainPutWorkspaceObjectsOK struct{}
+
+func (*KeychainPutWorkspaceObjectsOK) keychainPutWorkspaceObjectsRes() {}
 
 // Configuration settings for llm-classifier.
 // Ref: #/components/schemas/LLMClassifierConfig
@@ -8246,6 +8295,36 @@ func (s *NewVendorSettings) SetManagedKeyId(val OptRootEncryptionKeyReference) {
 // SetHYOKDisabled sets the value of HYOKDisabled.
 func (s *NewVendorSettings) SetHYOKDisabled(val OptBool) {
 	s.HYOKDisabled = val
+}
+
+// Ref: #/components/schemas/NewWorkspace
+type NewWorkspace struct {
+	Comment string `json:"comment"`
+}
+
+// GetComment returns the value of Comment.
+func (s *NewWorkspace) GetComment() string {
+	return s.Comment
+}
+
+// SetComment sets the value of Comment.
+func (s *NewWorkspace) SetComment(val string) {
+	s.Comment = val
+}
+
+// Ref: #/components/schemas/NewWorkspaceObjects
+type NewWorkspaceObjects struct {
+	Items []WorkspaceObject `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *NewWorkspaceObjects) GetItems() []WorkspaceObject {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *NewWorkspaceObjects) SetItems(val []WorkspaceObject) {
+	s.Items = val
 }
 
 type OAuthToken struct {
@@ -10516,6 +10595,190 @@ func (o OptTagValueField) Or(d TagValueField) TagValueField {
 	return d
 }
 
+// NewOptWorkspaceObjectApproval returns new OptWorkspaceObjectApproval with value set to v.
+func NewOptWorkspaceObjectApproval(v WorkspaceObjectApproval) OptWorkspaceObjectApproval {
+	return OptWorkspaceObjectApproval{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkspaceObjectApproval is optional WorkspaceObjectApproval.
+type OptWorkspaceObjectApproval struct {
+	Value WorkspaceObjectApproval
+	Set   bool
+}
+
+// IsSet returns true if OptWorkspaceObjectApproval was set.
+func (o OptWorkspaceObjectApproval) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkspaceObjectApproval) Reset() {
+	var v WorkspaceObjectApproval
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkspaceObjectApproval) SetTo(v WorkspaceObjectApproval) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkspaceObjectApproval) Get() (v WorkspaceObjectApproval, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkspaceObjectApproval) Or(d WorkspaceObjectApproval) WorkspaceObjectApproval {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWorkspaceObjectDelegationPacket returns new OptWorkspaceObjectDelegationPacket with value set to v.
+func NewOptWorkspaceObjectDelegationPacket(v WorkspaceObjectDelegationPacket) OptWorkspaceObjectDelegationPacket {
+	return OptWorkspaceObjectDelegationPacket{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkspaceObjectDelegationPacket is optional WorkspaceObjectDelegationPacket.
+type OptWorkspaceObjectDelegationPacket struct {
+	Value WorkspaceObjectDelegationPacket
+	Set   bool
+}
+
+// IsSet returns true if OptWorkspaceObjectDelegationPacket was set.
+func (o OptWorkspaceObjectDelegationPacket) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkspaceObjectDelegationPacket) Reset() {
+	var v WorkspaceObjectDelegationPacket
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkspaceObjectDelegationPacket) SetTo(v WorkspaceObjectDelegationPacket) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkspaceObjectDelegationPacket) Get() (v WorkspaceObjectDelegationPacket, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkspaceObjectDelegationPacket) Or(d WorkspaceObjectDelegationPacket) WorkspaceObjectDelegationPacket {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWorkspaceObjectKeychainInfo returns new OptWorkspaceObjectKeychainInfo with value set to v.
+func NewOptWorkspaceObjectKeychainInfo(v WorkspaceObjectKeychainInfo) OptWorkspaceObjectKeychainInfo {
+	return OptWorkspaceObjectKeychainInfo{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkspaceObjectKeychainInfo is optional WorkspaceObjectKeychainInfo.
+type OptWorkspaceObjectKeychainInfo struct {
+	Value WorkspaceObjectKeychainInfo
+	Set   bool
+}
+
+// IsSet returns true if OptWorkspaceObjectKeychainInfo was set.
+func (o OptWorkspaceObjectKeychainInfo) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkspaceObjectKeychainInfo) Reset() {
+	var v WorkspaceObjectKeychainInfo
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkspaceObjectKeychainInfo) SetTo(v WorkspaceObjectKeychainInfo) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkspaceObjectKeychainInfo) Get() (v WorkspaceObjectKeychainInfo, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkspaceObjectKeychainInfo) Or(d WorkspaceObjectKeychainInfo) WorkspaceObjectKeychainInfo {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWorkspaceObjectRequest returns new OptWorkspaceObjectRequest with value set to v.
+func NewOptWorkspaceObjectRequest(v WorkspaceObjectRequest) OptWorkspaceObjectRequest {
+	return OptWorkspaceObjectRequest{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkspaceObjectRequest is optional WorkspaceObjectRequest.
+type OptWorkspaceObjectRequest struct {
+	Value WorkspaceObjectRequest
+	Set   bool
+}
+
+// IsSet returns true if OptWorkspaceObjectRequest was set.
+func (o OptWorkspaceObjectRequest) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkspaceObjectRequest) Reset() {
+	var v WorkspaceObjectRequest
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkspaceObjectRequest) SetTo(v WorkspaceObjectRequest) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkspaceObjectRequest) Get() (v WorkspaceObjectRequest, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkspaceObjectRequest) Or(d WorkspaceObjectRequest) WorkspaceObjectRequest {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptWriteContextName returns new OptWriteContextName with value set to v.
 func NewOptWriteContextName(v WriteContextName) OptWriteContextName {
 	return OptWriteContextName{
@@ -10644,6 +10907,7 @@ func (*PermanentRedirect) domainDeleteDataPolicyRes()                      {}
 func (*PermanentRedirect) domainDeleteDataPolicyRuleRes()                  {}
 func (*PermanentRedirect) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*PermanentRedirect) domainDeleteFactByIDRes()                        {}
+func (*PermanentRedirect) domainDeleteFactByTupleRes()                     {}
 func (*PermanentRedirect) domainDeleteFactTypeRes()                        {}
 func (*PermanentRedirect) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*PermanentRedirect) domainDeleteIdentityProviderRes()                {}
@@ -10723,6 +10987,10 @@ func (*PermanentRedirect) domainUpsertReadContextRes()                     {}
 func (*PermanentRedirect) domainUpsertSpanTagsRes()                        {}
 func (*PermanentRedirect) domainUpsertWriteContextConfigurationRes()       {}
 func (*PermanentRedirect) domainUpsertWriteContextRes()                    {}
+func (*PermanentRedirect) keychainCreateWorkspaceRes()                     {}
+func (*PermanentRedirect) keychainGetWorkspaceInfoRes()                    {}
+func (*PermanentRedirect) keychainGetWorkspaceObjectsRes()                 {}
+func (*PermanentRedirect) keychainPutWorkspaceObjectsRes()                 {}
 func (*PermanentRedirect) starredDomainAddRes()                            {}
 func (*PermanentRedirect) starredDomainListRes()                           {}
 func (*PermanentRedirect) starredDomainRemoveRes()                         {}
@@ -10821,6 +11089,152 @@ func (s *PolicyRuleResult) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// Returned when the server is unable to process the request due to a failed precondition.
+// Ref: #/components/schemas/PreconditionFailedError
+type PreconditionFailedError struct {
+	// Which resource type failed precondition.
+	ResourceType string `json:"resourceType"`
+	// Identifier for the resource that the precondition failed on.
+	Identifier string `json:"identifier"`
+	// A free form message describing the error.
+	Message string `json:"message"`
+}
+
+// GetResourceType returns the value of ResourceType.
+func (s *PreconditionFailedError) GetResourceType() string {
+	return s.ResourceType
+}
+
+// GetIdentifier returns the value of Identifier.
+func (s *PreconditionFailedError) GetIdentifier() string {
+	return s.Identifier
+}
+
+// GetMessage returns the value of Message.
+func (s *PreconditionFailedError) GetMessage() string {
+	return s.Message
+}
+
+// SetResourceType sets the value of ResourceType.
+func (s *PreconditionFailedError) SetResourceType(val string) {
+	s.ResourceType = val
+}
+
+// SetIdentifier sets the value of Identifier.
+func (s *PreconditionFailedError) SetIdentifier(val string) {
+	s.Identifier = val
+}
+
+// SetMessage sets the value of Message.
+func (s *PreconditionFailedError) SetMessage(val string) {
+	s.Message = val
+}
+
+func (*PreconditionFailedError) capsuleGetByIdRes()                              {}
+func (*PreconditionFailedError) domainAddAccessLogEntryRes()                     {}
+func (*PreconditionFailedError) domainAddExternalRootEncryptionKeyRes()          {}
+func (*PreconditionFailedError) domainAddNewRes()                                {}
+func (*PreconditionFailedError) domainAddPeerDomainRes()                         {}
+func (*PreconditionFailedError) domainAuthenticateRes()                          {}
+func (*PreconditionFailedError) domainContactIssueVerifyRes()                    {}
+func (*PreconditionFailedError) domainContactVerifyRes()                         {}
+func (*PreconditionFailedError) domainCreateCapsuleRes()                         {}
+func (*PreconditionFailedError) domainCreateDataPolicyRes()                      {}
+func (*PreconditionFailedError) domainCreatePolicyRuleRes()                      {}
+func (*PreconditionFailedError) domainDataPolicyConfigureRulesRes()              {}
+func (*PreconditionFailedError) domainDataPolicyRuleUpdateRes()                  {}
+func (*PreconditionFailedError) domainDataTaggingHookInvokeRes()                 {}
+func (*PreconditionFailedError) domainDataTaggingHookTestRes()                   {}
+func (*PreconditionFailedError) domainDeleteCapabilityRes()                      {}
+func (*PreconditionFailedError) domainDeleteCapsuleTagsRes()                     {}
+func (*PreconditionFailedError) domainDeleteDataPolicyRes()                      {}
+func (*PreconditionFailedError) domainDeleteDataPolicyRuleRes()                  {}
+func (*PreconditionFailedError) domainDeleteExternalRootEncryptionKeyRes()       {}
+func (*PreconditionFailedError) domainDeleteFactByIDRes()                        {}
+func (*PreconditionFailedError) domainDeleteFactByTupleRes()                     {}
+func (*PreconditionFailedError) domainDeleteFactTypeRes()                        {}
+func (*PreconditionFailedError) domainDeleteIdentityProviderPrincipalRes()       {}
+func (*PreconditionFailedError) domainDeleteIdentityProviderRes()                {}
+func (*PreconditionFailedError) domainDeletePeerRes()                            {}
+func (*PreconditionFailedError) domainDeletePolicyRuleRes()                      {}
+func (*PreconditionFailedError) domainDeleteReadContextRes()                     {}
+func (*PreconditionFailedError) domainDeleteWriteContextClassifierRuleRes()      {}
+func (*PreconditionFailedError) domainDeleteWriteContextRegexRuleRes()           {}
+func (*PreconditionFailedError) domainDeleteWriteContextRes()                    {}
+func (*PreconditionFailedError) domainDescribeWriteContextRes()                  {}
+func (*PreconditionFailedError) domainExternalRootEncryptionKeyTestRes()         {}
+func (*PreconditionFailedError) domainFlushEncryptionKeysRes()                   {}
+func (*PreconditionFailedError) domainGetActiveExternalRootEncryptionKeyRes()    {}
+func (*PreconditionFailedError) domainGetCapabilitiesRes()                       {}
+func (*PreconditionFailedError) domainGetCapabilityRes()                         {}
+func (*PreconditionFailedError) domainGetCapsuleInfoRes()                        {}
+func (*PreconditionFailedError) domainGetDataPolicyBindingRes()                  {}
+func (*PreconditionFailedError) domainGetDataPolicyRes()                         {}
+func (*PreconditionFailedError) domainGetDataPolicyRuleRes()                     {}
+func (*PreconditionFailedError) domainGetDisasterRecoverySettingsRes()           {}
+func (*PreconditionFailedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*PreconditionFailedError) domainGetFactByIDRes()                           {}
+func (*PreconditionFailedError) domainGetFactTypeRes()                           {}
+func (*PreconditionFailedError) domainGetIdentityProviderPrincipalRes()          {}
+func (*PreconditionFailedError) domainGetIdentityProviderPrincipalsRes()         {}
+func (*PreconditionFailedError) domainGetIdentityProviderRes()                   {}
+func (*PreconditionFailedError) domainGetPeerConfigRes()                         {}
+func (*PreconditionFailedError) domainGetPeerRes()                               {}
+func (*PreconditionFailedError) domainGetPrivateInfoRes()                        {}
+func (*PreconditionFailedError) domainGetPublicInfoRes()                         {}
+func (*PreconditionFailedError) domainGetReadContextRes()                        {}
+func (*PreconditionFailedError) domainGetSettingsRes()                           {}
+func (*PreconditionFailedError) domainGetStatusRes()                             {}
+func (*PreconditionFailedError) domainGetTagInfoRes()                            {}
+func (*PreconditionFailedError) domainGetVendorSettingsRes()                     {}
+func (*PreconditionFailedError) domainGetWriteContextClassifierRulesRes()        {}
+func (*PreconditionFailedError) domainGetWriteContextRegexRulesRes()             {}
+func (*PreconditionFailedError) domainInsertIdentityProviderPrincipalRes()       {}
+func (*PreconditionFailedError) domainInsertWriteContextClassifierRuleRes()      {}
+func (*PreconditionFailedError) domainInsertWriteContextRegexRuleRes()           {}
+func (*PreconditionFailedError) domainListCapsulesRes()                          {}
+func (*PreconditionFailedError) domainListDataPoliciesRes()                      {}
+func (*PreconditionFailedError) domainListExternalRootEncryptionKeyRes()         {}
+func (*PreconditionFailedError) domainListFactTypesRes()                         {}
+func (*PreconditionFailedError) domainListFactsRes()                             {}
+func (*PreconditionFailedError) domainListHooksRes()                             {}
+func (*PreconditionFailedError) domainListIdentityProvidersRes()                 {}
+func (*PreconditionFailedError) domainListPeersRes()                             {}
+func (*PreconditionFailedError) domainListPolicyRulesRes()                       {}
+func (*PreconditionFailedError) domainListReadContextsRes()                      {}
+func (*PreconditionFailedError) domainListResourcesRes()                         {}
+func (*PreconditionFailedError) domainListWriteContextsRes()                     {}
+func (*PreconditionFailedError) domainOpenCapsuleRes()                           {}
+func (*PreconditionFailedError) domainPolicyFlushRes()                           {}
+func (*PreconditionFailedError) domainPutCapabilityRes()                         {}
+func (*PreconditionFailedError) domainPutDisasterRecoverySettingsRes()           {}
+func (*PreconditionFailedError) domainPutFactTypeRes()                           {}
+func (*PreconditionFailedError) domainPutSettingsRes()                           {}
+func (*PreconditionFailedError) domainPutVendorSettingsRes()                     {}
+func (*PreconditionFailedError) domainQueryAccessLogRes()                        {}
+func (*PreconditionFailedError) domainQueryAccessLogSingleCapsuleRes()           {}
+func (*PreconditionFailedError) domainQueryControlLogRes()                       {}
+func (*PreconditionFailedError) domainRenumberDataPolicyRulesRes()               {}
+func (*PreconditionFailedError) domainRenumberPolicyRulesRes()                   {}
+func (*PreconditionFailedError) domainRotateRootEncryptionKeysRes()              {}
+func (*PreconditionFailedError) domainSealCapsuleRes()                           {}
+func (*PreconditionFailedError) domainSetActiveExternalRootEncryptionKeyRes()    {}
+func (*PreconditionFailedError) domainSetDataPolicyBindingRes()                  {}
+func (*PreconditionFailedError) domainUpdateDataPolicyRes()                      {}
+func (*PreconditionFailedError) domainUpdateIdentityProviderPrincipalRes()       {}
+func (*PreconditionFailedError) domainUpdatePeerRes()                            {}
+func (*PreconditionFailedError) domainUpdatePolicyRuleRes()                      {}
+func (*PreconditionFailedError) domainUpsertCapsuleTagsRes()                     {}
+func (*PreconditionFailedError) domainUpsertFactRes()                            {}
+func (*PreconditionFailedError) domainUpsertIdentityProviderRes()                {}
+func (*PreconditionFailedError) domainUpsertReadContextRes()                     {}
+func (*PreconditionFailedError) domainUpsertSpanTagsRes()                        {}
+func (*PreconditionFailedError) domainUpsertWriteContextConfigurationRes()       {}
+func (*PreconditionFailedError) domainUpsertWriteContextRes()                    {}
+func (*PreconditionFailedError) starredDomainAddRes()                            {}
+func (*PreconditionFailedError) starredDomainListRes()                           {}
+func (*PreconditionFailedError) starredDomainRemoveRes()                         {}
 
 type PrincipalID string
 
@@ -11778,6 +12192,7 @@ func (*ResourceExhaustedError) domainDeleteDataPolicyRes()                      
 func (*ResourceExhaustedError) domainDeleteDataPolicyRuleRes()                  {}
 func (*ResourceExhaustedError) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*ResourceExhaustedError) domainDeleteFactByIDRes()                        {}
+func (*ResourceExhaustedError) domainDeleteFactByTupleRes()                     {}
 func (*ResourceExhaustedError) domainDeleteFactTypeRes()                        {}
 func (*ResourceExhaustedError) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*ResourceExhaustedError) domainDeleteIdentityProviderRes()                {}
@@ -11923,6 +12338,7 @@ func (*ResourceNotFoundError) domainDeleteDataPolicyRes()                      {
 func (*ResourceNotFoundError) domainDeleteDataPolicyRuleRes()                  {}
 func (*ResourceNotFoundError) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*ResourceNotFoundError) domainDeleteFactByIDRes()                        {}
+func (*ResourceNotFoundError) domainDeleteFactByTupleRes()                     {}
 func (*ResourceNotFoundError) domainDeleteFactTypeRes()                        {}
 func (*ResourceNotFoundError) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*ResourceNotFoundError) domainDeleteIdentityProviderRes()                {}
@@ -12002,6 +12418,10 @@ func (*ResourceNotFoundError) domainUpsertReadContextRes()                     {
 func (*ResourceNotFoundError) domainUpsertSpanTagsRes()                        {}
 func (*ResourceNotFoundError) domainUpsertWriteContextConfigurationRes()       {}
 func (*ResourceNotFoundError) domainUpsertWriteContextRes()                    {}
+func (*ResourceNotFoundError) keychainCreateWorkspaceRes()                     {}
+func (*ResourceNotFoundError) keychainGetWorkspaceInfoRes()                    {}
+func (*ResourceNotFoundError) keychainGetWorkspaceObjectsRes()                 {}
+func (*ResourceNotFoundError) keychainPutWorkspaceObjectsRes()                 {}
 func (*ResourceNotFoundError) starredDomainAddRes()                            {}
 func (*ResourceNotFoundError) starredDomainRemoveRes()                         {}
 
@@ -12917,6 +13337,7 @@ func (*UnauthorizedError) domainDeleteDataPolicyRes()                      {}
 func (*UnauthorizedError) domainDeleteDataPolicyRuleRes()                  {}
 func (*UnauthorizedError) domainDeleteExternalRootEncryptionKeyRes()       {}
 func (*UnauthorizedError) domainDeleteFactByIDRes()                        {}
+func (*UnauthorizedError) domainDeleteFactByTupleRes()                     {}
 func (*UnauthorizedError) domainDeleteFactTypeRes()                        {}
 func (*UnauthorizedError) domainDeleteIdentityProviderPrincipalRes()       {}
 func (*UnauthorizedError) domainDeleteIdentityProviderRes()                {}
@@ -13322,6 +13743,269 @@ func (s *VerifyContactResponse) SetMessage(val string) {
 func (*VerifyContactResponse) domainContactVerifyRes() {}
 
 type VersionConstraint string
+
+type WorkspaceID string
+
+// Ref: #/components/schemas/WorkspaceInfo
+type WorkspaceInfo struct {
+	Comment string      `json:"comment"`
+	ID      WorkspaceID `json:"id"`
+}
+
+// GetComment returns the value of Comment.
+func (s *WorkspaceInfo) GetComment() string {
+	return s.Comment
+}
+
+// GetID returns the value of ID.
+func (s *WorkspaceInfo) GetID() WorkspaceID {
+	return s.ID
+}
+
+// SetComment sets the value of Comment.
+func (s *WorkspaceInfo) SetComment(val string) {
+	s.Comment = val
+}
+
+// SetID sets the value of ID.
+func (s *WorkspaceInfo) SetID(val WorkspaceID) {
+	s.ID = val
+}
+
+func (*WorkspaceInfo) keychainCreateWorkspaceRes()  {}
+func (*WorkspaceInfo) keychainGetWorkspaceInfoRes() {}
+
+// Ref: #/components/schemas/WorkspaceObject
+type WorkspaceObject struct {
+	Request          OptWorkspaceObjectRequest          `json:"request"`
+	Approval         OptWorkspaceObjectApproval         `json:"approval"`
+	DelegationPacket OptWorkspaceObjectDelegationPacket `json:"delegationPacket"`
+	KeychainInfo     OptWorkspaceObjectKeychainInfo     `json:"keychainInfo"`
+}
+
+// GetRequest returns the value of Request.
+func (s *WorkspaceObject) GetRequest() OptWorkspaceObjectRequest {
+	return s.Request
+}
+
+// GetApproval returns the value of Approval.
+func (s *WorkspaceObject) GetApproval() OptWorkspaceObjectApproval {
+	return s.Approval
+}
+
+// GetDelegationPacket returns the value of DelegationPacket.
+func (s *WorkspaceObject) GetDelegationPacket() OptWorkspaceObjectDelegationPacket {
+	return s.DelegationPacket
+}
+
+// GetKeychainInfo returns the value of KeychainInfo.
+func (s *WorkspaceObject) GetKeychainInfo() OptWorkspaceObjectKeychainInfo {
+	return s.KeychainInfo
+}
+
+// SetRequest sets the value of Request.
+func (s *WorkspaceObject) SetRequest(val OptWorkspaceObjectRequest) {
+	s.Request = val
+}
+
+// SetApproval sets the value of Approval.
+func (s *WorkspaceObject) SetApproval(val OptWorkspaceObjectApproval) {
+	s.Approval = val
+}
+
+// SetDelegationPacket sets the value of DelegationPacket.
+func (s *WorkspaceObject) SetDelegationPacket(val OptWorkspaceObjectDelegationPacket) {
+	s.DelegationPacket = val
+}
+
+// SetKeychainInfo sets the value of KeychainInfo.
+func (s *WorkspaceObject) SetKeychainInfo(val OptWorkspaceObjectKeychainInfo) {
+	s.KeychainInfo = val
+}
+
+type WorkspaceObjectApproval struct {
+	RecipientFingerprint  string `json:"recipientFingerprint"`
+	DelegationFingerprint string `json:"delegationFingerprint"`
+	AffirmingFingerprint  string `json:"affirmingFingerprint"`
+	Content               []byte `json:"content"`
+}
+
+// GetRecipientFingerprint returns the value of RecipientFingerprint.
+func (s *WorkspaceObjectApproval) GetRecipientFingerprint() string {
+	return s.RecipientFingerprint
+}
+
+// GetDelegationFingerprint returns the value of DelegationFingerprint.
+func (s *WorkspaceObjectApproval) GetDelegationFingerprint() string {
+	return s.DelegationFingerprint
+}
+
+// GetAffirmingFingerprint returns the value of AffirmingFingerprint.
+func (s *WorkspaceObjectApproval) GetAffirmingFingerprint() string {
+	return s.AffirmingFingerprint
+}
+
+// GetContent returns the value of Content.
+func (s *WorkspaceObjectApproval) GetContent() []byte {
+	return s.Content
+}
+
+// SetRecipientFingerprint sets the value of RecipientFingerprint.
+func (s *WorkspaceObjectApproval) SetRecipientFingerprint(val string) {
+	s.RecipientFingerprint = val
+}
+
+// SetDelegationFingerprint sets the value of DelegationFingerprint.
+func (s *WorkspaceObjectApproval) SetDelegationFingerprint(val string) {
+	s.DelegationFingerprint = val
+}
+
+// SetAffirmingFingerprint sets the value of AffirmingFingerprint.
+func (s *WorkspaceObjectApproval) SetAffirmingFingerprint(val string) {
+	s.AffirmingFingerprint = val
+}
+
+// SetContent sets the value of Content.
+func (s *WorkspaceObjectApproval) SetContent(val []byte) {
+	s.Content = val
+}
+
+type WorkspaceObjectDelegationPacket struct {
+	RecipientFingerprint  string `json:"recipientFingerprint"`
+	DelegationFingerprint string `json:"delegationFingerprint"`
+	Content               []byte `json:"content"`
+}
+
+// GetRecipientFingerprint returns the value of RecipientFingerprint.
+func (s *WorkspaceObjectDelegationPacket) GetRecipientFingerprint() string {
+	return s.RecipientFingerprint
+}
+
+// GetDelegationFingerprint returns the value of DelegationFingerprint.
+func (s *WorkspaceObjectDelegationPacket) GetDelegationFingerprint() string {
+	return s.DelegationFingerprint
+}
+
+// GetContent returns the value of Content.
+func (s *WorkspaceObjectDelegationPacket) GetContent() []byte {
+	return s.Content
+}
+
+// SetRecipientFingerprint sets the value of RecipientFingerprint.
+func (s *WorkspaceObjectDelegationPacket) SetRecipientFingerprint(val string) {
+	s.RecipientFingerprint = val
+}
+
+// SetDelegationFingerprint sets the value of DelegationFingerprint.
+func (s *WorkspaceObjectDelegationPacket) SetDelegationFingerprint(val string) {
+	s.DelegationFingerprint = val
+}
+
+// SetContent sets the value of Content.
+func (s *WorkspaceObjectDelegationPacket) SetContent(val []byte) {
+	s.Content = val
+}
+
+type WorkspaceObjectKeychainInfo struct {
+	Fingerprint string `json:"fingerprint"`
+	Content     []byte `json:"content"`
+}
+
+// GetFingerprint returns the value of Fingerprint.
+func (s *WorkspaceObjectKeychainInfo) GetFingerprint() string {
+	return s.Fingerprint
+}
+
+// GetContent returns the value of Content.
+func (s *WorkspaceObjectKeychainInfo) GetContent() []byte {
+	return s.Content
+}
+
+// SetFingerprint sets the value of Fingerprint.
+func (s *WorkspaceObjectKeychainInfo) SetFingerprint(val string) {
+	s.Fingerprint = val
+}
+
+// SetContent sets the value of Content.
+func (s *WorkspaceObjectKeychainInfo) SetContent(val []byte) {
+	s.Content = val
+}
+
+// A list of objects from a workspace.
+// Ref: #/components/schemas/WorkspaceObjectList
+type WorkspaceObjectList struct {
+	NextId  string            `json:"nextId"`
+	HasMore bool              `json:"hasMore"`
+	Items   []WorkspaceObject `json:"items"`
+}
+
+// GetNextId returns the value of NextId.
+func (s *WorkspaceObjectList) GetNextId() string {
+	return s.NextId
+}
+
+// GetHasMore returns the value of HasMore.
+func (s *WorkspaceObjectList) GetHasMore() bool {
+	return s.HasMore
+}
+
+// GetItems returns the value of Items.
+func (s *WorkspaceObjectList) GetItems() []WorkspaceObject {
+	return s.Items
+}
+
+// SetNextId sets the value of NextId.
+func (s *WorkspaceObjectList) SetNextId(val string) {
+	s.NextId = val
+}
+
+// SetHasMore sets the value of HasMore.
+func (s *WorkspaceObjectList) SetHasMore(val bool) {
+	s.HasMore = val
+}
+
+// SetItems sets the value of Items.
+func (s *WorkspaceObjectList) SetItems(val []WorkspaceObject) {
+	s.Items = val
+}
+
+func (*WorkspaceObjectList) keychainGetWorkspaceObjectsRes() {}
+
+type WorkspaceObjectRequest struct {
+	RecipientFingerprint  string `json:"recipientFingerprint"`
+	DelegationFingerprint string `json:"delegationFingerprint"`
+	Content               []byte `json:"content"`
+}
+
+// GetRecipientFingerprint returns the value of RecipientFingerprint.
+func (s *WorkspaceObjectRequest) GetRecipientFingerprint() string {
+	return s.RecipientFingerprint
+}
+
+// GetDelegationFingerprint returns the value of DelegationFingerprint.
+func (s *WorkspaceObjectRequest) GetDelegationFingerprint() string {
+	return s.DelegationFingerprint
+}
+
+// GetContent returns the value of Content.
+func (s *WorkspaceObjectRequest) GetContent() []byte {
+	return s.Content
+}
+
+// SetRecipientFingerprint sets the value of RecipientFingerprint.
+func (s *WorkspaceObjectRequest) SetRecipientFingerprint(val string) {
+	s.RecipientFingerprint = val
+}
+
+// SetDelegationFingerprint sets the value of DelegationFingerprint.
+func (s *WorkspaceObjectRequest) SetDelegationFingerprint(val string) {
+	s.DelegationFingerprint = val
+}
+
+// SetContent sets the value of Content.
+func (s *WorkspaceObjectRequest) SetContent(val []byte) {
+	s.Content = val
+}
 
 // Tag descriptor for a write context regex rule.
 // Ref: #/components/schemas/WriteContextClassifierTag

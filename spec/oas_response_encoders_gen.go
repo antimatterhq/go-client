@@ -116,6 +116,19 @@ func encodeCapsuleGetByIdResponse(response CapsuleGetByIdRes, w http.ResponseWri
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -213,6 +226,19 @@ func encodeDomainAddAccessLogEntryResponse(response DomainAddAccessLogEntryRes, 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -329,6 +355,19 @@ func encodeDomainAddExternalRootEncryptionKeyResponse(response DomainAddExternal
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -427,6 +466,19 @@ func encodeDomainAddNewResponse(response DomainAddNewRes, w http.ResponseWriter,
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -543,6 +595,19 @@ func encodeDomainAddPeerDomainResponse(response DomainAddPeerDomainRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -641,6 +706,19 @@ func encodeDomainAuthenticateResponse(response DomainAuthenticateRes, w http.Res
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -750,6 +828,19 @@ func encodeDomainContactIssueVerifyResponse(response DomainContactIssueVerifyRes
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -848,6 +939,19 @@ func encodeDomainContactVerifyResponse(response DomainContactVerifyRes, w http.R
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -977,6 +1081,19 @@ func encodeDomainCreateCapsuleResponse(response DomainCreateCapsuleRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -1075,6 +1192,19 @@ func encodeDomainCreateDataPolicyResponse(response DomainCreateDataPolicyRes, w 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1191,6 +1321,19 @@ func encodeDomainCreatePolicyRuleResponse(response DomainCreatePolicyRuleRes, w 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -1298,6 +1441,19 @@ func encodeDomainDataPolicyConfigureRulesResponse(response DomainDataPolicyConfi
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -1389,6 +1545,19 @@ func encodeDomainDataPolicyRuleUpdateResponse(response DomainDataPolicyRuleUpdat
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1505,6 +1674,19 @@ func encodeDomainDataTaggingHookInvokeResponse(response DomainDataTaggingHookInv
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -1603,6 +1785,19 @@ func encodeDomainDataTaggingHookTestResponse(response DomainDataTaggingHookTestR
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1712,6 +1907,19 @@ func encodeDomainDeleteCapabilityResponse(response DomainDeleteCapabilityRes, w 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -1803,6 +2011,19 @@ func encodeDomainDeleteCapsuleTagsResponse(response DomainDeleteCapsuleTagsRes, 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1912,6 +2133,19 @@ func encodeDomainDeleteDataPolicyResponse(response DomainDeleteDataPolicyRes, w 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2012,6 +2246,19 @@ func encodeDomainDeleteDataPolicyRuleResponse(response DomainDeleteDataPolicyRul
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2103,6 +2350,19 @@ func encodeDomainDeleteExternalRootEncryptionKeyResponse(response DomainDeleteEx
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2218,6 +2478,138 @@ func encodeDomainDeleteFactByIDResponse(response DomainDeleteFactByIDRes, w http
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceExhaustedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(429)
+		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeDomainDeleteFactByTupleResponse(response DomainDeleteFactByTupleRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DomainDeleteFactByTupleOK:
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UnauthorizedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(401)
+		span.SetStatus(codes.Error, http.StatusText(401))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *DomainDeleteFactByTupleMethodNotAllowed:
+		w.WriteHeader(405)
+		span.SetStatus(codes.Error, http.StatusText(405))
+
+		return nil
+
+	case *ConflictError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(409)
+		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2309,6 +2701,19 @@ func encodeDomainDeleteFactTypeResponse(response DomainDeleteFactTypeRes, w http
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2418,6 +2823,19 @@ func encodeDomainDeleteIdentityProviderResponse(response DomainDeleteIdentityPro
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2509,6 +2927,19 @@ func encodeDomainDeleteIdentityProviderPrincipalResponse(response DomainDeleteId
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2618,6 +3049,19 @@ func encodeDomainDeletePeerResponse(response DomainDeletePeerRes, w http.Respons
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2709,6 +3153,19 @@ func encodeDomainDeletePolicyRuleResponse(response DomainDeletePolicyRuleRes, w 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2818,6 +3275,19 @@ func encodeDomainDeleteReadContextResponse(response DomainDeleteReadContextRes, 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -2909,6 +3379,19 @@ func encodeDomainDeleteWriteContextResponse(response DomainDeleteWriteContextRes
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -3018,6 +3501,19 @@ func encodeDomainDeleteWriteContextClassifierRuleResponse(response DomainDeleteW
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -3109,6 +3605,19 @@ func encodeDomainDeleteWriteContextRegexRuleResponse(response DomainDeleteWriteC
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -3225,6 +3734,19 @@ func encodeDomainDescribeWriteContextResponse(response DomainDescribeWriteContex
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -3332,6 +3854,19 @@ func encodeDomainExternalRootEncryptionKeyTestResponse(response DomainExternalRo
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -3423,6 +3958,19 @@ func encodeDomainFlushEncryptionKeysResponse(response DomainFlushEncryptionKeysR
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -3539,6 +4087,19 @@ func encodeDomainGetActiveExternalRootEncryptionKeyResponse(response DomainGetAc
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -3637,6 +4198,19 @@ func encodeDomainGetCapabilitiesResponse(response DomainGetCapabilitiesRes, w ht
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -3753,6 +4327,19 @@ func encodeDomainGetCapabilityResponse(response DomainGetCapabilityRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -3851,6 +4438,19 @@ func encodeDomainGetCapsuleInfoResponse(response DomainGetCapsuleInfoRes, w http
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -3967,6 +4567,19 @@ func encodeDomainGetDataPolicyResponse(response DomainGetDataPolicyRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -4065,6 +4678,19 @@ func encodeDomainGetDataPolicyBindingResponse(response DomainGetDataPolicyBindin
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -4181,6 +4807,19 @@ func encodeDomainGetDataPolicyRuleResponse(response DomainGetDataPolicyRuleRes, 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -4279,6 +4918,19 @@ func encodeDomainGetDisasterRecoverySettingsResponse(response DomainGetDisasterR
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -4395,6 +5047,19 @@ func encodeDomainGetExternalRootEncryptionKeyProvidersResponse(response DomainGe
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -4493,6 +5158,19 @@ func encodeDomainGetFactByIDResponse(response DomainGetFactByIDRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -4609,6 +5287,19 @@ func encodeDomainGetFactTypeResponse(response DomainGetFactTypeRes, w http.Respo
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -4707,6 +5398,19 @@ func encodeDomainGetIdentityProviderResponse(response DomainGetIdentityProviderR
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -4823,6 +5527,19 @@ func encodeDomainGetIdentityProviderPrincipalResponse(response DomainGetIdentity
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -4921,6 +5638,19 @@ func encodeDomainGetIdentityProviderPrincipalsResponse(response DomainGetIdentit
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -5037,6 +5767,19 @@ func encodeDomainGetPeerResponse(response DomainGetPeerRes, w http.ResponseWrite
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -5135,6 +5878,19 @@ func encodeDomainGetPeerConfigResponse(response DomainGetPeerConfigRes, w http.R
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -5251,6 +6007,19 @@ func encodeDomainGetPrivateInfoResponse(response DomainGetPrivateInfoRes, w http
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -5349,6 +6118,19 @@ func encodeDomainGetPublicInfoResponse(response DomainGetPublicInfoRes, w http.R
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -5465,6 +6247,19 @@ func encodeDomainGetReadContextResponse(response DomainGetReadContextRes, w http
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -5563,6 +6358,19 @@ func encodeDomainGetSettingsResponse(response DomainGetSettingsRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -5679,6 +6487,19 @@ func encodeDomainGetStatusResponse(response DomainGetStatusRes, w http.ResponseW
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -5777,6 +6598,19 @@ func encodeDomainGetTagInfoResponse(response DomainGetTagInfoRes, w http.Respons
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -5893,6 +6727,19 @@ func encodeDomainGetVendorSettingsResponse(response DomainGetVendorSettingsRes, 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -5991,6 +6838,19 @@ func encodeDomainGetWriteContextClassifierRulesResponse(response DomainGetWriteC
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -6107,6 +6967,19 @@ func encodeDomainGetWriteContextRegexRulesResponse(response DomainGetWriteContex
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -6205,6 +7078,19 @@ func encodeDomainInsertIdentityProviderPrincipalResponse(response DomainInsertId
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -6321,6 +7207,19 @@ func encodeDomainInsertWriteContextClassifierRuleResponse(response DomainInsertW
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -6419,6 +7318,19 @@ func encodeDomainInsertWriteContextRegexRuleResponse(response DomainInsertWriteC
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -6535,6 +7447,19 @@ func encodeDomainListCapsulesResponse(response DomainListCapsulesRes, w http.Res
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -6633,6 +7558,19 @@ func encodeDomainListDataPoliciesResponse(response DomainListDataPoliciesRes, w 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -6749,6 +7687,19 @@ func encodeDomainListExternalRootEncryptionKeyResponse(response DomainListExtern
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -6847,6 +7798,19 @@ func encodeDomainListFactTypesResponse(response DomainListFactTypesRes, w http.R
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -6963,6 +7927,19 @@ func encodeDomainListFactsResponse(response DomainListFactsRes, w http.ResponseW
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -7061,6 +8038,19 @@ func encodeDomainListHooksResponse(response DomainListHooksRes, w http.ResponseW
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -7177,6 +8167,19 @@ func encodeDomainListIdentityProvidersResponse(response DomainListIdentityProvid
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -7275,6 +8278,19 @@ func encodeDomainListPeersResponse(response DomainListPeersRes, w http.ResponseW
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -7391,6 +8407,19 @@ func encodeDomainListPolicyRulesResponse(response DomainListPolicyRulesRes, w ht
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -7489,6 +8518,19 @@ func encodeDomainListReadContextsResponse(response DomainListReadContextsRes, w 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -7605,6 +8647,19 @@ func encodeDomainListResourcesResponse(response DomainListResourcesRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -7703,6 +8758,19 @@ func encodeDomainListWriteContextsResponse(response DomainListWriteContextsRes, 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -7832,6 +8900,19 @@ func encodeDomainOpenCapsuleResponse(response DomainOpenCapsuleRes, w http.Respo
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -7923,6 +9004,19 @@ func encodeDomainPolicyFlushResponse(response DomainPolicyFlushRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -8032,6 +9126,19 @@ func encodeDomainPutCapabilityResponse(response DomainPutCapabilityRes, w http.R
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -8132,6 +9239,19 @@ func encodeDomainPutDisasterRecoverySettingsResponse(response DomainPutDisasterR
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -8223,6 +9343,19 @@ func encodeDomainPutFactTypeResponse(response DomainPutFactTypeRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -8339,6 +9472,19 @@ func encodeDomainPutSettingsResponse(response DomainPutSettingsRes, w http.Respo
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -8430,6 +9576,19 @@ func encodeDomainPutVendorSettingsResponse(response DomainPutVendorSettingsRes, 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -8546,6 +9705,19 @@ func encodeDomainQueryAccessLogResponse(response DomainQueryAccessLogRes, w http
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -8644,6 +9816,19 @@ func encodeDomainQueryAccessLogSingleCapsuleResponse(response DomainQueryAccessL
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -8760,6 +9945,19 @@ func encodeDomainQueryControlLogResponse(response DomainQueryControlLogRes, w ht
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -8851,6 +10049,19 @@ func encodeDomainRenumberDataPolicyRulesResponse(response DomainRenumberDataPoli
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -8967,6 +10178,19 @@ func encodeDomainRenumberPolicyRulesResponse(response DomainRenumberPolicyRulesR
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9074,6 +10298,19 @@ func encodeDomainRotateRootEncryptionKeysResponse(response DomainRotateRootEncry
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9165,6 +10402,19 @@ func encodeDomainSealCapsuleResponse(response DomainSealCapsuleRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -9281,6 +10531,19 @@ func encodeDomainSetActiveExternalRootEncryptionKeyResponse(response DomainSetAc
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9372,6 +10635,19 @@ func encodeDomainSetDataPolicyBindingResponse(response DomainSetDataPolicyBindin
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -9481,6 +10757,19 @@ func encodeDomainUpdateDataPolicyResponse(response DomainUpdateDataPolicyRes, w 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9572,6 +10861,19 @@ func encodeDomainUpdateIdentityProviderPrincipalResponse(response DomainUpdateId
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -9681,6 +10983,19 @@ func encodeDomainUpdatePeerResponse(response DomainUpdatePeerRes, w http.Respons
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9781,6 +11096,19 @@ func encodeDomainUpdatePolicyRuleResponse(response DomainUpdatePolicyRuleRes, w 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -9872,6 +11200,19 @@ func encodeDomainUpsertCapsuleTagsResponse(response DomainUpsertCapsuleTagsRes, 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -9988,6 +11329,19 @@ func encodeDomainUpsertFactResponse(response DomainUpsertFactRes, w http.Respons
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -10086,6 +11440,19 @@ func encodeDomainUpsertIdentityProviderResponse(response DomainUpsertIdentityPro
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -10195,6 +11562,19 @@ func encodeDomainUpsertReadContextResponse(response DomainUpsertReadContextRes, 
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -10286,6 +11666,19 @@ func encodeDomainUpsertSpanTagsResponse(response DomainUpsertSpanTagsRes, w http
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -10395,6 +11788,19 @@ func encodeDomainUpsertWriteContextResponse(response DomainUpsertWriteContextRes
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -10495,10 +11901,288 @@ func encodeDomainUpsertWriteContextConfigurationResponse(response DomainUpsertWr
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
 		span.SetStatus(codes.Error, http.StatusText(429))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeKeychainCreateWorkspaceResponse(response KeychainCreateWorkspaceRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *WorkspaceInfo:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeKeychainGetWorkspaceInfoResponse(response KeychainGetWorkspaceInfoRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *WorkspaceInfo:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeKeychainGetWorkspaceObjectsResponse(response KeychainGetWorkspaceObjectsRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *WorkspaceObjectList:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeKeychainPutWorkspaceObjectsResponse(response KeychainPutWorkspaceObjectsRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *KeychainPutWorkspaceObjectsOK:
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		return nil
+
+	case *PermanentRedirect:
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "Location" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "Location",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					return e.EncodeValue(conv.StringToString(response.Location))
+				}); err != nil {
+					return errors.Wrap(err, "encode Location header")
+				}
+			}
+		}
+		w.WriteHeader(308)
+		span.SetStatus(codes.Ok, http.StatusText(308))
+
+		return nil
+
+	case *InvalidRequestError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ResourceNotFoundError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -10595,6 +12279,19 @@ func encodeStarredDomainAddResponse(response StarredDomainAddRes, w http.Respons
 
 		return nil
 
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
 	case *ResourceExhaustedError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
@@ -10667,6 +12364,19 @@ func encodeStarredDomainListResponse(response StarredDomainListRes, w http.Respo
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -10767,6 +12477,19 @@ func encodeStarredDomainRemoveResponse(response StarredDomainRemoveRes, w http.R
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
 		span.SetStatus(codes.Error, http.StatusText(409))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *PreconditionFailedError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(412)
+		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
