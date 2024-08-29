@@ -425,6 +425,15 @@ func (UnimplementedHandler) DomainGetDisasterRecoverySettings(ctx context.Contex
 	return r, ht.ErrNotImplemented
 }
 
+// DomainGetEncryptionSettings implements domainGetEncryptionSettings operation.
+//
+// Returns the current value of each encryption-related setting for the domain.
+//
+// GET /domains/{domainID}/control/encryption/settings
+func (UnimplementedHandler) DomainGetEncryptionSettings(ctx context.Context, params DomainGetEncryptionSettingsParams) (r DomainGetEncryptionSettingsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainGetExternalRootEncryptionKeyProviders implements domainGetExternalRootEncryptionKeyProviders operation.
 //
 // Returns a list of available root encryption key providers, along with their description and, if
@@ -451,6 +460,16 @@ func (UnimplementedHandler) DomainGetFactByID(ctx context.Context, params Domain
 //
 // GET /domains/{domainID}/control/facts/{factType}
 func (UnimplementedHandler) DomainGetFactType(ctx context.Context, params DomainGetFactTypeParams) (r DomainGetFactTypeRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainGetIdentityGroupProviders implements domainGetIdentityGroupProviders operation.
+//
+// Retrieve details on what information is required in order to allow for mapping external domain
+// group membership to capabilities at authentication.
+//
+// GET /domains/{domainID}/control/identities/group-providers
+func (UnimplementedHandler) DomainGetIdentityGroupProviders(ctx context.Context, params DomainGetIdentityGroupProvidersParams) (r DomainGetIdentityGroupProvidersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -770,6 +789,15 @@ func (UnimplementedHandler) DomainPutCapability(ctx context.Context, req *NewCap
 //
 // PUT /domains/{domainID}/control/keys/disaster-recovery
 func (UnimplementedHandler) DomainPutDisasterRecoverySettings(ctx context.Context, req *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (r DomainPutDisasterRecoverySettingsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DomainPutEncryptionSettings implements domainPutEncryptionSettings operation.
+//
+// Updates encryption settings for the domain.
+//
+// PUT /domains/{domainID}/control/encryption/settings
+func (UnimplementedHandler) DomainPutEncryptionSettings(ctx context.Context, req *EncryptionSettings, params DomainPutEncryptionSettingsParams) (r DomainPutEncryptionSettingsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

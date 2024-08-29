@@ -294,6 +294,12 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/control/keys/disaster-recovery
 	DomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (DomainGetDisasterRecoverySettingsRes, error)
+	// DomainGetEncryptionSettings implements domainGetEncryptionSettings operation.
+	//
+	// Returns the current value of each encryption-related setting for the domain.
+	//
+	// GET /domains/{domainID}/control/encryption/settings
+	DomainGetEncryptionSettings(ctx context.Context, params DomainGetEncryptionSettingsParams) (DomainGetEncryptionSettingsRes, error)
 	// DomainGetExternalRootEncryptionKeyProviders implements domainGetExternalRootEncryptionKeyProviders operation.
 	//
 	// Returns a list of available root encryption key providers, along with their description and, if
@@ -314,6 +320,13 @@ type Handler interface {
 	//
 	// GET /domains/{domainID}/control/facts/{factType}
 	DomainGetFactType(ctx context.Context, params DomainGetFactTypeParams) (DomainGetFactTypeRes, error)
+	// DomainGetIdentityGroupProviders implements domainGetIdentityGroupProviders operation.
+	//
+	// Retrieve details on what information is required in order to allow for mapping external domain
+	// group membership to capabilities at authentication.
+	//
+	// GET /domains/{domainID}/control/identities/group-providers
+	DomainGetIdentityGroupProviders(ctx context.Context, params DomainGetIdentityGroupProvidersParams) (DomainGetIdentityGroupProvidersRes, error)
 	// DomainGetIdentityProvider implements domainGetIdentityProvider operation.
 	//
 	// Retrieve detailed information and configuration of an identity provider.
@@ -534,6 +547,12 @@ type Handler interface {
 	//
 	// PUT /domains/{domainID}/control/keys/disaster-recovery
 	DomainPutDisasterRecoverySettings(ctx context.Context, req *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (DomainPutDisasterRecoverySettingsRes, error)
+	// DomainPutEncryptionSettings implements domainPutEncryptionSettings operation.
+	//
+	// Updates encryption settings for the domain.
+	//
+	// PUT /domains/{domainID}/control/encryption/settings
+	DomainPutEncryptionSettings(ctx context.Context, req *EncryptionSettings, params DomainPutEncryptionSettingsParams) (DomainPutEncryptionSettingsRes, error)
 	// DomainPutFactType implements domainPutFactType operation.
 	//
 	// Facts are used to store ancillary information that helps express domain policy rules and read

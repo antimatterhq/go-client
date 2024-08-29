@@ -276,7 +276,7 @@ func (s *AccessLogEntry) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("time")
-		json.EncodeDateTime(e, s.Time)
+		e.Str(s.Time)
 	}
 	{
 		e.FieldStart("domain")
@@ -389,8 +389,8 @@ func (s *AccessLogEntry) Decode(d *jx.Decoder) error {
 		case "time":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.Time = v
+				v, err := d.Str()
+				s.Time = string(v)
 				if err != nil {
 					return err
 				}
@@ -8775,10 +8775,15 @@ func (s *Domain) encodeFields(e *jx.Encoder) {
 		e.FieldStart("id")
 		s.ID.Encode(e)
 	}
+	{
+		e.FieldStart("encryptionSettings")
+		s.EncryptionSettings.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfDomain = [1]string{
+var jsonFieldsNameOfDomain = [2]string{
 	0: "id",
+	1: "encryptionSettings",
 }
 
 // Decode decodes Domain from json.
@@ -8800,6 +8805,16 @@ func (s *Domain) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
+		case "encryptionSettings":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.EncryptionSettings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"encryptionSettings\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -8810,7 +8825,7 @@ func (s *Domain) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8985,13 +9000,20 @@ func (s *DomainAuthenticateResponse) encodeFields(e *jx.Encoder) {
 			s.CellAddress.Encode(e)
 		}
 	}
+	{
+		if s.GroupLookupResult.Set {
+			e.FieldStart("groupLookupResult")
+			s.GroupLookupResult.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfDomainAuthenticateResponse = [4]string{
+var jsonFieldsNameOfDomainAuthenticateResponse = [5]string{
 	0: "token",
 	1: "expiry",
 	2: "advisory",
 	3: "cellAddress",
+	4: "groupLookupResult",
 }
 
 // Decode decodes DomainAuthenticateResponse from json.
@@ -9055,6 +9077,16 @@ func (s *DomainAuthenticateResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"cellAddress\"")
+			}
+		case "groupLookupResult":
+			if err := func() error {
+				s.GroupLookupResult.Reset()
+				if err := s.GroupLookupResult.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"groupLookupResult\"")
 			}
 		default:
 			return d.Skip()
@@ -9227,7 +9259,7 @@ func (s *DomainControlLogEntry) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("time")
-		json.EncodeDateTime(e, s.Time)
+		e.Str(s.Time)
 	}
 	{
 		e.FieldStart("session")
@@ -9299,8 +9331,8 @@ func (s *DomainControlLogEntry) Decode(d *jx.Decoder) error {
 		case "time":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.Time = v
+				v, err := d.Str()
+				s.Time = string(v)
 				if err != nil {
 					return err
 				}
@@ -10817,6 +10849,177 @@ func (s DomainIdentityEmailPrincipalParamsType) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainIdentityEmailPrincipalParamsType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DomainIdentityGroupProviderDetails) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainIdentityGroupProviderDetails) encodeFields(e *jx.Encoder) {
+	{
+		if s.GroupIdentityProviders != nil {
+			e.FieldStart("groupIdentityProviders")
+			e.ArrStart()
+			for _, elem := range s.GroupIdentityProviders {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfDomainIdentityGroupProviderDetails = [1]string{
+	0: "groupIdentityProviders",
+}
+
+// Decode decodes DomainIdentityGroupProviderDetails from json.
+func (s *DomainIdentityGroupProviderDetails) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainIdentityGroupProviderDetails to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "groupIdentityProviders":
+			if err := func() error {
+				s.GroupIdentityProviders = make([]DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.GroupIdentityProviders = append(s.GroupIdentityProviders, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"groupIdentityProviders\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainIdentityGroupProviderDetails")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainIdentityGroupProviderDetails) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainIdentityGroupProviderDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) encodeFields(e *jx.Encoder) {
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.Description.Set {
+			e.FieldStart("description")
+			s.Description.Encode(e)
+		}
+	}
+	{
+		if s.AccountDetails.Set {
+			e.FieldStart("accountDetails")
+			s.AccountDetails.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfDomainIdentityGroupProviderDetailsGroupIdentityProvidersItem = [3]string{
+	0: "name",
+	1: "description",
+	2: "accountDetails",
+}
+
+// Decode decodes DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem from json.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			if err := func() error {
+				s.Description.Reset()
+				if err := s.Description.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "accountDetails":
+			if err := func() error {
+				s.AccountDetails.Reset()
+				if err := s.AccountDetails.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"accountDetails\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -15227,6 +15430,102 @@ func (s *DomainUpsertCapsuleTagsReq) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *EncryptionSettings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *EncryptionSettings) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("enableBypass")
+		e.Bool(s.EnableBypass)
+	}
+}
+
+var jsonFieldsNameOfEncryptionSettings = [1]string{
+	0: "enableBypass",
+}
+
+// Decode decodes EncryptionSettings from json.
+func (s *EncryptionSettings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EncryptionSettings to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enableBypass":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.EnableBypass = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enableBypass\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EncryptionSettings")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEncryptionSettings) {
+					name = jsonFieldsNameOfEncryptionSettings[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *EncryptionSettings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EncryptionSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Error) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -17336,10 +17635,17 @@ func (s *GoogleOAuthDomainIdentityProviderDetails) encodeFields(e *jx.Encoder) {
 			s.ClientID.Encode(e)
 		}
 	}
+	{
+		if s.GroupMappings.Set {
+			e.FieldStart("groupMappings")
+			s.GroupMappings.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfGoogleOAuthDomainIdentityProviderDetails = [1]string{
+var jsonFieldsNameOfGoogleOAuthDomainIdentityProviderDetails = [2]string{
 	0: "clientID",
+	1: "groupMappings",
 }
 
 // Decode decodes GoogleOAuthDomainIdentityProviderDetails from json.
@@ -17359,6 +17665,16 @@ func (s *GoogleOAuthDomainIdentityProviderDetails) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"clientID\"")
+			}
+		case "groupMappings":
+			if err := func() error {
+				s.GroupMappings.Reset()
+				if err := s.GroupMappings.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"groupMappings\"")
 			}
 		default:
 			return d.Skip()
@@ -17380,6 +17696,343 @@ func (s *GoogleOAuthDomainIdentityProviderDetails) MarshalJSON() ([]byte, error)
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *GoogleOAuthDomainIdentityProviderDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) encodeFields(e *jx.Encoder) {
+	{
+		if s.Mappings != nil {
+			e.FieldStart("mappings")
+			e.ArrStart()
+			for _, elem := range s.Mappings {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfGoogleOAuthDomainIdentityProviderDetailsGroupMappings = [1]string{
+	0: "mappings",
+}
+
+// Decode decodes GoogleOAuthDomainIdentityProviderDetailsGroupMappings from json.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GoogleOAuthDomainIdentityProviderDetailsGroupMappings to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "mappings":
+			if err := func() error {
+				s.Mappings = make([]GoogleOAuthDomainIdentityProviderGroupMappingDetails, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem GoogleOAuthDomainIdentityProviderGroupMappingDetails
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Mappings = append(s.Mappings, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mappings\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GoogleOAuthDomainIdentityProviderDetailsGroupMappings")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("group")
+		e.Str(s.Group)
+	}
+	{
+		e.FieldStart("capabilities")
+		e.ArrStart()
+		for _, elem := range s.Capabilities {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupCapabilityMappings = [2]string{
+	0: "group",
+	1: "capabilities",
+}
+
+// Decode decodes GoogleOAuthDomainIdentityProviderGroupCapabilityMappings from json.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GoogleOAuthDomainIdentityProviderGroupCapabilityMappings to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "group":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Group = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"group\"")
+			}
+		case "capabilities":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Capabilities = make([]Capability, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Capability
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Capabilities = append(s.Capabilities, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capabilities\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GoogleOAuthDomainIdentityProviderGroupCapabilityMappings")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupCapabilityMappings) {
+					name = jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupCapabilityMappings[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("groupDomain")
+		e.Str(s.GroupDomain)
+	}
+	{
+		e.FieldStart("domainGroupReaderAdmin")
+		e.Str(s.DomainGroupReaderAdmin)
+	}
+	{
+		e.FieldStart("groupCapabilities")
+		e.ArrStart()
+		for _, elem := range s.GroupCapabilities {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupMappingDetails = [3]string{
+	0: "groupDomain",
+	1: "domainGroupReaderAdmin",
+	2: "groupCapabilities",
+}
+
+// Decode decodes GoogleOAuthDomainIdentityProviderGroupMappingDetails from json.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GoogleOAuthDomainIdentityProviderGroupMappingDetails to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "groupDomain":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.GroupDomain = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"groupDomain\"")
+			}
+		case "domainGroupReaderAdmin":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.DomainGroupReaderAdmin = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"domainGroupReaderAdmin\"")
+			}
+		case "groupCapabilities":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.GroupCapabilities = make([]GoogleOAuthDomainIdentityProviderGroupCapabilityMappings, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem GoogleOAuthDomainIdentityProviderGroupCapabilityMappings
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.GroupCapabilities = append(s.GroupCapabilities, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"groupCapabilities\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GoogleOAuthDomainIdentityProviderGroupMappingDetails")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupMappingDetails) {
+					name = jsonFieldsNameOfGoogleOAuthDomainIdentityProviderGroupMappingDetails[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -21359,6 +22012,39 @@ func (s OptGoogleOAuthDomainIdentityProviderDetails) MarshalJSON() ([]byte, erro
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptGoogleOAuthDomainIdentityProviderDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GoogleOAuthDomainIdentityProviderDetailsGroupMappings as json.
+func (o OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes GoogleOAuthDomainIdentityProviderDetailsGroupMappings from json.
+func (o *OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -27385,6 +28071,12 @@ func (s *VariableDefinition) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ReadParameterName.Set {
+			e.FieldStart("readParameterName")
+			s.ReadParameterName.Encode(e)
+		}
+	}
+	{
 		if s.FactType.Set {
 			e.FieldStart("factType")
 			s.FactType.Encode(e)
@@ -27412,14 +28104,15 @@ func (s *VariableDefinition) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfVariableDefinition = [7]string{
+var jsonFieldsNameOfVariableDefinition = [8]string{
 	0: "variableName",
 	1: "source",
 	2: "tagName",
 	3: "capabilityName",
-	4: "factType",
-	5: "factArguments",
-	6: "variables",
+	4: "readParameterName",
+	5: "factType",
+	6: "factArguments",
+	7: "variables",
 }
 
 // Decode decodes VariableDefinition from json.
@@ -27472,6 +28165,16 @@ func (s *VariableDefinition) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"capabilityName\"")
+			}
+		case "readParameterName":
+			if err := func() error {
+				s.ReadParameterName.Reset()
+				if err := s.ReadParameterName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"readParameterName\"")
 			}
 		case "factType":
 			if err := func() error {
@@ -27763,6 +28466,8 @@ func (s *VariableDefinitionSource) Decode(d *jx.Decoder) error {
 		*s = VariableDefinitionSourceFactArgument
 	case VariableDefinitionSourceCapabilityValue:
 		*s = VariableDefinitionSourceCapabilityValue
+	case VariableDefinitionSourceReadParamValue:
+		*s = VariableDefinitionSourceReadParamValue
 	default:
 		*s = VariableDefinitionSource(v)
 	}

@@ -169,6 +169,10 @@ type DomainGetDisasterRecoverySettingsRes interface {
 	domainGetDisasterRecoverySettingsRes()
 }
 
+type DomainGetEncryptionSettingsRes interface {
+	domainGetEncryptionSettingsRes()
+}
+
 type DomainGetExternalRootEncryptionKeyProvidersRes interface {
 	domainGetExternalRootEncryptionKeyProvidersRes()
 }
@@ -179,6 +183,10 @@ type DomainGetFactByIDRes interface {
 
 type DomainGetFactTypeRes interface {
 	domainGetFactTypeRes()
+}
+
+type DomainGetIdentityGroupProvidersRes interface {
+	domainGetIdentityGroupProvidersRes()
 }
 
 type DomainGetIdentityProviderPrincipalRes interface {
@@ -311,6 +319,10 @@ type DomainPutCapabilityRes interface {
 
 type DomainPutDisasterRecoverySettingsRes interface {
 	domainPutDisasterRecoverySettingsRes()
+}
+
+type DomainPutEncryptionSettingsRes interface {
+	domainPutEncryptionSettingsRes()
 }
 
 type DomainPutFactTypeRes interface {

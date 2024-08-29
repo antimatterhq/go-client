@@ -122,7 +122,7 @@ func (s *AWSServiceAccountKeyInfoProviderName) UnmarshalText(data []byte) error 
 type AccessLogEntry struct {
 	ID LogEntryID `json:"id"`
 	// The time of a read operation, in UTC.
-	Time      time.Time               `json:"time" db:"-"`
+	Time      string                  `json:"time" db:"-"`
 	Domain    DomainID                `json:"domain"`
 	Capsule   CapsuleID               `json:"capsule"`
 	Operation AccessLogEntryOperation `json:"operation"`
@@ -155,7 +155,7 @@ func (s *AccessLogEntry) GetID() LogEntryID {
 }
 
 // GetTime returns the value of Time.
-func (s *AccessLogEntry) GetTime() time.Time {
+func (s *AccessLogEntry) GetTime() string {
 	return s.Time
 }
 
@@ -235,7 +235,7 @@ func (s *AccessLogEntry) SetID(val LogEntryID) {
 }
 
 // SetTime sets the value of Time.
-func (s *AccessLogEntry) SetTime(val time.Time) {
+func (s *AccessLogEntry) SetTime(val string) {
 	s.Time = val
 }
 
@@ -2312,9 +2312,11 @@ func (*ConflictError) domainGetDataPolicyBindingRes()                  {}
 func (*ConflictError) domainGetDataPolicyRes()                         {}
 func (*ConflictError) domainGetDataPolicyRuleRes()                     {}
 func (*ConflictError) domainGetDisasterRecoverySettingsRes()           {}
+func (*ConflictError) domainGetEncryptionSettingsRes()                 {}
 func (*ConflictError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*ConflictError) domainGetFactByIDRes()                           {}
 func (*ConflictError) domainGetFactTypeRes()                           {}
+func (*ConflictError) domainGetIdentityGroupProvidersRes()             {}
 func (*ConflictError) domainGetIdentityProviderPrincipalRes()          {}
 func (*ConflictError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*ConflictError) domainGetIdentityProviderRes()                   {}
@@ -2348,6 +2350,7 @@ func (*ConflictError) domainOpenCapsuleRes()                           {}
 func (*ConflictError) domainPolicyFlushRes()                           {}
 func (*ConflictError) domainPutCapabilityRes()                         {}
 func (*ConflictError) domainPutDisasterRecoverySettingsRes()           {}
+func (*ConflictError) domainPutEncryptionSettingsRes()                 {}
 func (*ConflictError) domainPutFactTypeRes()                           {}
 func (*ConflictError) domainPutSettingsRes()                           {}
 func (*ConflictError) domainPutVendorSettingsRes()                     {}
@@ -3744,7 +3747,8 @@ func (*DisasterRecoverySettings) domainGetDisasterRecoverySettingsRes() {}
 // Information about a domain.
 // Ref: #/components/schemas/Domain
 type Domain struct {
-	ID DomainID `json:"id"`
+	ID                 DomainID           `json:"id"`
+	EncryptionSettings EncryptionSettings `json:"encryptionSettings"`
 }
 
 // GetID returns the value of ID.
@@ -3752,9 +3756,19 @@ func (s *Domain) GetID() DomainID {
 	return s.ID
 }
 
+// GetEncryptionSettings returns the value of EncryptionSettings.
+func (s *Domain) GetEncryptionSettings() EncryptionSettings {
+	return s.EncryptionSettings
+}
+
 // SetID sets the value of ID.
 func (s *Domain) SetID(val DomainID) {
 	s.ID = val
+}
+
+// SetEncryptionSettings sets the value of EncryptionSettings.
+func (s *Domain) SetEncryptionSettings(val EncryptionSettings) {
+	s.EncryptionSettings = val
 }
 
 func (*Domain) domainGetPeerRes() {}
@@ -3796,6 +3810,9 @@ type DomainAuthenticateResponse struct {
 	Advisory []string `json:"advisory"`
 	// The public URL of the cell responding to the authentication request.
 	CellAddress OptString `json:"cellAddress"`
+	// Optional message for use if user domain group lookup resolution fails. If this field is populated,
+	// it indicates that no capabilities were retrieved that relate to domain group mappings.
+	GroupLookupResult OptString `json:"groupLookupResult"`
 }
 
 // GetToken returns the value of Token.
@@ -3818,6 +3835,11 @@ func (s *DomainAuthenticateResponse) GetCellAddress() OptString {
 	return s.CellAddress
 }
 
+// GetGroupLookupResult returns the value of GroupLookupResult.
+func (s *DomainAuthenticateResponse) GetGroupLookupResult() OptString {
+	return s.GroupLookupResult
+}
+
 // SetToken sets the value of Token.
 func (s *DomainAuthenticateResponse) SetToken(val string) {
 	s.Token = val
@@ -3836,6 +3858,11 @@ func (s *DomainAuthenticateResponse) SetAdvisory(val []string) {
 // SetCellAddress sets the value of CellAddress.
 func (s *DomainAuthenticateResponse) SetCellAddress(val OptString) {
 	s.CellAddress = val
+}
+
+// SetGroupLookupResult sets the value of GroupLookupResult.
+func (s *DomainAuthenticateResponse) SetGroupLookupResult(val OptString) {
+	s.GroupLookupResult = val
 }
 
 func (*DomainAuthenticateResponse) domainAuthenticateRes() {}
@@ -3866,7 +3893,7 @@ type DomainControlLogEntry struct {
 	Domain DomainID   `json:"domain"`
 	ID     LogEntryID `json:"id"`
 	// The time of an operation, in UTC.
-	Time        time.Time                        `json:"time" db:"-"`
+	Time        string                           `json:"time" db:"-"`
 	Session     SessionID                        `json:"session"`
 	URL         string                           `json:"url"`
 	Summary     string                           `json:"summary"`
@@ -3888,7 +3915,7 @@ func (s *DomainControlLogEntry) GetID() LogEntryID {
 }
 
 // GetTime returns the value of Time.
-func (s *DomainControlLogEntry) GetTime() time.Time {
+func (s *DomainControlLogEntry) GetTime() string {
 	return s.Time
 }
 
@@ -3933,7 +3960,7 @@ func (s *DomainControlLogEntry) SetID(val LogEntryID) {
 }
 
 // SetTime sets the value of Time.
-func (s *DomainControlLogEntry) SetTime(val time.Time) {
+func (s *DomainControlLogEntry) SetTime(val string) {
 	s.Time = val
 }
 
@@ -4455,6 +4482,64 @@ func (s *DomainIdentityEmailPrincipalParamsType) UnmarshalText(data []byte) erro
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Information about an identity provider. This may be an imported provider or a provider in this
+// domain.
+// Ref: #/components/schemas/DomainIdentityGroupProviderDetails
+type DomainIdentityGroupProviderDetails struct {
+	GroupIdentityProviders []DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem `json:"groupIdentityProviders"`
+}
+
+// GetGroupIdentityProviders returns the value of GroupIdentityProviders.
+func (s *DomainIdentityGroupProviderDetails) GetGroupIdentityProviders() []DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem {
+	return s.GroupIdentityProviders
+}
+
+// SetGroupIdentityProviders sets the value of GroupIdentityProviders.
+func (s *DomainIdentityGroupProviderDetails) SetGroupIdentityProviders(val []DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) {
+	s.GroupIdentityProviders = val
+}
+
+func (*DomainIdentityGroupProviderDetails) domainGetIdentityGroupProvidersRes() {}
+
+type DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem struct {
+	// The name of the group membership identity provider.
+	Name OptString `json:"name"`
+	// Detailed instructions on how to configure and enable this group membership identity provider.
+	Description OptString `json:"description"`
+	// The account delegation, if needed, has to be done to.
+	AccountDetails OptString `json:"accountDetails"`
+}
+
+// GetName returns the value of Name.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) GetName() OptString {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) GetDescription() OptString {
+	return s.Description
+}
+
+// GetAccountDetails returns the value of AccountDetails.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) GetAccountDetails() OptString {
+	return s.AccountDetails
+}
+
+// SetName sets the value of Name.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetAccountDetails sets the value of AccountDetails.
+func (s *DomainIdentityGroupProviderDetailsGroupIdentityProvidersItem) SetAccountDetails(val OptString) {
+	s.AccountDetails = val
 }
 
 // Additional details for a hosted domain principal.
@@ -5894,6 +5979,11 @@ type DomainPutDisasterRecoverySettingsOK struct{}
 
 func (*DomainPutDisasterRecoverySettingsOK) domainPutDisasterRecoverySettingsRes() {}
 
+// DomainPutEncryptionSettingsOK is response for DomainPutEncryptionSettings operation.
+type DomainPutEncryptionSettingsOK struct{}
+
+func (*DomainPutEncryptionSettingsOK) domainPutEncryptionSettingsRes() {}
+
 // DomainPutFactTypeOK is response for DomainPutFactType operation.
 type DomainPutFactTypeOK struct{}
 
@@ -6302,6 +6392,27 @@ func (*DomainUpsertWriteContextConfigurationOK) domainUpsertWriteContextConfigur
 type DomainUpsertWriteContextOK struct{}
 
 func (*DomainUpsertWriteContextOK) domainUpsertWriteContextRes() {}
+
+// Encryption-related settings for a domain.
+// Ref: #/components/schemas/EncryptionSettings
+type EncryptionSettings struct {
+	// If true, allow clients to optionally bypass encryption for this domain. When this setting is
+	// enabled, if clients pass the AllowBypass call option when encapsulating, the input plaintext will
+	// be passed through directly without any modifications, and without creating a capsule.
+	EnableBypass bool `json:"enableBypass"`
+}
+
+// GetEnableBypass returns the value of EnableBypass.
+func (s *EncryptionSettings) GetEnableBypass() bool {
+	return s.EnableBypass
+}
+
+// SetEnableBypass sets the value of EnableBypass.
+func (s *EncryptionSettings) SetEnableBypass(val bool) {
+	s.EnableBypass = val
+}
+
+func (*EncryptionSettings) domainGetEncryptionSettingsRes() {}
 
 // An internal error.
 // Ref: #/components/schemas/Error
@@ -7038,7 +7149,8 @@ func (s *GCPServiceAccountKeyInfoProviderName) UnmarshalText(data []byte) error 
 // Antimatter Client ID will be used.
 // Ref: #/components/schemas/GoogleOAuthDomainIdentityProviderDetails
 type GoogleOAuthDomainIdentityProviderDetails struct {
-	ClientID OptString `json:"clientID"`
+	ClientID      OptString                                                `json:"clientID"`
+	GroupMappings OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings `json:"groupMappings"`
 }
 
 // GetClientID returns the value of ClientID.
@@ -7046,9 +7158,105 @@ func (s *GoogleOAuthDomainIdentityProviderDetails) GetClientID() OptString {
 	return s.ClientID
 }
 
+// GetGroupMappings returns the value of GroupMappings.
+func (s *GoogleOAuthDomainIdentityProviderDetails) GetGroupMappings() OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings {
+	return s.GroupMappings
+}
+
 // SetClientID sets the value of ClientID.
 func (s *GoogleOAuthDomainIdentityProviderDetails) SetClientID(val OptString) {
 	s.ClientID = val
+}
+
+// SetGroupMappings sets the value of GroupMappings.
+func (s *GoogleOAuthDomainIdentityProviderDetails) SetGroupMappings(val OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) {
+	s.GroupMappings = val
+}
+
+type GoogleOAuthDomainIdentityProviderDetailsGroupMappings struct {
+	// A detailed mapping of user group membership to capabilities associated  with these groups.
+	Mappings []GoogleOAuthDomainIdentityProviderGroupMappingDetails `json:"mappings"`
+}
+
+// GetMappings returns the value of Mappings.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) GetMappings() []GoogleOAuthDomainIdentityProviderGroupMappingDetails {
+	return s.Mappings
+}
+
+// SetMappings sets the value of Mappings.
+func (s *GoogleOAuthDomainIdentityProviderDetailsGroupMappings) SetMappings(val []GoogleOAuthDomainIdentityProviderGroupMappingDetails) {
+	s.Mappings = val
+}
+
+// A mapping of group membership to allocated capabilities.
+// Ref: #/components/schemas/GoogleOAuthDomainIdentityProviderGroupCapabilityMappings
+type GoogleOAuthDomainIdentityProviderGroupCapabilityMappings struct {
+	// The group name to check if a user is a member of.
+	Group string `json:"group"`
+	// The capabilities to assign if the user is a member of the group.
+	Capabilities []Capability `json:"capabilities"`
+}
+
+// GetGroup returns the value of Group.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) GetGroup() string {
+	return s.Group
+}
+
+// GetCapabilities returns the value of Capabilities.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) GetCapabilities() []Capability {
+	return s.Capabilities
+}
+
+// SetGroup sets the value of Group.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) SetGroup(val string) {
+	s.Group = val
+}
+
+// SetCapabilities sets the value of Capabilities.
+func (s *GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) SetCapabilities(val []Capability) {
+	s.Capabilities = val
+}
+
+// The group capability mapping object containing both mappings and administrative configuration.
+// Ref: #/components/schemas/GoogleOAuthDomainIdentityProviderGroupMappingDetails
+type GoogleOAuthDomainIdentityProviderGroupMappingDetails struct {
+	// The domain this group mapping applies to.
+	GroupDomain string `json:"groupDomain"`
+	// The Groups Reader administrator to impersonate when looking up a user's group membership.
+	DomainGroupReaderAdmin string `json:"domainGroupReaderAdmin"`
+	// Detailed information about a Google OAuth identity provider's group mappings. If left empty, then
+	// no group mapping will be checked on use of this identity provider.
+	GroupCapabilities []GoogleOAuthDomainIdentityProviderGroupCapabilityMappings `json:"groupCapabilities"`
+}
+
+// GetGroupDomain returns the value of GroupDomain.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) GetGroupDomain() string {
+	return s.GroupDomain
+}
+
+// GetDomainGroupReaderAdmin returns the value of DomainGroupReaderAdmin.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) GetDomainGroupReaderAdmin() string {
+	return s.DomainGroupReaderAdmin
+}
+
+// GetGroupCapabilities returns the value of GroupCapabilities.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) GetGroupCapabilities() []GoogleOAuthDomainIdentityProviderGroupCapabilityMappings {
+	return s.GroupCapabilities
+}
+
+// SetGroupDomain sets the value of GroupDomain.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) SetGroupDomain(val string) {
+	s.GroupDomain = val
+}
+
+// SetDomainGroupReaderAdmin sets the value of DomainGroupReaderAdmin.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) SetDomainGroupReaderAdmin(val string) {
+	s.DomainGroupReaderAdmin = val
+}
+
+// SetGroupCapabilities sets the value of GroupCapabilities.
+func (s *GoogleOAuthDomainIdentityProviderGroupMappingDetails) SetGroupCapabilities(val []GoogleOAuthDomainIdentityProviderGroupCapabilityMappings) {
+	s.GroupCapabilities = val
 }
 
 type HookName string
@@ -7130,9 +7338,11 @@ func (*InvalidRequestError) domainGetDataPolicyBindingRes()                  {}
 func (*InvalidRequestError) domainGetDataPolicyRes()                         {}
 func (*InvalidRequestError) domainGetDataPolicyRuleRes()                     {}
 func (*InvalidRequestError) domainGetDisasterRecoverySettingsRes()           {}
+func (*InvalidRequestError) domainGetEncryptionSettingsRes()                 {}
 func (*InvalidRequestError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*InvalidRequestError) domainGetFactByIDRes()                           {}
 func (*InvalidRequestError) domainGetFactTypeRes()                           {}
+func (*InvalidRequestError) domainGetIdentityGroupProvidersRes()             {}
 func (*InvalidRequestError) domainGetIdentityProviderPrincipalRes()          {}
 func (*InvalidRequestError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*InvalidRequestError) domainGetIdentityProviderRes()                   {}
@@ -7166,6 +7376,7 @@ func (*InvalidRequestError) domainOpenCapsuleRes()                           {}
 func (*InvalidRequestError) domainPolicyFlushRes()                           {}
 func (*InvalidRequestError) domainPutCapabilityRes()                         {}
 func (*InvalidRequestError) domainPutDisasterRecoverySettingsRes()           {}
+func (*InvalidRequestError) domainPutEncryptionSettingsRes()                 {}
 func (*InvalidRequestError) domainPutFactTypeRes()                           {}
 func (*InvalidRequestError) domainPutSettingsRes()                           {}
 func (*InvalidRequestError) domainPutVendorSettingsRes()                     {}
@@ -9675,6 +9886,52 @@ func (o OptGoogleOAuthDomainIdentityProviderDetails) Or(d GoogleOAuthDomainIdent
 	return d
 }
 
+// NewOptGoogleOAuthDomainIdentityProviderDetailsGroupMappings returns new OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings with value set to v.
+func NewOptGoogleOAuthDomainIdentityProviderDetailsGroupMappings(v GoogleOAuthDomainIdentityProviderDetailsGroupMappings) OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings {
+	return OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings is optional GoogleOAuthDomainIdentityProviderDetailsGroupMappings.
+type OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings struct {
+	Value GoogleOAuthDomainIdentityProviderDetailsGroupMappings
+	Set   bool
+}
+
+// IsSet returns true if OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings was set.
+func (o OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) Reset() {
+	var v GoogleOAuthDomainIdentityProviderDetailsGroupMappings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) SetTo(v GoogleOAuthDomainIdentityProviderDetailsGroupMappings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) Get() (v GoogleOAuthDomainIdentityProviderDetailsGroupMappings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGoogleOAuthDomainIdentityProviderDetailsGroupMappings) Or(d GoogleOAuthDomainIdentityProviderDetailsGroupMappings) GoogleOAuthDomainIdentityProviderDetailsGroupMappings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptIdentityProviderName returns new OptIdentityProviderName with value set to v.
 func NewOptIdentityProviderName(v IdentityProviderName) OptIdentityProviderName {
 	return OptIdentityProviderName{
@@ -10928,9 +11185,11 @@ func (*PermanentRedirect) domainGetDataPolicyBindingRes()                  {}
 func (*PermanentRedirect) domainGetDataPolicyRes()                         {}
 func (*PermanentRedirect) domainGetDataPolicyRuleRes()                     {}
 func (*PermanentRedirect) domainGetDisasterRecoverySettingsRes()           {}
+func (*PermanentRedirect) domainGetEncryptionSettingsRes()                 {}
 func (*PermanentRedirect) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*PermanentRedirect) domainGetFactByIDRes()                           {}
 func (*PermanentRedirect) domainGetFactTypeRes()                           {}
+func (*PermanentRedirect) domainGetIdentityGroupProvidersRes()             {}
 func (*PermanentRedirect) domainGetIdentityProviderPrincipalRes()          {}
 func (*PermanentRedirect) domainGetIdentityProviderPrincipalsRes()         {}
 func (*PermanentRedirect) domainGetIdentityProviderRes()                   {}
@@ -10964,6 +11223,7 @@ func (*PermanentRedirect) domainOpenCapsuleRes()                           {}
 func (*PermanentRedirect) domainPolicyFlushRes()                           {}
 func (*PermanentRedirect) domainPutCapabilityRes()                         {}
 func (*PermanentRedirect) domainPutDisasterRecoverySettingsRes()           {}
+func (*PermanentRedirect) domainPutEncryptionSettingsRes()                 {}
 func (*PermanentRedirect) domainPutFactTypeRes()                           {}
 func (*PermanentRedirect) domainPutSettingsRes()                           {}
 func (*PermanentRedirect) domainPutVendorSettingsRes()                     {}
@@ -11173,9 +11433,11 @@ func (*PreconditionFailedError) domainGetDataPolicyBindingRes()                 
 func (*PreconditionFailedError) domainGetDataPolicyRes()                         {}
 func (*PreconditionFailedError) domainGetDataPolicyRuleRes()                     {}
 func (*PreconditionFailedError) domainGetDisasterRecoverySettingsRes()           {}
+func (*PreconditionFailedError) domainGetEncryptionSettingsRes()                 {}
 func (*PreconditionFailedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*PreconditionFailedError) domainGetFactByIDRes()                           {}
 func (*PreconditionFailedError) domainGetFactTypeRes()                           {}
+func (*PreconditionFailedError) domainGetIdentityGroupProvidersRes()             {}
 func (*PreconditionFailedError) domainGetIdentityProviderPrincipalRes()          {}
 func (*PreconditionFailedError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*PreconditionFailedError) domainGetIdentityProviderRes()                   {}
@@ -11209,6 +11471,7 @@ func (*PreconditionFailedError) domainOpenCapsuleRes()                          
 func (*PreconditionFailedError) domainPolicyFlushRes()                           {}
 func (*PreconditionFailedError) domainPutCapabilityRes()                         {}
 func (*PreconditionFailedError) domainPutDisasterRecoverySettingsRes()           {}
+func (*PreconditionFailedError) domainPutEncryptionSettingsRes()                 {}
 func (*PreconditionFailedError) domainPutFactTypeRes()                           {}
 func (*PreconditionFailedError) domainPutSettingsRes()                           {}
 func (*PreconditionFailedError) domainPutVendorSettingsRes()                     {}
@@ -12213,9 +12476,11 @@ func (*ResourceExhaustedError) domainGetDataPolicyBindingRes()                  
 func (*ResourceExhaustedError) domainGetDataPolicyRes()                         {}
 func (*ResourceExhaustedError) domainGetDataPolicyRuleRes()                     {}
 func (*ResourceExhaustedError) domainGetDisasterRecoverySettingsRes()           {}
+func (*ResourceExhaustedError) domainGetEncryptionSettingsRes()                 {}
 func (*ResourceExhaustedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*ResourceExhaustedError) domainGetFactByIDRes()                           {}
 func (*ResourceExhaustedError) domainGetFactTypeRes()                           {}
+func (*ResourceExhaustedError) domainGetIdentityGroupProvidersRes()             {}
 func (*ResourceExhaustedError) domainGetIdentityProviderPrincipalRes()          {}
 func (*ResourceExhaustedError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*ResourceExhaustedError) domainGetIdentityProviderRes()                   {}
@@ -12249,6 +12514,7 @@ func (*ResourceExhaustedError) domainOpenCapsuleRes()                           
 func (*ResourceExhaustedError) domainPolicyFlushRes()                           {}
 func (*ResourceExhaustedError) domainPutCapabilityRes()                         {}
 func (*ResourceExhaustedError) domainPutDisasterRecoverySettingsRes()           {}
+func (*ResourceExhaustedError) domainPutEncryptionSettingsRes()                 {}
 func (*ResourceExhaustedError) domainPutFactTypeRes()                           {}
 func (*ResourceExhaustedError) domainPutSettingsRes()                           {}
 func (*ResourceExhaustedError) domainPutVendorSettingsRes()                     {}
@@ -12359,9 +12625,11 @@ func (*ResourceNotFoundError) domainGetDataPolicyBindingRes()                  {
 func (*ResourceNotFoundError) domainGetDataPolicyRes()                         {}
 func (*ResourceNotFoundError) domainGetDataPolicyRuleRes()                     {}
 func (*ResourceNotFoundError) domainGetDisasterRecoverySettingsRes()           {}
+func (*ResourceNotFoundError) domainGetEncryptionSettingsRes()                 {}
 func (*ResourceNotFoundError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*ResourceNotFoundError) domainGetFactByIDRes()                           {}
 func (*ResourceNotFoundError) domainGetFactTypeRes()                           {}
+func (*ResourceNotFoundError) domainGetIdentityGroupProvidersRes()             {}
 func (*ResourceNotFoundError) domainGetIdentityProviderPrincipalRes()          {}
 func (*ResourceNotFoundError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*ResourceNotFoundError) domainGetIdentityProviderRes()                   {}
@@ -12395,6 +12663,7 @@ func (*ResourceNotFoundError) domainOpenCapsuleRes()                           {
 func (*ResourceNotFoundError) domainPolicyFlushRes()                           {}
 func (*ResourceNotFoundError) domainPutCapabilityRes()                         {}
 func (*ResourceNotFoundError) domainPutDisasterRecoverySettingsRes()           {}
+func (*ResourceNotFoundError) domainPutEncryptionSettingsRes()                 {}
 func (*ResourceNotFoundError) domainPutFactTypeRes()                           {}
 func (*ResourceNotFoundError) domainPutSettingsRes()                           {}
 func (*ResourceNotFoundError) domainPutVendorSettingsRes()                     {}
@@ -13358,9 +13627,11 @@ func (*UnauthorizedError) domainGetDataPolicyBindingRes()                  {}
 func (*UnauthorizedError) domainGetDataPolicyRes()                         {}
 func (*UnauthorizedError) domainGetDataPolicyRuleRes()                     {}
 func (*UnauthorizedError) domainGetDisasterRecoverySettingsRes()           {}
+func (*UnauthorizedError) domainGetEncryptionSettingsRes()                 {}
 func (*UnauthorizedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
 func (*UnauthorizedError) domainGetFactByIDRes()                           {}
 func (*UnauthorizedError) domainGetFactTypeRes()                           {}
+func (*UnauthorizedError) domainGetIdentityGroupProvidersRes()             {}
 func (*UnauthorizedError) domainGetIdentityProviderPrincipalRes()          {}
 func (*UnauthorizedError) domainGetIdentityProviderPrincipalsRes()         {}
 func (*UnauthorizedError) domainGetIdentityProviderRes()                   {}
@@ -13394,6 +13665,7 @@ func (*UnauthorizedError) domainOpenCapsuleRes()                           {}
 func (*UnauthorizedError) domainPolicyFlushRes()                           {}
 func (*UnauthorizedError) domainPutCapabilityRes()                         {}
 func (*UnauthorizedError) domainPutDisasterRecoverySettingsRes()           {}
+func (*UnauthorizedError) domainPutEncryptionSettingsRes()                 {}
 func (*UnauthorizedError) domainPutFactTypeRes()                           {}
 func (*UnauthorizedError) domainPutSettingsRes()                           {}
 func (*UnauthorizedError) domainPutVendorSettingsRes()                     {}
@@ -13443,10 +13715,12 @@ type VariableDefinition struct {
 	// This should be a TagName but can contain variables.
 	TagName OptString `json:"tagName"`
 	// This should be a CapabilityReference but can contain variables.
-	CapabilityName OptString                             `json:"capabilityName"`
-	FactType       OptFactTypeReference                  `json:"factType"`
-	FactArguments  []VariableDefinitionFactArgumentsItem `json:"factArguments"`
-	Variables      []VariableDefinition                  `json:"variables"`
+	CapabilityName OptString `json:"capabilityName"`
+	// This should be the name of a read parameter but can contain variables.
+	ReadParameterName OptString                             `json:"readParameterName"`
+	FactType          OptFactTypeReference                  `json:"factType"`
+	FactArguments     []VariableDefinitionFactArgumentsItem `json:"factArguments"`
+	Variables         []VariableDefinition                  `json:"variables"`
 }
 
 // GetVariableName returns the value of VariableName.
@@ -13467,6 +13741,11 @@ func (s *VariableDefinition) GetTagName() OptString {
 // GetCapabilityName returns the value of CapabilityName.
 func (s *VariableDefinition) GetCapabilityName() OptString {
 	return s.CapabilityName
+}
+
+// GetReadParameterName returns the value of ReadParameterName.
+func (s *VariableDefinition) GetReadParameterName() OptString {
+	return s.ReadParameterName
 }
 
 // GetFactType returns the value of FactType.
@@ -13502,6 +13781,11 @@ func (s *VariableDefinition) SetTagName(val OptString) {
 // SetCapabilityName sets the value of CapabilityName.
 func (s *VariableDefinition) SetCapabilityName(val OptString) {
 	s.CapabilityName = val
+}
+
+// SetReadParameterName sets the value of ReadParameterName.
+func (s *VariableDefinition) SetReadParameterName(val OptString) {
+	s.ReadParameterName = val
 }
 
 // SetFactType sets the value of FactType.
@@ -13605,6 +13889,7 @@ const (
 	VariableDefinitionSourceTagValue        VariableDefinitionSource = "TagValue"
 	VariableDefinitionSourceFactArgument    VariableDefinitionSource = "FactArgument"
 	VariableDefinitionSourceCapabilityValue VariableDefinitionSource = "CapabilityValue"
+	VariableDefinitionSourceReadParamValue  VariableDefinitionSource = "ReadParamValue"
 )
 
 // AllValues returns all VariableDefinitionSource values.
@@ -13613,6 +13898,7 @@ func (VariableDefinitionSource) AllValues() []VariableDefinitionSource {
 		VariableDefinitionSourceTagValue,
 		VariableDefinitionSourceFactArgument,
 		VariableDefinitionSourceCapabilityValue,
+		VariableDefinitionSourceReadParamValue,
 	}
 }
 
@@ -13624,6 +13910,8 @@ func (s VariableDefinitionSource) MarshalText() ([]byte, error) {
 	case VariableDefinitionSourceFactArgument:
 		return []byte(s), nil
 	case VariableDefinitionSourceCapabilityValue:
+		return []byte(s), nil
+	case VariableDefinitionSourceReadParamValue:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -13641,6 +13929,9 @@ func (s *VariableDefinitionSource) UnmarshalText(data []byte) error {
 		return nil
 	case VariableDefinitionSourceCapabilityValue:
 		*s = VariableDefinitionSourceCapabilityValue
+		return nil
+	case VariableDefinitionSourceReadParamValue:
+		*s = VariableDefinitionSourceReadParamValue
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

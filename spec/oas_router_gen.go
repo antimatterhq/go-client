@@ -951,6 +951,33 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										}
 
 										elem = origElem
+									case 's': // Prefix: "settings"
+										origElem := elem
+										if l := len("settings"); len(elem) >= l && elem[0:l] == "settings" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleDomainGetEncryptionSettingsRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											case "PUT":
+												s.handleDomainPutEncryptionSettingsRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "GET,PUT")
+											}
+
+											return
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem
@@ -1164,6 +1191,34 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											break
 										}
 
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'g': // Prefix: "group-providers"
+											origElem := elem
+											if l := len("group-providers"); len(elem) >= l && elem[0:l] == "group-providers" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleDomainGetIdentityGroupProvidersRequest([1]string{
+														args[0],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, "GET")
+												}
+
+												return
+											}
+
+											elem = origElem
+										}
 										// Param: "identityProviderName"
 										// Match until "/"
 										idx := strings.IndexByte(elem, '/')
@@ -3443,6 +3498,39 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										}
 
 										elem = origElem
+									case 's': // Prefix: "settings"
+										origElem := elem
+										if l := len("settings"); len(elem) >= l && elem[0:l] == "settings" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "GET":
+												r.name = "DomainGetEncryptionSettings"
+												r.summary = "Get encryption-related settings for a domain."
+												r.operationID = "domainGetEncryptionSettings"
+												r.pathPattern = "/domains/{domainID}/control/encryption/settings"
+												r.args = args
+												r.count = 1
+												return r, true
+											case "PUT":
+												r.name = "DomainPutEncryptionSettings"
+												r.summary = "Update encryption settings for a domain."
+												r.operationID = "domainPutEncryptionSettings"
+												r.pathPattern = "/domains/{domainID}/control/encryption/settings"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem
@@ -3672,6 +3760,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											break
 										}
 
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'g': // Prefix: "group-providers"
+											origElem := elem
+											if l := len("group-providers"); len(elem) >= l && elem[0:l] == "group-providers" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = "DomainGetIdentityGroupProviders"
+													r.summary = "Get supported group identity provider details"
+													r.operationID = "domainGetIdentityGroupProviders"
+													r.pathPattern = "/domains/{domainID}/control/identities/group-providers"
+													r.args = args
+													r.count = 1
+													return r, true
+												default:
+													return
+												}
+											}
+
+											elem = origElem
+										}
 										// Param: "identityProviderName"
 										// Match until "/"
 										idx := strings.IndexByte(elem, '/')

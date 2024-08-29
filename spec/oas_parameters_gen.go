@@ -6268,6 +6268,86 @@ func decodeDomainGetDisasterRecoverySettingsParams(args [1]string, argsEscaped b
 	return params, nil
 }
 
+// DomainGetEncryptionSettingsParams is parameters of domainGetEncryptionSettings operation.
+type DomainGetEncryptionSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainGetEncryptionSettingsParams(packed middleware.Parameters) (params DomainGetEncryptionSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainGetEncryptionSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainGetEncryptionSettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainGetExternalRootEncryptionKeyProvidersParams is parameters of domainGetExternalRootEncryptionKeyProviders operation.
 type DomainGetExternalRootEncryptionKeyProvidersParams struct {
 	DomainID DomainID
@@ -6708,6 +6788,86 @@ func decodeDomainGetFactTypeParams(args [2]string, argsEscaped bool, r *http.Req
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "factType",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainGetIdentityGroupProvidersParams is parameters of domainGetIdentityGroupProviders operation.
+type DomainGetIdentityGroupProvidersParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainGetIdentityGroupProvidersParams(packed middleware.Parameters) (params DomainGetIdentityGroupProvidersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainGetIdentityGroupProvidersParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainGetIdentityGroupProvidersParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
 			In:   "path",
 			Err:  err,
 		}
@@ -10967,6 +11127,86 @@ func unpackDomainPutDisasterRecoverySettingsParams(packed middleware.Parameters)
 }
 
 func decodeDomainPutDisasterRecoverySettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPutDisasterRecoverySettingsParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DomainPutEncryptionSettingsParams is parameters of domainPutEncryptionSettings operation.
+type DomainPutEncryptionSettingsParams struct {
+	DomainID DomainID
+}
+
+func unpackDomainPutEncryptionSettingsParams(packed middleware.Parameters) (params DomainPutEncryptionSettingsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	return params
+}
+
+func decodeDomainPutEncryptionSettingsParams(args [1]string, argsEscaped bool, r *http.Request) (params DomainPutEncryptionSettingsParams, _ error) {
 	// Decode path: domainID.
 	if err := func() error {
 		param := args[0]
