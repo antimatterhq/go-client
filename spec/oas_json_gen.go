@@ -878,9 +878,17 @@ func (s *AccessLogEntryReadInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("filteredRecords")
 		e.Int(s.FilteredRecords)
 	}
+	{
+		e.FieldStart("returnedSpans")
+		e.Int(s.ReturnedSpans)
+	}
+	{
+		e.FieldStart("filteredSpans")
+		e.Int(s.FilteredSpans)
+	}
 }
 
-var jsonFieldsNameOfAccessLogEntryReadInfo = [7]string{
+var jsonFieldsNameOfAccessLogEntryReadInfo = [9]string{
 	0: "parameters",
 	1: "readContext",
 	2: "allowedTags",
@@ -888,6 +896,8 @@ var jsonFieldsNameOfAccessLogEntryReadInfo = [7]string{
 	4: "tokenizedTags",
 	5: "returnedRecords",
 	6: "filteredRecords",
+	7: "returnedSpans",
+	8: "filteredSpans",
 }
 
 // Decode decodes AccessLogEntryReadInfo from json.
@@ -895,7 +905,7 @@ func (s *AccessLogEntryReadInfo) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode AccessLogEntryReadInfo to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -973,6 +983,30 @@ func (s *AccessLogEntryReadInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"filteredRecords\"")
 			}
+		case "returnedSpans":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int()
+				s.ReturnedSpans = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"returnedSpans\"")
+			}
+		case "filteredSpans":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.FilteredSpans = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"filteredSpans\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -982,8 +1016,9 @@ func (s *AccessLogEntryReadInfo) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b01111111,
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

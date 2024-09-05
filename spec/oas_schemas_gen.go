@@ -403,6 +403,10 @@ type AccessLogEntryReadInfo struct {
 	ReturnedRecords int `json:"returnedRecords"`
 	// The number of records that were completely filtered out during the read operation.
 	FilteredRecords int `json:"filteredRecords"`
+	// The number of spans that were allowed during the read operation.
+	ReturnedSpans int `json:"returnedSpans"`
+	// The number of spans that were redacted during the read operation.
+	FilteredSpans int `json:"filteredSpans"`
 }
 
 // GetParameters returns the value of Parameters.
@@ -440,6 +444,16 @@ func (s *AccessLogEntryReadInfo) GetFilteredRecords() int {
 	return s.FilteredRecords
 }
 
+// GetReturnedSpans returns the value of ReturnedSpans.
+func (s *AccessLogEntryReadInfo) GetReturnedSpans() int {
+	return s.ReturnedSpans
+}
+
+// GetFilteredSpans returns the value of FilteredSpans.
+func (s *AccessLogEntryReadInfo) GetFilteredSpans() int {
+	return s.FilteredSpans
+}
+
 // SetParameters sets the value of Parameters.
 func (s *AccessLogEntryReadInfo) SetParameters(val AccessLogEntryReadInfoParameters) {
 	s.Parameters = val
@@ -473,6 +487,16 @@ func (s *AccessLogEntryReadInfo) SetReturnedRecords(val int) {
 // SetFilteredRecords sets the value of FilteredRecords.
 func (s *AccessLogEntryReadInfo) SetFilteredRecords(val int) {
 	s.FilteredRecords = val
+}
+
+// SetReturnedSpans sets the value of ReturnedSpans.
+func (s *AccessLogEntryReadInfo) SetReturnedSpans(val int) {
+	s.ReturnedSpans = val
+}
+
+// SetFilteredSpans sets the value of FilteredSpans.
+func (s *AccessLogEntryReadInfo) SetFilteredSpans(val int) {
+	s.FilteredSpans = val
 }
 
 // The client-specified parameters representing the user on whose behalf this read is being carried
@@ -2314,6 +2338,7 @@ func (*ConflictError) domainGetDataPolicyRuleRes()                     {}
 func (*ConflictError) domainGetDisasterRecoverySettingsRes()           {}
 func (*ConflictError) domainGetEncryptionSettingsRes()                 {}
 func (*ConflictError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*ConflictError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*ConflictError) domainGetFactByIDRes()                           {}
 func (*ConflictError) domainGetFactTypeRes()                           {}
 func (*ConflictError) domainGetIdentityGroupProvidersRes()             {}
@@ -7340,6 +7365,7 @@ func (*InvalidRequestError) domainGetDataPolicyRuleRes()                     {}
 func (*InvalidRequestError) domainGetDisasterRecoverySettingsRes()           {}
 func (*InvalidRequestError) domainGetEncryptionSettingsRes()                 {}
 func (*InvalidRequestError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*InvalidRequestError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*InvalidRequestError) domainGetFactByIDRes()                           {}
 func (*InvalidRequestError) domainGetFactTypeRes()                           {}
 func (*InvalidRequestError) domainGetIdentityGroupProvidersRes()             {}
@@ -11187,6 +11213,7 @@ func (*PermanentRedirect) domainGetDataPolicyRuleRes()                     {}
 func (*PermanentRedirect) domainGetDisasterRecoverySettingsRes()           {}
 func (*PermanentRedirect) domainGetEncryptionSettingsRes()                 {}
 func (*PermanentRedirect) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*PermanentRedirect) domainGetExternalRootEncryptionKeyRes()          {}
 func (*PermanentRedirect) domainGetFactByIDRes()                           {}
 func (*PermanentRedirect) domainGetFactTypeRes()                           {}
 func (*PermanentRedirect) domainGetIdentityGroupProvidersRes()             {}
@@ -11435,6 +11462,7 @@ func (*PreconditionFailedError) domainGetDataPolicyRuleRes()                    
 func (*PreconditionFailedError) domainGetDisasterRecoverySettingsRes()           {}
 func (*PreconditionFailedError) domainGetEncryptionSettingsRes()                 {}
 func (*PreconditionFailedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*PreconditionFailedError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*PreconditionFailedError) domainGetFactByIDRes()                           {}
 func (*PreconditionFailedError) domainGetFactTypeRes()                           {}
 func (*PreconditionFailedError) domainGetIdentityGroupProvidersRes()             {}
@@ -12478,6 +12506,7 @@ func (*ResourceExhaustedError) domainGetDataPolicyRuleRes()                     
 func (*ResourceExhaustedError) domainGetDisasterRecoverySettingsRes()           {}
 func (*ResourceExhaustedError) domainGetEncryptionSettingsRes()                 {}
 func (*ResourceExhaustedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*ResourceExhaustedError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*ResourceExhaustedError) domainGetFactByIDRes()                           {}
 func (*ResourceExhaustedError) domainGetFactTypeRes()                           {}
 func (*ResourceExhaustedError) domainGetIdentityGroupProvidersRes()             {}
@@ -12627,6 +12656,7 @@ func (*ResourceNotFoundError) domainGetDataPolicyRuleRes()                     {
 func (*ResourceNotFoundError) domainGetDisasterRecoverySettingsRes()           {}
 func (*ResourceNotFoundError) domainGetEncryptionSettingsRes()                 {}
 func (*ResourceNotFoundError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*ResourceNotFoundError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*ResourceNotFoundError) domainGetFactByIDRes()                           {}
 func (*ResourceNotFoundError) domainGetFactTypeRes()                           {}
 func (*ResourceNotFoundError) domainGetIdentityGroupProvidersRes()             {}
@@ -12801,6 +12831,7 @@ func (s *RootEncryptionKeyItem) SetSourceDomainName(val OptString) {
 }
 
 func (*RootEncryptionKeyItem) domainGetActiveExternalRootEncryptionKeyRes() {}
+func (*RootEncryptionKeyItem) domainGetExternalRootEncryptionKeyRes()       {}
 
 // Ref: #/components/schemas/RootEncryptionKeyListResponse
 type RootEncryptionKeyListResponse struct {
@@ -13629,6 +13660,7 @@ func (*UnauthorizedError) domainGetDataPolicyRuleRes()                     {}
 func (*UnauthorizedError) domainGetDisasterRecoverySettingsRes()           {}
 func (*UnauthorizedError) domainGetEncryptionSettingsRes()                 {}
 func (*UnauthorizedError) domainGetExternalRootEncryptionKeyProvidersRes() {}
+func (*UnauthorizedError) domainGetExternalRootEncryptionKeyRes()          {}
 func (*UnauthorizedError) domainGetFactByIDRes()                           {}
 func (*UnauthorizedError) domainGetFactTypeRes()                           {}
 func (*UnauthorizedError) domainGetIdentityGroupProvidersRes()             {}

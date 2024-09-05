@@ -177,6 +177,10 @@ type DomainGetExternalRootEncryptionKeyProvidersRes interface {
 	domainGetExternalRootEncryptionKeyProvidersRes()
 }
 
+type DomainGetExternalRootEncryptionKeyRes interface {
+	domainGetExternalRootEncryptionKeyRes()
+}
+
 type DomainGetFactByIDRes interface {
 	domainGetFactByIDRes()
 }

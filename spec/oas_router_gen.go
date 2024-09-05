@@ -868,8 +868,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 														args[0],
 														args[1],
 													}, elemIsEscaped, w, r)
+												case "GET":
+													s.handleDomainGetExternalRootEncryptionKeyRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
 												default:
-													s.notAllowed(w, r, "DELETE")
+													s.notAllowed(w, r, "DELETE,GET")
 												}
 
 												return
@@ -3408,6 +3413,14 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 													r.name = "DomainDeleteExternalRootEncryptionKey"
 													r.summary = "Delete an external root encryption key by ID."
 													r.operationID = "domainDeleteExternalRootEncryptionKey"
+													r.pathPattern = "/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"
+													r.args = args
+													r.count = 2
+													return r, true
+												case "GET":
+													r.name = "DomainGetExternalRootEncryptionKey"
+													r.summary = "Get an external root encryption key by ID."
+													r.operationID = "domainGetExternalRootEncryptionKey"
 													r.pathPattern = "/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"
 													r.args = args
 													r.count = 2

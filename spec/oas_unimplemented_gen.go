@@ -434,6 +434,16 @@ func (UnimplementedHandler) DomainGetEncryptionSettings(ctx context.Context, par
 	return r, ht.ErrNotImplemented
 }
 
+// DomainGetExternalRootEncryptionKey implements domainGetExternalRootEncryptionKey operation.
+//
+// Get an external root encryption key using its ID. This operation is only successful if the
+// external root encryption key exists, and the requesting domain has permissions to view the key.
+//
+// GET /domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}
+func (UnimplementedHandler) DomainGetExternalRootEncryptionKey(ctx context.Context, params DomainGetExternalRootEncryptionKeyParams) (r DomainGetExternalRootEncryptionKeyRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DomainGetExternalRootEncryptionKeyProviders implements domainGetExternalRootEncryptionKeyProviders operation.
 //
 // Returns a list of available root encryption key providers, along with their description and, if

@@ -74,7 +74,7 @@ func (s *AccessLogEntry) Validate() error {
 			MaxLengthSet: false,
 			Email:        false,
 			Hostname:     false,
-			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{6})?Z$"],
+			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{0,9})?Z$"],
 		}).Validate(string(s.Time)); err != nil {
 			return errors.Wrap(err, "string")
 		}
@@ -3081,7 +3081,7 @@ func (s *DomainControlLogEntry) Validate() error {
 			MaxLengthSet: false,
 			Email:        false,
 			Hostname:     false,
-			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?Z$"],
+			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{0,9})?Z$"],
 		}).Validate(string(s.Time)); err != nil {
 			return errors.Wrap(err, "string")
 		}
@@ -8667,7 +8667,7 @@ func (s TagName) Validate() error {
 		MaxLengthSet: false,
 		Email:        false,
 		Hostname:     false,
-		Regex:        regexMap["^[a-z0-9._/-]{2,64}$"],
+		Regex:        regexMap["^[a-z0-9._/*-]{2,64}$"],
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
 	}

@@ -6348,6 +6348,154 @@ func decodeDomainGetEncryptionSettingsParams(args [1]string, argsEscaped bool, r
 	return params, nil
 }
 
+// DomainGetExternalRootEncryptionKeyParams is parameters of domainGetExternalRootEncryptionKey operation.
+type DomainGetExternalRootEncryptionKeyParams struct {
+	DomainID            DomainID
+	RootEncryptionKeyID RootEncryptionKeyID
+}
+
+func unpackDomainGetExternalRootEncryptionKeyParams(packed middleware.Parameters) (params DomainGetExternalRootEncryptionKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "domainID",
+			In:   "path",
+		}
+		params.DomainID = packed[key].(DomainID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "rootEncryptionKeyID",
+			In:   "path",
+		}
+		params.RootEncryptionKeyID = packed[key].(RootEncryptionKeyID)
+	}
+	return params
+}
+
+func decodeDomainGetExternalRootEncryptionKeyParams(args [2]string, argsEscaped bool, r *http.Request) (params DomainGetExternalRootEncryptionKeyParams, _ error) {
+	// Decode path: domainID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "domainID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotDomainIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DomainID = DomainID(paramsDotDomainIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.DomainID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domainID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: rootEncryptionKeyID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "rootEncryptionKeyID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotRootEncryptionKeyIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotRootEncryptionKeyIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.RootEncryptionKeyID = RootEncryptionKeyID(paramsDotRootEncryptionKeyIDVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.RootEncryptionKeyID.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "rootEncryptionKeyID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DomainGetExternalRootEncryptionKeyProvidersParams is parameters of domainGetExternalRootEncryptionKeyProviders operation.
 type DomainGetExternalRootEncryptionKeyProvidersParams struct {
 	DomainID DomainID
