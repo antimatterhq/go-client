@@ -11760,11 +11760,11 @@ type DomainQueryAccessLogParams struct {
 	OperationType OptQueryOperationType
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
-	AllowedTag OptTagName
+	AllowedTag OptTagNamePattern
 	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
-	RedactedOrTokenizedTag OptTagName
+	RedactedOrTokenizedTag OptTagNamePattern
 }
 
 func unpackDomainQueryAccessLogParams(packed middleware.Parameters) (params DomainQueryAccessLogParams) {
@@ -11853,7 +11853,7 @@ func unpackDomainQueryAccessLogParams(packed middleware.Parameters) (params Doma
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.AllowedTag = v.(OptTagName)
+			params.AllowedTag = v.(OptTagNamePattern)
 		}
 	}
 	{
@@ -11862,7 +11862,7 @@ func unpackDomainQueryAccessLogParams(packed middleware.Parameters) (params Doma
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.RedactedOrTokenizedTag = v.(OptTagName)
+			params.RedactedOrTokenizedTag = v.(OptTagNamePattern)
 		}
 	}
 	return params
@@ -12339,7 +12339,7 @@ func decodeDomainQueryAccessLogParams(args [1]string, argsEscaped bool, r *http.
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAllowedTagVal TagName
+				var paramsDotAllowedTagVal TagNamePattern
 				if err := func() error {
 					var paramsDotAllowedTagValVal string
 					if err := func() error {
@@ -12358,7 +12358,7 @@ func decodeDomainQueryAccessLogParams(args [1]string, argsEscaped bool, r *http.
 					}(); err != nil {
 						return err
 					}
-					paramsDotAllowedTagVal = TagName(paramsDotAllowedTagValVal)
+					paramsDotAllowedTagVal = TagNamePattern(paramsDotAllowedTagValVal)
 					return nil
 				}(); err != nil {
 					return err
@@ -12402,7 +12402,7 @@ func decodeDomainQueryAccessLogParams(args [1]string, argsEscaped bool, r *http.
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotRedactedOrTokenizedTagVal TagName
+				var paramsDotRedactedOrTokenizedTagVal TagNamePattern
 				if err := func() error {
 					var paramsDotRedactedOrTokenizedTagValVal string
 					if err := func() error {
@@ -12421,7 +12421,7 @@ func decodeDomainQueryAccessLogParams(args [1]string, argsEscaped bool, r *http.
 					}(); err != nil {
 						return err
 					}
-					paramsDotRedactedOrTokenizedTagVal = TagName(paramsDotRedactedOrTokenizedTagValVal)
+					paramsDotRedactedOrTokenizedTagVal = TagNamePattern(paramsDotRedactedOrTokenizedTagValVal)
 					return nil
 				}(); err != nil {
 					return err
@@ -12491,11 +12491,11 @@ type DomainQueryAccessLogSingleCapsuleParams struct {
 	OperationType OptQueryOperationType
 	// The allow tag key you would like to filter on. This accepts tag key only and will return all
 	// allowed tag results matching the provided tag key. If not specified, this field is ignored.
-	AllowedTag OptTagName
+	AllowedTag OptTagNamePattern
 	// The redacted or tokenized tag key you would like ot filter on. This accepts a tag key only and
 	// will return all redacted and tokenized tag key results matching the provided tag key. If not
 	// specified, this field is ignored.
-	RedactedOrTokenizedTag OptTagName
+	RedactedOrTokenizedTag OptTagNamePattern
 	CapsuleID              CapsuleID
 }
 
@@ -12585,7 +12585,7 @@ func unpackDomainQueryAccessLogSingleCapsuleParams(packed middleware.Parameters)
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.AllowedTag = v.(OptTagName)
+			params.AllowedTag = v.(OptTagNamePattern)
 		}
 	}
 	{
@@ -12594,7 +12594,7 @@ func unpackDomainQueryAccessLogSingleCapsuleParams(packed middleware.Parameters)
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.RedactedOrTokenizedTag = v.(OptTagName)
+			params.RedactedOrTokenizedTag = v.(OptTagNamePattern)
 		}
 	}
 	{
@@ -13078,7 +13078,7 @@ func decodeDomainQueryAccessLogSingleCapsuleParams(args [2]string, argsEscaped b
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotAllowedTagVal TagName
+				var paramsDotAllowedTagVal TagNamePattern
 				if err := func() error {
 					var paramsDotAllowedTagValVal string
 					if err := func() error {
@@ -13097,7 +13097,7 @@ func decodeDomainQueryAccessLogSingleCapsuleParams(args [2]string, argsEscaped b
 					}(); err != nil {
 						return err
 					}
-					paramsDotAllowedTagVal = TagName(paramsDotAllowedTagValVal)
+					paramsDotAllowedTagVal = TagNamePattern(paramsDotAllowedTagValVal)
 					return nil
 				}(); err != nil {
 					return err
@@ -13141,7 +13141,7 @@ func decodeDomainQueryAccessLogSingleCapsuleParams(args [2]string, argsEscaped b
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotRedactedOrTokenizedTagVal TagName
+				var paramsDotRedactedOrTokenizedTagVal TagNamePattern
 				if err := func() error {
 					var paramsDotRedactedOrTokenizedTagValVal string
 					if err := func() error {
@@ -13160,7 +13160,7 @@ func decodeDomainQueryAccessLogSingleCapsuleParams(args [2]string, argsEscaped b
 					}(); err != nil {
 						return err
 					}
-					paramsDotRedactedOrTokenizedTagVal = TagName(paramsDotRedactedOrTokenizedTagValVal)
+					paramsDotRedactedOrTokenizedTagVal = TagNamePattern(paramsDotRedactedOrTokenizedTagValVal)
 					return nil
 				}(); err != nil {
 					return err

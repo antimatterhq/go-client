@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/conv"
@@ -669,7 +669,7 @@ type Invoker interface {
 	// exist.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}
-	DomainUpdateIdentityProviderPrincipal(ctx context.Context, request *CapabilityList, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error)
+	DomainUpdateIdentityProviderPrincipal(ctx context.Context, request *UpdatePrincipalParams, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error)
 	// DomainUpdatePeer invokes domainUpdatePeer operation.
 	//
 	// Create or update the configuration for this peer. Please note, if the configuration already exists,
@@ -845,7 +845,7 @@ func (c *Client) CapsuleGetById(ctx context.Context, params CapsuleGetByIdParams
 func (c *Client) sendCapsuleGetById(ctx context.Context, params CapsuleGetByIdParams) (res CapsuleGetByIdRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("capsuleGetById"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/capsules/{capsuleID}"),
 	}
 
@@ -941,7 +941,7 @@ func (c *Client) DomainAddAccessLogEntry(ctx context.Context, request *AddCapsul
 func (c *Client) sendDomainAddAccessLogEntry(ctx context.Context, request *AddCapsuleLogEntryRequest, params DomainAddAccessLogEntryParams) (res DomainAddAccessLogEntryRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddAccessLogEntry"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/log"),
 	}
 
@@ -1114,7 +1114,7 @@ func (c *Client) DomainAddExternalRootEncryptionKey(ctx context.Context, request
 func (c *Client) sendDomainAddExternalRootEncryptionKey(ctx context.Context, request *KeyInfos, params DomainAddExternalRootEncryptionKeyParams) (res DomainAddExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
@@ -1245,7 +1245,7 @@ func (c *Client) DomainAddNew(ctx context.Context, request *NewDomain) (DomainAd
 func (c *Client) sendDomainAddNew(ctx context.Context, request *NewDomain) (res DomainAddNewRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddNew"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains"),
 	}
 
@@ -1329,7 +1329,7 @@ func (c *Client) DomainAddPeerDomain(ctx context.Context, request *CreatePeerDom
 func (c *Client) sendDomainAddPeerDomain(ctx context.Context, request *CreatePeerDomain, params DomainAddPeerDomainParams) (res DomainAddPeerDomainRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAddPeerDomain"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
 	}
 
@@ -1461,7 +1461,7 @@ func (c *Client) DomainAuthenticate(ctx context.Context, request *DomainAuthenti
 func (c *Client) sendDomainAuthenticate(ctx context.Context, request *DomainAuthenticate, params DomainAuthenticateParams) (res DomainAuthenticateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainAuthenticate"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/authenticate"),
 	}
 
@@ -1617,7 +1617,7 @@ func (c *Client) DomainContactIssueVerify(ctx context.Context, request *DomainCo
 func (c *Client) sendDomainContactIssueVerify(ctx context.Context, request *DomainContactIssueVerifyReq, params DomainContactIssueVerifyParams) (res DomainContactIssueVerifyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainContactIssueVerify"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/account/verify"),
 	}
 
@@ -1716,7 +1716,7 @@ func (c *Client) DomainContactVerify(ctx context.Context, params DomainContactVe
 func (c *Client) sendDomainContactVerify(ctx context.Context, params DomainContactVerifyParams) (res DomainContactVerifyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainContactVerify"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/account/verify"),
 	}
 
@@ -1864,7 +1864,7 @@ func (c *Client) DomainCreateCapsule(ctx context.Context, request *DomainCreateC
 func (c *Client) sendDomainCreateCapsule(ctx context.Context, request *DomainCreateCapsuleReq, params DomainCreateCapsuleParams) (res DomainCreateCapsuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainCreateCapsule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules"),
 	}
 
@@ -2015,7 +2015,7 @@ func (c *Client) DomainCreateDataPolicy(ctx context.Context, request *NewDataPol
 func (c *Client) sendDomainCreateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainCreateDataPolicyParams) (res DomainCreateDataPolicyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainCreateDataPolicy"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
 	}
 
@@ -2145,7 +2145,7 @@ func (c *Client) DomainCreatePolicyRule(ctx context.Context, request *NewDomainP
 func (c *Client) sendDomainCreatePolicyRule(ctx context.Context, request *NewDomainPolicyRule, params DomainCreatePolicyRuleParams) (res DomainCreatePolicyRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainCreatePolicyRule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy"),
 	}
 
@@ -2275,7 +2275,7 @@ func (c *Client) DomainDataPolicyConfigureRules(ctx context.Context, request *Da
 func (c *Client) sendDomainDataPolicyConfigureRules(ctx context.Context, request *DataPolicyRuleChanges, params DomainDataPolicyConfigureRulesParams) (res DomainDataPolicyConfigureRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDataPolicyConfigureRules"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules"),
 	}
 
@@ -2427,7 +2427,7 @@ func (c *Client) DomainDataPolicyRuleUpdate(ctx context.Context, request *NewDat
 func (c *Client) sendDomainDataPolicyRuleUpdate(ctx context.Context, request *NewDataPolicyRule, params DomainDataPolicyRuleUpdateParams) (res DomainDataPolicyRuleUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDataPolicyRuleUpdate"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
 	}
 
@@ -2600,7 +2600,7 @@ func (c *Client) DomainDataTaggingHookInvoke(ctx context.Context, request *DataT
 func (c *Client) sendDomainDataTaggingHookInvoke(ctx context.Context, request *DataTaggingHookInput, params DomainDataTaggingHookInvokeParams) (res DomainDataTaggingHookInvokeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDataTaggingHookInvoke"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/invoke"),
 	}
 
@@ -2778,7 +2778,7 @@ func (c *Client) DomainDataTaggingHookTest(ctx context.Context, request *DomainD
 func (c *Client) sendDomainDataTaggingHookTest(ctx context.Context, request *DomainDataTaggingHookTestReq, params DomainDataTaggingHookTestParams) (res DomainDataTaggingHookTestRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDataTaggingHookTest"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks/data-tagging/{hookName}/test"),
 	}
 
@@ -2931,7 +2931,7 @@ func (c *Client) DomainDeleteCapability(ctx context.Context, params DomainDelete
 func (c *Client) sendDomainDeleteCapability(ctx context.Context, params DomainDeleteCapabilityParams) (res DomainDeleteCapabilityRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteCapability"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/capabilities/{capability}"),
 	}
 
@@ -3079,7 +3079,7 @@ func (c *Client) DomainDeleteCapsuleTags(ctx context.Context, request *DeleteTag
 func (c *Client) sendDomainDeleteCapsuleTags(ctx context.Context, request *DeleteTags, params DomainDeleteCapsuleTagsParams) (res DomainDeleteCapsuleTagsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteCapsuleTags"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/capsule-tags/delete"),
 	}
 
@@ -3231,7 +3231,7 @@ func (c *Client) DomainDeleteDataPolicy(ctx context.Context, params DomainDelete
 func (c *Client) sendDomainDeleteDataPolicy(ctx context.Context, params DomainDeleteDataPolicyParams) (res DomainDeleteDataPolicyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteDataPolicy"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
 	}
 
@@ -3379,7 +3379,7 @@ func (c *Client) DomainDeleteDataPolicyRule(ctx context.Context, params DomainDe
 func (c *Client) sendDomainDeleteDataPolicyRule(ctx context.Context, params DomainDeleteDataPolicyRuleParams) (res DomainDeleteDataPolicyRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteDataPolicyRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
 	}
 
@@ -3551,7 +3551,7 @@ func (c *Client) DomainDeleteExternalRootEncryptionKey(ctx context.Context, para
 func (c *Client) sendDomainDeleteExternalRootEncryptionKey(ctx context.Context, params DomainDeleteExternalRootEncryptionKeyParams) (res DomainDeleteExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"),
 	}
 
@@ -3699,7 +3699,7 @@ func (c *Client) DomainDeleteFactByID(ctx context.Context, params DomainDeleteFa
 func (c *Client) sendDomainDeleteFactByID(ctx context.Context, params DomainDeleteFactByIDParams) (res DomainDeleteFactByIDRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteFactByID"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/{factID}"),
 	}
 
@@ -3869,7 +3869,7 @@ func (c *Client) DomainDeleteFactByTuple(ctx context.Context, request *FactTuple
 func (c *Client) sendDomainDeleteFactByTuple(ctx context.Context, request *FactTuple, params DomainDeleteFactByTupleParams) (res DomainDeleteFactByTupleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteFactByTuple"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/tuple"),
 	}
 
@@ -4021,7 +4021,7 @@ func (c *Client) DomainDeleteFactType(ctx context.Context, params DomainDeleteFa
 func (c *Client) sendDomainDeleteFactType(ctx context.Context, params DomainDeleteFactTypeParams) (res DomainDeleteFactTypeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteFactType"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}"),
 	}
 
@@ -4192,7 +4192,7 @@ func (c *Client) DomainDeleteIdentityProvider(ctx context.Context, params Domain
 func (c *Client) sendDomainDeleteIdentityProvider(ctx context.Context, params DomainDeleteIdentityProviderParams) (res DomainDeleteIdentityProviderRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteIdentityProvider"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}"),
 	}
 
@@ -4340,7 +4340,7 @@ func (c *Client) DomainDeleteIdentityProviderPrincipal(ctx context.Context, para
 func (c *Client) sendDomainDeleteIdentityProviderPrincipal(ctx context.Context, params DomainDeleteIdentityProviderPrincipalParams) (res DomainDeleteIdentityProviderPrincipalRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteIdentityProviderPrincipal"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}"),
 	}
 
@@ -4510,7 +4510,7 @@ func (c *Client) DomainDeletePeer(ctx context.Context, params DomainDeletePeerPa
 func (c *Client) sendDomainDeletePeer(ctx context.Context, params DomainDeletePeerParams) (res DomainDeletePeerRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeletePeer"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/peers/{peerDomainID}"),
 	}
 
@@ -4658,7 +4658,7 @@ func (c *Client) DomainDeletePolicyRule(ctx context.Context, params DomainDelete
 func (c *Client) sendDomainDeletePolicyRule(ctx context.Context, params DomainDeletePolicyRuleParams) (res DomainDeletePolicyRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeletePolicyRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy/{ruleID}"),
 	}
 
@@ -4807,7 +4807,7 @@ func (c *Client) DomainDeleteReadContext(ctx context.Context, params DomainDelet
 func (c *Client) sendDomainDeleteReadContext(ctx context.Context, params DomainDeleteReadContextParams) (res DomainDeleteReadContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteReadContext"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}"),
 	}
 
@@ -4956,7 +4956,7 @@ func (c *Client) DomainDeleteWriteContext(ctx context.Context, params DomainDele
 func (c *Client) sendDomainDeleteWriteContext(ctx context.Context, params DomainDeleteWriteContextParams) (res DomainDeleteWriteContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteWriteContext"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}"),
 	}
 
@@ -5104,7 +5104,7 @@ func (c *Client) DomainDeleteWriteContextClassifierRule(ctx context.Context, par
 func (c *Client) sendDomainDeleteWriteContextClassifierRule(ctx context.Context, params DomainDeleteWriteContextClassifierRuleParams) (res DomainDeleteWriteContextClassifierRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteWriteContextClassifierRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule/{ruleID}"),
 	}
 
@@ -5274,7 +5274,7 @@ func (c *Client) DomainDeleteWriteContextRegexRule(ctx context.Context, params D
 func (c *Client) sendDomainDeleteWriteContextRegexRule(ctx context.Context, params DomainDeleteWriteContextRegexRuleParams) (res DomainDeleteWriteContextRegexRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDeleteWriteContextRegexRule"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/regex-rule/{ruleID}"),
 	}
 
@@ -5444,7 +5444,7 @@ func (c *Client) DomainDescribeWriteContext(ctx context.Context, params DomainDe
 func (c *Client) sendDomainDescribeWriteContext(ctx context.Context, params DomainDescribeWriteContextParams) (res DomainDescribeWriteContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainDescribeWriteContext"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}"),
 	}
 
@@ -5592,7 +5592,7 @@ func (c *Client) DomainExternalRootEncryptionKeyTest(ctx context.Context, reques
 func (c *Client) sendDomainExternalRootEncryptionKeyTest(ctx context.Context, request *DomainExternalRootEncryptionKeyTestReq, params DomainExternalRootEncryptionKeyTestParams) (res DomainExternalRootEncryptionKeyTestRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainExternalRootEncryptionKeyTest"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}/test"),
 	}
 
@@ -5745,7 +5745,7 @@ func (c *Client) DomainFlushEncryptionKeys(ctx context.Context, request *DomainF
 func (c *Client) sendDomainFlushEncryptionKeys(ctx context.Context, request *DomainFlushEncryptionKeysReq, params DomainFlushEncryptionKeysParams) (res DomainFlushEncryptionKeysRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainFlushEncryptionKeys"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/flush"),
 	}
 
@@ -5875,7 +5875,7 @@ func (c *Client) DomainGetActiveExternalRootEncryptionKey(ctx context.Context, p
 func (c *Client) sendDomainGetActiveExternalRootEncryptionKey(ctx context.Context, params DomainGetActiveExternalRootEncryptionKeyParams) (res DomainGetActiveExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetActiveExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
@@ -6004,7 +6004,7 @@ func (c *Client) DomainGetCapabilities(ctx context.Context, params DomainGetCapa
 func (c *Client) sendDomainGetCapabilities(ctx context.Context, params DomainGetCapabilitiesParams) (res DomainGetCapabilitiesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetCapabilities"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/capabilities"),
 	}
 
@@ -6132,7 +6132,7 @@ func (c *Client) DomainGetCapability(ctx context.Context, params DomainGetCapabi
 func (c *Client) sendDomainGetCapability(ctx context.Context, params DomainGetCapabilityParams) (res DomainGetCapabilityRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetCapability"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/capabilities/{capability}"),
 	}
 
@@ -6280,7 +6280,7 @@ func (c *Client) DomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsu
 func (c *Client) sendDomainGetCapsuleInfo(ctx context.Context, params DomainGetCapsuleInfoParams) (res DomainGetCapsuleInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetCapsuleInfo"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}"),
 	}
 
@@ -6428,7 +6428,7 @@ func (c *Client) DomainGetDataPolicy(ctx context.Context, params DomainGetDataPo
 func (c *Client) sendDomainGetDataPolicy(ctx context.Context, params DomainGetDataPolicyParams) (res DomainGetDataPolicyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetDataPolicy"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
 	}
 
@@ -6576,7 +6576,7 @@ func (c *Client) DomainGetDataPolicyBinding(ctx context.Context, params DomainGe
 func (c *Client) sendDomainGetDataPolicyBinding(ctx context.Context, params DomainGetDataPolicyBindingParams) (res DomainGetDataPolicyBindingRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetDataPolicyBinding"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
 	}
 
@@ -6725,7 +6725,7 @@ func (c *Client) DomainGetDataPolicyRule(ctx context.Context, params DomainGetDa
 func (c *Client) sendDomainGetDataPolicyRule(ctx context.Context, params DomainGetDataPolicyRuleParams) (res DomainGetDataPolicyRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetDataPolicyRule"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/rules/{ruleID}"),
 	}
 
@@ -6895,7 +6895,7 @@ func (c *Client) DomainGetDisasterRecoverySettings(ctx context.Context, params D
 func (c *Client) sendDomainGetDisasterRecoverySettings(ctx context.Context, params DomainGetDisasterRecoverySettingsParams) (res DomainGetDisasterRecoverySettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetDisasterRecoverySettings"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
 	}
 
@@ -7022,7 +7022,7 @@ func (c *Client) DomainGetEncryptionSettings(ctx context.Context, params DomainG
 func (c *Client) sendDomainGetEncryptionSettings(ctx context.Context, params DomainGetEncryptionSettingsParams) (res DomainGetEncryptionSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetEncryptionSettings"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/settings"),
 	}
 
@@ -7150,7 +7150,7 @@ func (c *Client) DomainGetExternalRootEncryptionKey(ctx context.Context, params 
 func (c *Client) sendDomainGetExternalRootEncryptionKey(ctx context.Context, params DomainGetExternalRootEncryptionKeyParams) (res DomainGetExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys/{rootEncryptionKeyID}"),
 	}
 
@@ -7300,7 +7300,7 @@ func (c *Client) DomainGetExternalRootEncryptionKeyProviders(ctx context.Context
 func (c *Client) sendDomainGetExternalRootEncryptionKeyProviders(ctx context.Context, params DomainGetExternalRootEncryptionKeyProvidersParams) (res DomainGetExternalRootEncryptionKeyProvidersRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetExternalRootEncryptionKeyProviders"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/providers"),
 	}
 
@@ -7427,7 +7427,7 @@ func (c *Client) DomainGetFactByID(ctx context.Context, params DomainGetFactByID
 func (c *Client) sendDomainGetFactByID(ctx context.Context, params DomainGetFactByIDParams) (res DomainGetFactByIDRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetFactByID"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/{factID}"),
 	}
 
@@ -7597,7 +7597,7 @@ func (c *Client) DomainGetFactType(ctx context.Context, params DomainGetFactType
 func (c *Client) sendDomainGetFactType(ctx context.Context, params DomainGetFactTypeParams) (res DomainGetFactTypeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetFactType"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}"),
 	}
 
@@ -7746,7 +7746,7 @@ func (c *Client) DomainGetIdentityGroupProviders(ctx context.Context, params Dom
 func (c *Client) sendDomainGetIdentityGroupProviders(ctx context.Context, params DomainGetIdentityGroupProvidersParams) (res DomainGetIdentityGroupProvidersRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetIdentityGroupProviders"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/group-providers"),
 	}
 
@@ -7873,7 +7873,7 @@ func (c *Client) DomainGetIdentityProvider(ctx context.Context, params DomainGet
 func (c *Client) sendDomainGetIdentityProvider(ctx context.Context, params DomainGetIdentityProviderParams) (res DomainGetIdentityProviderRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetIdentityProvider"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}"),
 	}
 
@@ -8021,7 +8021,7 @@ func (c *Client) DomainGetIdentityProviderPrincipal(ctx context.Context, params 
 func (c *Client) sendDomainGetIdentityProviderPrincipal(ctx context.Context, params DomainGetIdentityProviderPrincipalParams) (res DomainGetIdentityProviderPrincipalRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetIdentityProviderPrincipal"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}"),
 	}
 
@@ -8191,7 +8191,7 @@ func (c *Client) DomainGetIdentityProviderPrincipals(ctx context.Context, params
 func (c *Client) sendDomainGetIdentityProviderPrincipals(ctx context.Context, params DomainGetIdentityProviderPrincipalsParams) (res DomainGetIdentityProviderPrincipalsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetIdentityProviderPrincipals"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals"),
 	}
 
@@ -8341,7 +8341,7 @@ func (c *Client) DomainGetPeer(ctx context.Context, params DomainGetPeerParams) 
 func (c *Client) sendDomainGetPeer(ctx context.Context, params DomainGetPeerParams) (res DomainGetPeerRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetPeer"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/peer-domain"),
 	}
 
@@ -8509,7 +8509,7 @@ func (c *Client) DomainGetPeerConfig(ctx context.Context, params DomainGetPeerCo
 func (c *Client) sendDomainGetPeerConfig(ctx context.Context, params DomainGetPeerConfigParams) (res DomainGetPeerConfigRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetPeerConfig"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/peers/{peerDomainID}"),
 	}
 
@@ -8658,7 +8658,7 @@ func (c *Client) DomainGetPrivateInfo(ctx context.Context, params DomainGetPriva
 func (c *Client) sendDomainGetPrivateInfo(ctx context.Context, params DomainGetPrivateInfoParams) (res DomainGetPrivateInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetPrivateInfo"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/info"),
 	}
 
@@ -8786,7 +8786,7 @@ func (c *Client) DomainGetPublicInfo(ctx context.Context, params DomainGetPublic
 func (c *Client) sendDomainGetPublicInfo(ctx context.Context, params DomainGetPublicInfoParams) (res DomainGetPublicInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetPublicInfo"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/public-info"),
 	}
 
@@ -8880,7 +8880,7 @@ func (c *Client) DomainGetReadContext(ctx context.Context, params DomainGetReadC
 func (c *Client) sendDomainGetReadContext(ctx context.Context, params DomainGetReadContextParams) (res DomainGetReadContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetReadContext"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}"),
 	}
 
@@ -9050,7 +9050,7 @@ func (c *Client) DomainGetSettings(ctx context.Context, params DomainGetSettings
 func (c *Client) sendDomainGetSettings(ctx context.Context, params DomainGetSettingsParams) (res DomainGetSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetSettings"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
 	}
 
@@ -9177,7 +9177,7 @@ func (c *Client) DomainGetStatus(ctx context.Context, params DomainGetStatusPara
 func (c *Client) sendDomainGetStatus(ctx context.Context, params DomainGetStatusParams) (res DomainGetStatusRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetStatus"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/status"),
 	}
 
@@ -9307,7 +9307,7 @@ func (c *Client) DomainGetTagInfo(ctx context.Context, params DomainGetTagInfoPa
 func (c *Client) sendDomainGetTagInfo(ctx context.Context, params DomainGetTagInfoParams) (res DomainGetTagInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetTagInfo"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/tag-info"),
 	}
 
@@ -9434,7 +9434,7 @@ func (c *Client) DomainGetVendorSettings(ctx context.Context, params DomainGetVe
 func (c *Client) sendDomainGetVendorSettings(ctx context.Context, params DomainGetVendorSettingsParams) (res DomainGetVendorSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetVendorSettings"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/vendor/settings"),
 	}
 
@@ -9561,7 +9561,7 @@ func (c *Client) DomainGetWriteContextClassifierRules(ctx context.Context, param
 func (c *Client) sendDomainGetWriteContextClassifierRules(ctx context.Context, params DomainGetWriteContextClassifierRulesParams) (res DomainGetWriteContextClassifierRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetWriteContextClassifierRules"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
 	}
 
@@ -9710,7 +9710,7 @@ func (c *Client) DomainGetWriteContextRegexRules(ctx context.Context, params Dom
 func (c *Client) sendDomainGetWriteContextRegexRules(ctx context.Context, params DomainGetWriteContextRegexRulesParams) (res DomainGetWriteContextRegexRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainGetWriteContextRegexRules"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/regex-rule"),
 	}
 
@@ -9860,7 +9860,7 @@ func (c *Client) DomainInsertIdentityProviderPrincipal(ctx context.Context, requ
 func (c *Client) sendDomainInsertIdentityProviderPrincipal(ctx context.Context, request *DomainIdentityProviderPrincipalParams, params DomainInsertIdentityProviderPrincipalParams) (res DomainInsertIdentityProviderPrincipalRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainInsertIdentityProviderPrincipal"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals"),
 	}
 
@@ -10012,7 +10012,7 @@ func (c *Client) DomainInsertWriteContextClassifierRule(ctx context.Context, req
 func (c *Client) sendDomainInsertWriteContextClassifierRule(ctx context.Context, request *ClassifierRule, params DomainInsertWriteContextClassifierRuleParams) (res DomainInsertWriteContextClassifierRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainInsertWriteContextClassifierRule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/classifier-rule"),
 	}
 
@@ -10164,7 +10164,7 @@ func (c *Client) DomainInsertWriteContextRegexRule(ctx context.Context, request 
 func (c *Client) sendDomainInsertWriteContextRegexRule(ctx context.Context, request *WriteContextRegexRule, params DomainInsertWriteContextRegexRuleParams) (res DomainInsertWriteContextRegexRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainInsertWriteContextRegexRule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/regex-rule"),
 	}
 
@@ -10316,7 +10316,7 @@ func (c *Client) DomainListCapsules(ctx context.Context, params DomainListCapsul
 func (c *Client) sendDomainListCapsules(ctx context.Context, params DomainListCapsulesParams) (res DomainListCapsulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListCapsules"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules"),
 	}
 
@@ -10566,7 +10566,7 @@ func (c *Client) DomainListDataPolicies(ctx context.Context, params DomainListDa
 func (c *Client) sendDomainListDataPolicies(ctx context.Context, params DomainListDataPoliciesParams) (res DomainListDataPoliciesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListDataPolicies"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy"),
 	}
 
@@ -10693,7 +10693,7 @@ func (c *Client) DomainListExternalRootEncryptionKey(ctx context.Context, params
 func (c *Client) sendDomainListExternalRootEncryptionKey(ctx context.Context, params DomainListExternalRootEncryptionKeyParams) (res DomainListExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/keys"),
 	}
 
@@ -10821,7 +10821,7 @@ func (c *Client) DomainListFactTypes(ctx context.Context, params DomainListFactT
 func (c *Client) sendDomainListFactTypes(ctx context.Context, params DomainListFactTypesParams) (res DomainListFactTypesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListFactTypes"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts"),
 	}
 
@@ -10948,7 +10948,7 @@ func (c *Client) DomainListFacts(ctx context.Context, params DomainListFactsPara
 func (c *Client) sendDomainListFacts(ctx context.Context, params DomainListFactsParams) (res DomainListFactsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListFacts"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/list"),
 	}
 
@@ -11098,7 +11098,7 @@ func (c *Client) DomainListHooks(ctx context.Context, params DomainListHooksPara
 func (c *Client) sendDomainListHooks(ctx context.Context, params DomainListHooksParams) (res DomainListHooksRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListHooks"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/hooks"),
 	}
 
@@ -11227,7 +11227,7 @@ func (c *Client) DomainListIdentityProviders(ctx context.Context, params DomainL
 func (c *Client) sendDomainListIdentityProviders(ctx context.Context, params DomainListIdentityProvidersParams) (res DomainListIdentityProvidersRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListIdentityProviders"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities"),
 	}
 
@@ -11354,7 +11354,7 @@ func (c *Client) DomainListPeers(ctx context.Context, params DomainListPeersPara
 func (c *Client) sendDomainListPeers(ctx context.Context, params DomainListPeersParams) (res DomainListPeersRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListPeers"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/peers"),
 	}
 
@@ -11484,7 +11484,7 @@ func (c *Client) DomainListPolicyRules(ctx context.Context, params DomainListPol
 func (c *Client) sendDomainListPolicyRules(ctx context.Context, params DomainListPolicyRulesParams) (res DomainListPolicyRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListPolicyRules"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy"),
 	}
 
@@ -11613,7 +11613,7 @@ func (c *Client) DomainListReadContexts(ctx context.Context, params DomainListRe
 func (c *Client) sendDomainListReadContexts(ctx context.Context, params DomainListReadContextsParams) (res DomainListReadContextsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListReadContexts"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context"),
 	}
 
@@ -11742,7 +11742,7 @@ func (c *Client) DomainListResources(ctx context.Context, params DomainListResou
 func (c *Client) sendDomainListResources(ctx context.Context, params DomainListResourcesParams) (res DomainListResourcesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListResources"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/resources"),
 	}
 
@@ -11871,7 +11871,7 @@ func (c *Client) DomainListWriteContexts(ctx context.Context, params DomainListW
 func (c *Client) sendDomainListWriteContexts(ctx context.Context, params DomainListWriteContextsParams) (res DomainListWriteContextsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainListWriteContexts"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context"),
 	}
 
@@ -11998,7 +11998,7 @@ func (c *Client) DomainOpenCapsule(ctx context.Context, request *CapsuleOpenRequ
 func (c *Client) sendDomainOpenCapsule(ctx context.Context, request *CapsuleOpenRequest, params DomainOpenCapsuleParams) (res DomainOpenCapsuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainOpenCapsule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/open"),
 	}
 
@@ -12171,7 +12171,7 @@ func (c *Client) DomainPolicyFlush(ctx context.Context, params DomainPolicyFlush
 func (c *Client) sendDomainPolicyFlush(ctx context.Context, params DomainPolicyFlushParams) (res DomainPolicyFlushRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPolicyFlush"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy/flush"),
 	}
 
@@ -12299,7 +12299,7 @@ func (c *Client) DomainPutCapability(ctx context.Context, request *NewCapability
 func (c *Client) sendDomainPutCapability(ctx context.Context, request *NewCapabilityDefinition, params DomainPutCapabilityParams) (res DomainPutCapabilityRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutCapability"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/capabilities/{capability}"),
 	}
 
@@ -12471,7 +12471,7 @@ func (c *Client) DomainPutDisasterRecoverySettings(ctx context.Context, request 
 func (c *Client) sendDomainPutDisasterRecoverySettings(ctx context.Context, request *DisasterRecoverySettings, params DomainPutDisasterRecoverySettingsParams) (res DomainPutDisasterRecoverySettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutDisasterRecoverySettings"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/keys/disaster-recovery"),
 	}
 
@@ -12601,7 +12601,7 @@ func (c *Client) DomainPutEncryptionSettings(ctx context.Context, request *Encry
 func (c *Client) sendDomainPutEncryptionSettings(ctx context.Context, request *EncryptionSettings, params DomainPutEncryptionSettingsParams) (res DomainPutEncryptionSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutEncryptionSettings"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/settings"),
 	}
 
@@ -12733,7 +12733,7 @@ func (c *Client) DomainPutFactType(ctx context.Context, request *NewFactTypeDefi
 func (c *Client) sendDomainPutFactType(ctx context.Context, request *NewFactTypeDefinition, params DomainPutFactTypeParams) (res DomainPutFactTypeRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutFactType"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}"),
 	}
 
@@ -12884,7 +12884,7 @@ func (c *Client) DomainPutSettings(ctx context.Context, request *NewDomainSettin
 func (c *Client) sendDomainPutSettings(ctx context.Context, request *NewDomainSettings, params DomainPutSettingsParams) (res DomainPutSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutSettings"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/settings"),
 	}
 
@@ -13014,7 +13014,7 @@ func (c *Client) DomainPutVendorSettings(ctx context.Context, request *NewVendor
 func (c *Client) sendDomainPutVendorSettings(ctx context.Context, request *NewVendorSettings, params DomainPutVendorSettingsParams) (res DomainPutVendorSettingsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainPutVendorSettings"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/vendor/settings"),
 	}
 
@@ -13145,7 +13145,7 @@ func (c *Client) DomainQueryAccessLog(ctx context.Context, params DomainQueryAcc
 func (c *Client) sendDomainQueryAccessLog(ctx context.Context, params DomainQueryAccessLogParams) (res DomainQueryAccessLogRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainQueryAccessLog"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/log"),
 	}
 
@@ -13456,7 +13456,7 @@ func (c *Client) DomainQueryAccessLogSingleCapsule(ctx context.Context, params D
 func (c *Client) sendDomainQueryAccessLogSingleCapsule(ctx context.Context, params DomainQueryAccessLogSingleCapsuleParams) (res DomainQueryAccessLogSingleCapsuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainQueryAccessLogSingleCapsule"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/log"),
 	}
 
@@ -13788,7 +13788,7 @@ func (c *Client) DomainQueryControlLog(ctx context.Context, params DomainQueryCo
 func (c *Client) sendDomainQueryControlLog(ctx context.Context, params DomainQueryControlLogParams) (res DomainQueryControlLogRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainQueryControlLog"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/log"),
 	}
 
@@ -14041,7 +14041,7 @@ func (c *Client) DomainRenumberDataPolicyRules(ctx context.Context, params Domai
 func (c *Client) sendDomainRenumberDataPolicyRules(ctx context.Context, params DomainRenumberDataPolicyRulesParams) (res DomainRenumberDataPolicyRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRenumberDataPolicyRules"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/renumber"),
 	}
 
@@ -14190,7 +14190,7 @@ func (c *Client) DomainRenumberPolicyRules(ctx context.Context, request *DomainR
 func (c *Client) sendDomainRenumberPolicyRules(ctx context.Context, request *DomainRenumberPolicyRulesReq, params DomainRenumberPolicyRulesParams) (res DomainRenumberPolicyRulesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRenumberPolicyRules"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy/renumber"),
 	}
 
@@ -14324,7 +14324,7 @@ func (c *Client) DomainRotateRootEncryptionKeys(ctx context.Context, request *Do
 func (c *Client) sendDomainRotateRootEncryptionKeys(ctx context.Context, request *DomainRotateRootEncryptionKeysReq, params DomainRotateRootEncryptionKeysParams) (res DomainRotateRootEncryptionKeysRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainRotateRootEncryptionKeys"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/rotate"),
 	}
 
@@ -14454,7 +14454,7 @@ func (c *Client) DomainSealCapsule(ctx context.Context, request *CapsuleSealRequ
 func (c *Client) sendDomainSealCapsule(ctx context.Context, request *CapsuleSealRequest, params DomainSealCapsuleParams) (res DomainSealCapsuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSealCapsule"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/seal"),
 	}
 
@@ -14628,7 +14628,7 @@ func (c *Client) DomainSetActiveExternalRootEncryptionKey(ctx context.Context, r
 func (c *Client) sendDomainSetActiveExternalRootEncryptionKey(ctx context.Context, request *ActiveRootEncryptionKeyID, params DomainSetActiveExternalRootEncryptionKeyParams) (res DomainSetActiveExternalRootEncryptionKeyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSetActiveExternalRootEncryptionKey"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/encryption/active-key"),
 	}
 
@@ -14758,7 +14758,7 @@ func (c *Client) DomainSetDataPolicyBinding(ctx context.Context, request *SetDat
 func (c *Client) sendDomainSetDataPolicyBinding(ctx context.Context, request *SetDataPolicyBinding, params DomainSetDataPolicyBindingParams) (res DomainSetDataPolicyBindingRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainSetDataPolicyBinding"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}/binding"),
 	}
 
@@ -14910,7 +14910,7 @@ func (c *Client) DomainUpdateDataPolicy(ctx context.Context, request *NewDataPol
 func (c *Client) sendDomainUpdateDataPolicy(ctx context.Context, request *NewDataPolicy, params DomainUpdateDataPolicyParams) (res DomainUpdateDataPolicyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpdateDataPolicy"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/data-policy/{policyID}"),
 	}
 
@@ -15054,15 +15054,15 @@ func (c *Client) sendDomainUpdateDataPolicy(ctx context.Context, request *NewDat
 // exist.
 //
 // PUT /domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}
-func (c *Client) DomainUpdateIdentityProviderPrincipal(ctx context.Context, request *CapabilityList, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error) {
+func (c *Client) DomainUpdateIdentityProviderPrincipal(ctx context.Context, request *UpdatePrincipalParams, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error) {
 	res, err := c.sendDomainUpdateIdentityProviderPrincipal(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDomainUpdateIdentityProviderPrincipal(ctx context.Context, request *CapabilityList, params DomainUpdateIdentityProviderPrincipalParams) (res DomainUpdateIdentityProviderPrincipalRes, err error) {
+func (c *Client) sendDomainUpdateIdentityProviderPrincipal(ctx context.Context, request *UpdatePrincipalParams, params DomainUpdateIdentityProviderPrincipalParams) (res DomainUpdateIdentityProviderPrincipalRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpdateIdentityProviderPrincipal"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}"),
 	}
 
@@ -15239,7 +15239,7 @@ func (c *Client) DomainUpdatePeer(ctx context.Context, request *DomainPeerConfig
 func (c *Client) sendDomainUpdatePeer(ctx context.Context, request *DomainPeerConfig, params DomainUpdatePeerParams) (res DomainUpdatePeerRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpdatePeer"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/peers/{peerDomainID}"),
 	}
 
@@ -15390,7 +15390,7 @@ func (c *Client) DomainUpdatePolicyRule(ctx context.Context, request *NewDomainP
 func (c *Client) sendDomainUpdatePolicyRule(ctx context.Context, request *NewDomainPolicyRule, params DomainUpdatePolicyRuleParams) (res DomainUpdatePolicyRuleRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpdatePolicyRule"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/policy/{ruleID}"),
 	}
 
@@ -15541,7 +15541,7 @@ func (c *Client) DomainUpsertCapsuleTags(ctx context.Context, request *DomainUps
 func (c *Client) sendDomainUpsertCapsuleTags(ctx context.Context, request *DomainUpsertCapsuleTagsReq, params DomainUpsertCapsuleTagsParams) (res DomainUpsertCapsuleTagsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertCapsuleTags"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/capsule-tags"),
 	}
 
@@ -15695,7 +15695,7 @@ func (c *Client) DomainUpsertFact(ctx context.Context, request *NewFact, params 
 func (c *Client) sendDomainUpsertFact(ctx context.Context, request *NewFact, params DomainUpsertFactParams) (res DomainUpsertFactRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertFact"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/facts/{factType}/new"),
 	}
 
@@ -15847,7 +15847,7 @@ func (c *Client) DomainUpsertIdentityProvider(ctx context.Context, request *Doma
 func (c *Client) sendDomainUpsertIdentityProvider(ctx context.Context, request *DomainIdentityProviderDetails, params DomainUpsertIdentityProviderParams) (res DomainUpsertIdentityProviderRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertIdentityProvider"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/identities/{identityProviderName}"),
 	}
 
@@ -15998,7 +15998,7 @@ func (c *Client) DomainUpsertReadContext(ctx context.Context, request *AddReadCo
 func (c *Client) sendDomainUpsertReadContext(ctx context.Context, request *AddReadContext, params DomainUpsertReadContextParams) (res DomainUpsertReadContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertReadContext"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/read-context/{contextName}"),
 	}
 
@@ -16152,7 +16152,7 @@ func (c *Client) DomainUpsertSpanTags(ctx context.Context, request *UpsertSpanTa
 func (c *Client) sendDomainUpsertSpanTags(ctx context.Context, request *UpsertSpanTagsRequest, params DomainUpsertSpanTagsParams) (res DomainUpsertSpanTagsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertSpanTags"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/capsules/{capsuleID}/span-tags"),
 	}
 
@@ -16326,7 +16326,7 @@ func (c *Client) DomainUpsertWriteContext(ctx context.Context, request *AddWrite
 func (c *Client) sendDomainUpsertWriteContext(ctx context.Context, request *AddWriteContext, params DomainUpsertWriteContextParams) (res DomainUpsertWriteContextRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertWriteContext"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}"),
 	}
 
@@ -16477,7 +16477,7 @@ func (c *Client) DomainUpsertWriteContextConfiguration(ctx context.Context, requ
 func (c *Client) sendDomainUpsertWriteContextConfiguration(ctx context.Context, request *WriteContextConfigInfo, params DomainUpsertWriteContextConfigurationParams) (res DomainUpsertWriteContextConfigurationRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("domainUpsertWriteContextConfiguration"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/domains/{domainID}/control/write-context/{contextName}/config"),
 	}
 
@@ -16629,7 +16629,7 @@ func (c *Client) KeychainCreateWorkspace(ctx context.Context, request *NewWorksp
 func (c *Client) sendKeychainCreateWorkspace(ctx context.Context, request *NewWorkspace) (res KeychainCreateWorkspaceRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("keychainCreateWorkspace"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/keychain/workspaces"),
 	}
 
@@ -16704,7 +16704,7 @@ func (c *Client) KeychainGetWorkspaceInfo(ctx context.Context, params KeychainGe
 func (c *Client) sendKeychainGetWorkspaceInfo(ctx context.Context, params KeychainGetWorkspaceInfoParams) (res KeychainGetWorkspaceInfoRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("keychainGetWorkspaceInfo"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/info"),
 	}
 
@@ -16798,7 +16798,7 @@ func (c *Client) KeychainGetWorkspaceObjects(ctx context.Context, params Keychai
 func (c *Client) sendKeychainGetWorkspaceObjects(ctx context.Context, params KeychainGetWorkspaceObjectsParams) (res KeychainGetWorkspaceObjectsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("keychainGetWorkspaceObjects"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/objects"),
 	}
 
@@ -16910,7 +16910,7 @@ func (c *Client) KeychainPutWorkspaceObjects(ctx context.Context, request *NewWo
 func (c *Client) sendKeychainPutWorkspaceObjects(ctx context.Context, request *NewWorkspaceObjects, params KeychainPutWorkspaceObjectsParams) (res KeychainPutWorkspaceObjectsRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("keychainPutWorkspaceObjects"),
-		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/keychain/workspaces/{workspace}/objects"),
 	}
 
@@ -17007,7 +17007,7 @@ func (c *Client) StarredDomainAdd(ctx context.Context, request *StarredDomainAdd
 func (c *Client) sendStarredDomainAdd(ctx context.Context, request *StarredDomainAddReq, params StarredDomainAddParams) (res StarredDomainAddRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("starredDomainAdd"),
-		semconv.HTTPMethodKey.String("PUT"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
 		semconv.HTTPRouteKey.String("/global/starred-domains/{domainID}"),
 	}
 
@@ -17137,7 +17137,7 @@ func (c *Client) StarredDomainList(ctx context.Context) (StarredDomainListRes, e
 func (c *Client) sendStarredDomainList(ctx context.Context) (res StarredDomainListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("starredDomainList"),
-		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/global/starred-domains"),
 	}
 
@@ -17242,7 +17242,7 @@ func (c *Client) StarredDomainRemove(ctx context.Context, params StarredDomainRe
 func (c *Client) sendStarredDomainRemove(ctx context.Context, params StarredDomainRemoveParams) (res StarredDomainRemoveRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("starredDomainRemove"),
-		semconv.HTTPMethodKey.String("DELETE"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
 		semconv.HTTPRouteKey.String("/global/starred-domains/{domainID}"),
 	}
 

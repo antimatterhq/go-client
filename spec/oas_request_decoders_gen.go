@@ -2299,7 +2299,7 @@ func (s *Server) decodeDomainUpdateDataPolicyRequest(r *http.Request) (
 }
 
 func (s *Server) decodeDomainUpdateIdentityProviderPrincipalRequest(r *http.Request) (
-	req *CapabilityList,
+	req *UpdatePrincipalParams,
 	close func() error,
 	rerr error,
 ) {
@@ -2338,7 +2338,7 @@ func (s *Server) decodeDomainUpdateIdentityProviderPrincipalRequest(r *http.Requ
 
 		d := jx.DecodeBytes(buf)
 
-		var request CapabilityList
+		var request UpdatePrincipalParams
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

@@ -1628,22 +1628,6 @@ func (s *CapabilityExpressionOperator) UnmarshalText(data []byte) error {
 	}
 }
 
-// A list of capabilities.
-// Ref: #/components/schemas/CapabilityList
-type CapabilityList struct {
-	Capabilities []Capability `json:"capabilities"`
-}
-
-// GetCapabilities returns the value of Capabilities.
-func (s *CapabilityList) GetCapabilities() []Capability {
-	return s.Capabilities
-}
-
-// SetCapabilities sets the value of Capabilities.
-func (s *CapabilityList) SetCapabilities(val []Capability) {
-	s.Capabilities = val
-}
-
 type CapabilityName string
 
 type CapabilityReference string
@@ -10786,38 +10770,38 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
-// NewOptTagName returns new OptTagName with value set to v.
-func NewOptTagName(v TagName) OptTagName {
-	return OptTagName{
+// NewOptTagNamePattern returns new OptTagNamePattern with value set to v.
+func NewOptTagNamePattern(v TagNamePattern) OptTagNamePattern {
+	return OptTagNamePattern{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptTagName is optional TagName.
-type OptTagName struct {
-	Value TagName
+// OptTagNamePattern is optional TagNamePattern.
+type OptTagNamePattern struct {
+	Value TagNamePattern
 	Set   bool
 }
 
-// IsSet returns true if OptTagName was set.
-func (o OptTagName) IsSet() bool { return o.Set }
+// IsSet returns true if OptTagNamePattern was set.
+func (o OptTagNamePattern) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptTagName) Reset() {
-	var v TagName
+func (o *OptTagNamePattern) Reset() {
+	var v TagNamePattern
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptTagName) SetTo(v TagName) {
+func (o *OptTagNamePattern) SetTo(v TagNamePattern) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptTagName) Get() (v TagName, ok bool) {
+func (o OptTagNamePattern) Get() (v TagNamePattern, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -10825,7 +10809,7 @@ func (o OptTagName) Get() (v TagName, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptTagName) Or(d TagName) TagName {
+func (o OptTagNamePattern) Or(d TagNamePattern) TagNamePattern {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -13372,9 +13356,9 @@ func (s *TagMeta) SetName(val string) {
 	s.Name = val
 }
 
-type TagName string
-
 type TagNameField string
+
+type TagNamePattern string
 
 // Ref: #/components/schemas/TagSet
 type TagSet struct {
@@ -13724,6 +13708,34 @@ func (*UnauthorizedError) domainUpsertWriteContextRes()                    {}
 func (*UnauthorizedError) starredDomainAddRes()                            {}
 func (*UnauthorizedError) starredDomainListRes()                           {}
 func (*UnauthorizedError) starredDomainRemoveRes()                         {}
+
+// New principal settings to apply to principal.
+// Ref: #/components/schemas/UpdatePrincipalParams
+type UpdatePrincipalParams struct {
+	Capabilities []Capability `json:"capabilities"`
+	// A comment about the principal.
+	Comment OptString `json:"comment"`
+}
+
+// GetCapabilities returns the value of Capabilities.
+func (s *UpdatePrincipalParams) GetCapabilities() []Capability {
+	return s.Capabilities
+}
+
+// GetComment returns the value of Comment.
+func (s *UpdatePrincipalParams) GetComment() OptString {
+	return s.Comment
+}
+
+// SetCapabilities sets the value of Capabilities.
+func (s *UpdatePrincipalParams) SetCapabilities(val []Capability) {
+	s.Capabilities = val
+}
+
+// SetComment sets the value of Comment.
+func (s *UpdatePrincipalParams) SetComment(val OptString) {
+	s.Comment = val
+}
 
 // Ref: #/components/schemas/UpsertSpanTagsRequest
 type UpsertSpanTagsRequest struct {

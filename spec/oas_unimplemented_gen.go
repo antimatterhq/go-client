@@ -943,7 +943,7 @@ func (UnimplementedHandler) DomainUpdateDataPolicy(ctx context.Context, req *New
 // exist.
 //
 // PUT /domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}
-func (UnimplementedHandler) DomainUpdateIdentityProviderPrincipal(ctx context.Context, req *CapabilityList, params DomainUpdateIdentityProviderPrincipalParams) (r DomainUpdateIdentityProviderPrincipalRes, _ error) {
+func (UnimplementedHandler) DomainUpdateIdentityProviderPrincipal(ctx context.Context, req *UpdatePrincipalParams, params DomainUpdateIdentityProviderPrincipalParams) (r DomainUpdateIdentityProviderPrincipalRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

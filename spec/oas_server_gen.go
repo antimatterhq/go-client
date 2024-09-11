@@ -653,7 +653,7 @@ type Handler interface {
 	// exist.
 	//
 	// PUT /domains/{domainID}/control/identities/{identityProviderName}/principals/{principalID}
-	DomainUpdateIdentityProviderPrincipal(ctx context.Context, req *CapabilityList, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error)
+	DomainUpdateIdentityProviderPrincipal(ctx context.Context, req *UpdatePrincipalParams, params DomainUpdateIdentityProviderPrincipalParams) (DomainUpdateIdentityProviderPrincipalRes, error)
 	// DomainUpdatePeer implements domainUpdatePeer operation.
 	//
 	// Create or update the configuration for this peer. Please note, if the configuration already exists,

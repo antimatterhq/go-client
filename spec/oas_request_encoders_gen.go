@@ -478,7 +478,7 @@ func encodeDomainUpdateDataPolicyRequest(
 }
 
 func encodeDomainUpdateIdentityProviderPrincipalRequest(
-	req *CapabilityList,
+	req *UpdatePrincipalParams,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

@@ -74,7 +74,7 @@ func (s *AccessLogEntry) Validate() error {
 			MaxLengthSet: false,
 			Email:        false,
 			Hostname:     false,
-			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{0,9})?Z$"],
+			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{9})?Z$"],
 		}).Validate(string(s.Time)); err != nil {
 			return errors.Wrap(err, "string")
 		}
@@ -1222,46 +1222,6 @@ func (s CapabilityExpressionOperator) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
-}
-
-func (s *CapabilityList) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Capabilities == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.Capabilities {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "capabilities",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
 }
 
 func (s CapabilityName) Validate() error {
@@ -3081,7 +3041,7 @@ func (s *DomainControlLogEntry) Validate() error {
 			MaxLengthSet: false,
 			Email:        false,
 			Hostname:     false,
-			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{0,9})?Z$"],
+			Regex:        regexMap["^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{9})?Z$"],
 		}).Validate(string(s.Time)); err != nil {
 			return errors.Wrap(err, "string")
 		}
@@ -8658,22 +8618,6 @@ func (s *TagMeta) Validate() error {
 	return nil
 }
 
-func (s TagName) Validate() error {
-	alias := (string)(s)
-	if err := (validate.String{
-		MinLength:    0,
-		MinLengthSet: false,
-		MaxLength:    0,
-		MaxLengthSet: false,
-		Email:        false,
-		Hostname:     false,
-		Regex:        regexMap["^[a-z0-9._/*-]{2,64}$"],
-	}).Validate(string(alias)); err != nil {
-		return errors.Wrap(err, "string")
-	}
-	return nil
-}
-
 func (s TagNameField) Validate() error {
 	alias := (string)(s)
 	if err := (validate.String{
@@ -8684,6 +8628,22 @@ func (s TagNameField) Validate() error {
 		Email:        false,
 		Hostname:     false,
 		Regex:        nil,
+	}).Validate(string(alias)); err != nil {
+		return errors.Wrap(err, "string")
+	}
+	return nil
+}
+
+func (s TagNamePattern) Validate() error {
+	alias := (string)(s)
+	if err := (validate.String{
+		MinLength:    0,
+		MinLengthSet: false,
+		MaxLength:    0,
+		MaxLengthSet: false,
+		Email:        false,
+		Hostname:     false,
+		Regex:        regexMap["^[a-z0-9._/*-]{2,64}$"],
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
 	}
@@ -8901,6 +8861,46 @@ func (s TagValueField) Validate() error {
 		Regex:        nil,
 	}).Validate(string(alias)); err != nil {
 		return errors.Wrap(err, "string")
+	}
+	return nil
+}
+
+func (s *UpdatePrincipalParams) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Capabilities == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Capabilities {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "capabilities",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 	return nil
 }
