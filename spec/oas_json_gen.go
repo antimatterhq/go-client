@@ -23166,12 +23166,19 @@ func (s *PrincipalSummary) encodeFields(e *jx.Encoder) {
 		e.FieldStart("comment")
 		e.Str(s.Comment)
 	}
+	{
+		if s.Email.Set {
+			e.FieldStart("email")
+			s.Email.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfPrincipalSummary = [3]string{
+var jsonFieldsNameOfPrincipalSummary = [4]string{
 	0: "principalID",
 	1: "principalType",
 	2: "comment",
+	3: "email",
 }
 
 // Decode decodes PrincipalSummary from json.
@@ -23214,6 +23221,16 @@ func (s *PrincipalSummary) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"comment\"")
+			}
+		case "email":
+			if err := func() error {
+				s.Email.Reset()
+				if err := s.Email.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"email\"")
 			}
 		default:
 			return d.Skip()

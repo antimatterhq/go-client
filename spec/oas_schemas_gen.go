@@ -11559,6 +11559,8 @@ type PrincipalSummary struct {
 	PrincipalType DomainIdentityProviderPrincipalType `json:"principalType"`
 	// An optional comment for the principal.
 	Comment string `json:"comment"`
+	// Principal email address if provided.
+	Email OptString `json:"email"`
 }
 
 // GetPrincipalID returns the value of PrincipalID.
@@ -11576,6 +11578,11 @@ func (s *PrincipalSummary) GetComment() string {
 	return s.Comment
 }
 
+// GetEmail returns the value of Email.
+func (s *PrincipalSummary) GetEmail() OptString {
+	return s.Email
+}
+
 // SetPrincipalID sets the value of PrincipalID.
 func (s *PrincipalSummary) SetPrincipalID(val PrincipalID) {
 	s.PrincipalID = val
@@ -11589,6 +11596,11 @@ func (s *PrincipalSummary) SetPrincipalType(val DomainIdentityProviderPrincipalT
 // SetComment sets the value of Comment.
 func (s *PrincipalSummary) SetComment(val string) {
 	s.Comment = val
+}
+
+// SetEmail sets the value of Email.
+func (s *PrincipalSummary) SetEmail(val OptString) {
+	s.Email = val
 }
 
 type QueryCapsulesSortOn string
